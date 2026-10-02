@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>REHZO — Find & List Rooms | Web App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        rehzo: {50:'#FFF1EC',100:'#FFE0D5',500:'#FF4D24',600:'#E63E15',700:'#C2310E',900:'#7A1F0A'},
+        ink: {800:'#151A35',900:'#0B0E1F',950:'#070912'},
+        mint:'#00D1B2', gold:'#FFB800'
+      },
+      fontFamily: { sora:['Sora','sans-serif'], jakarta:['"Plus Jakarta Sans"','sans-serif'] },
+      boxShadow: { app:'0 30px 80px -20px rgba(0,0,0,.55)', card:'0 12px 32px -12px rgba(11,14,31,.25)', pop:'0 20px 60px -10px rgba(255,77,36,.45)' }
+    }
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{ -webkit-tap-highlight-color:transparent; }
+body{ font-family:'Plus Jakarta Sans',sans-serif; background:#070912; }
+.font-sora{ font-family:'Sora',sans-serif; }
+::-webkit-scrollbar{ width:6px; height:6px } ::-webkit-scrollbar-thumb{ background:#FF4D24; border-radius:99px } ::-webkit-scrollbar-track{ background:transparent }
+.splash-anim{ animation:splashPop 1.1s cubic-bezier(.2,1.4,.3,1) both }
+@keyframes splashPop{ 0%{ transform:scale(.6); opacity:0 } 60%{ transform:scale(1.05); opacity:1 } 100%{ transform:scale(1); opacity:1 } }
+.logo-ring{ animation:ringSpin 6s linear infinite }
+@keyframes ringSpin{ to{ transform:rotate(360deg) } }
+.float-anim{ animation:floaty 5s ease-in-out infinite }
+@keyframes floaty{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-10px) } }
+.fadeUp{ animation:fadeUp .5s ease both }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:translateY(0) } }
+.shimmer{ position:relative; overflow:hidden } .shimmer::after{ content:''; position:absolute; inset:0; background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%); animation:shim 1.8s infinite } @keyframes shim{ from{ transform:translateX(-100%) } to{ transform:translateX(100%) } }
+.no-scrollbar::-webkit-scrollbar{ display:none } .no-scrollbar{ scrollbar-width:none }
+.glass{ background:rgba(255,255,255,.82); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px) }
+.glass-dark{ background:rgba(11,14,31,.78); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px) }
+.chip-active{ background:#0B0E1F !important; color:#fff !important; border-color:#0B0E1F !important }
+.dot{ width:6px; height:6px; border-radius:99px; background:rgba(255,255,255,.5) } .dot.on{ background:#fff; width:18px }
+.step-line::before{ content:''; position:absolute; left:15px; top:32px; bottom:-6px; width:2px; background:#E7EAF3 } .step-line:last-child::before{ display:none } .step-line.done::before{ background:#00D1B2 }
+input,select,textarea{ outline:none } input:focus,select:focus,textarea:focus{ border-color:#FF4D24 !important; box-shadow:0 0 0 3px rgba(255,77,36,.15) }
+.leaflet-container{ border-radius:18px; z-index:1 }
+.pdf-paper{ background:#fff; color:#0B0E1F; }
+.bottom-safe{ padding-bottom:calc(env(safe-area-inset-bottom) + 84px) }
+.app-view{ display:none } .app-view.on{ display:block; animation:fadeUp .35s ease both }
+.star{ cursor:pointer; transition:.15s } .star.on{ color:#FFB800; transform:scale(1.15) }
+.toastIn{ animation:toastIn .35s cubic-bezier(.2,1.2,.3,1) both } @keyframes toastIn{ from{ opacity:0; transform:translateY(16px) scale(.95) } to{ opacity:1; transform:translateY(0) scale(1) } }
+.marquee{ display:flex; gap:12px; animation:marq 22s linear infinite; width:max-content } @keyframes marq{ to{ transform:translateX(-50%) } }
+.grid-bg{ background-image:radial-gradient(rgba(255,255,255,.09) 1px, transparent 1px); background-size:22px 22px }
+.btn-press:active{ transform:scale(.97) }
+.map-pin-pulse{ animation:pinPulse 1.6s ease-out infinite } @keyframes pinPulse{ 0%{ box-shadow:0 0 0 0 rgba(255,77,36,.5)} 100%{ box-shadow:0 0 0 18px rgba(255,77,36,0)} }
+@media print{ body *{ visibility:hidden } #pdfPrintArea, #pdfPrintArea *{ visibility:visible } #pdfPrintArea{ position:absolute; inset:0; margin:0 } }
+</style>
+</head>
+<body class="min-h-screen text-slate-900">
+
+<!-- DESKTOP BACKGROUND -->
+<div class="fixed inset-0 pointer-events-none">
+  <div class="absolute inset-0 bg-[radial-gradient(1200px_600px_at_20%_-10%,#FF4D24_0%,transparent_60%),radial-gradient(900px_500px_at_90%_10%,#4F46E5_0%,transparent_60%),radial-gradient(800px_600px_at_50%_110%,#00D1B2_0%,transparent_55%)] opacity-30"></div>
+  <div class="absolute inset-0 grid-bg opacity-60"></div>
+</div>
+
+<!-- SPLASH -->
+<div id="splash" class="fixed inset-0 z-[100] bg-ink-950 flex flex-col items-center justify-center text-white px-6">
+  <div class="relative">
+    <div class="absolute -inset-6 rounded-[32px] border border-white/10 logo-ring"></div>
+    <div class="splash-anim w-24 h-24 rounded-[26px] bg-gradient-to-br from-rehzo-500 via-rehzo-600 to-amber-500 flex items-center justify-center shadow-pop">
+      <svg width="52" height="52" viewBox="0 0 48 48" fill="none"><path d="M8 22L24 8L40 22" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20V38H19V28H29V38H36V20" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="34" r="8" fill="white"/><path d="M31 34L33.2 36.2L37 32.2" stroke="#FF4D24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <h1 class="font-sora font-extrabold text-5xl tracking-tight mt-6 splash-anim">REHZO</h1>
+  <p class="text-white/60 text-sm mt-2 tracking-[.25em] font-semibold">FIND • LIST • BOOK</p>
+  <div class="mt-8 w-56 h-1.5 bg-white/10 rounded-full overflow-hidden"><div id="splashBar" class="h-full w-0 bg-gradient-to-r from-rehzo-500 to-amber-400 rounded-full transition-all duration-500"></div></div>
+  <p id="splashMsg" class="text-xs text-white/50 mt-4">Securing session • Verifying listings…</p>
+</div>
+
+<!-- APP SHELL -->
+<div class="relative z-10 max-w-[1120px] mx-auto lg:py-6 px-0 lg:px-6 flex gap-6 items-start">
+
+  <!-- LEFT MARKETING (desktop) -->
+  <aside class="hidden lg:flex flex-col w-[300px] shrink-0 sticky top-6 text-white">
+    <div class="rounded-[28px] overflow-hidden bg-gradient-to-b from-white/10 to-white/[.03] border border-white/10 p-6 backdrop-blur-xl">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-rehzo-500 to-amber-500 flex items-center justify-center font-sora font-extrabold text-xl">R</div>
+        <div><div class="font-sora font-extrabold text-2xl leading-none">REHZO</div><div class="text-[11px] text-white/60 tracking-widest">WEB APP • v2.0</div></div>
+      </div>
+      <h2 class="font-sora font-bold text-[26px] leading-tight mt-6">Room booking,<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-rehzo-500 to-amber-300">re-imagined for Bharat.</span></h2>
+      <p class="text-sm text-white/60 mt-3">Single account for Guest + Owner • 90-day listings • TRL verified bookings • Auto PDF.</p>
+      <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-3"><div class="font-sora font-extrabold text-lg" id="statSideRooms">0</div><div class="text-[10px] text-white/50">Live Rooms</div></div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-3"><div class="font-sora font-extrabold text-lg" id="statSideUsers">0</div><div class="text-[10px] text-white/50">Users</div></div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-3"><div class="font-sora font-extrabold text-lg" id="statSideTrl">0</div><div class="text-[10px] text-white/50">TRL Issued</div></div>
+      </div>
+      <div class="mt-5 rounded-2xl bg-ink-900/80 border border-white/10 p-4">
+        <div class="text-[11px] font-bold tracking-widest text-mint">DEPLOYMENT PIPELINE</div>
+        <div class="mt-3 space-y-2 text-[12px]">
+          <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px]">✓</span> Design Arena <span class="ml-auto text-emerald-400 font-bold">DONE</span></div>
+          <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px]">✓</span> GitHub Source <span class="ml-auto text-emerald-400 font-bold">READY</span></div>
+          <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-rehzo-500 flex items-center justify-center text-[10px] animate-pulse">•</span> Netlify Web App <span class="ml-auto text-amber-300 font-bold">LIVE DEMO</span></div>
+          <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center text-[10px]">→</span> Android AAB <span class="ml-auto text-white/50 font-bold">NEXT</span></div>
+          <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center text-[10px]">★</span> Play Store <span class="ml-auto text-white/50 font-bold">QUEUED</span></div>
+        </div>
+        <button onclick="go('roadmap')" class="mt-4 w-full py-2.5 rounded-xl bg-white text-ink-900 text-[13px] font-extrabold btn-press">View Full Roadmap →</button>
+      </div>
+    </div>
+    <div class="mt-4 rounded-[24px] border border-white/10 bg-white/[.04] p-4 backdrop-blur-xl">
+      <div class="text-[11px] font-bold tracking-widest text-white/50">TRUSTED SEARCH</div>
+      <div class="marquee mt-3" id="sideMarquee"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN PHONE / WEB CONTAINER -->
+  <main class="flex-1 min-w-0">
+    <div class="bg-[#F5F6FB] lg:rounded-[32px] overflow-hidden shadow-app border border-white/20 min-h-[100dvh] lg:min-h-[92vh] flex flex-col relative">
+
+      <!-- TOPBAR -->
+      <header class="sticky top-0 z-40 glass border-b border-slate-200/70">
+        <div class="px-4 pt-3 pb-2 flex items-center gap-3">
+          <div class="flex items-center gap-2.5 cursor-pointer" onclick="go('home')">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-rehzo-500 via-rehzo-600 to-amber-500 flex items-center justify-center shadow-pop shrink-0">
+              <svg width="24" height="24" viewBox="0 0 48 48" fill="none"><path d="M8 22L24 8L40 22" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20V38H19V28H29V38H36V20" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="leading-none"><div class="font-sora font-extrabold text-[20px] tracking-tight text-ink-900">REHZO</div><div class="text-[10px] font-bold tracking-[.2em] text-rehzo-600">STAY VERIFIED</div></div>
+          </div>
+          <div class="flex-1"></div>
+          <button onclick="openCountry()" class="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-ink-900 text-white text-[12px] font-bold btn-press"><span id="hdrFlag">🇮🇳</span><span id="hdrCurr">₹</span><span id="hdrDial" class="text-white/60 font-semibold">+91</span><span class="text-white/40">▾</span></button>
+          <button onclick="go('notifications')" class="relative w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center btn-press">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B0E1F" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span id="bellBadge" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rehzo-500 text-white text-[11px] font-extrabold flex items-center justify-center">0</span>
+          </button>
+          <button id="avatarBtn" onclick="handleAvatar()" class="w-10 h-10 rounded-full bg-gradient-to-br from-ink-900 to-indigo-700 text-white font-sora font-bold text-sm flex items-center justify-center border-2 border-white shadow btn-press overflow-hidden">?</button>
+        </div>
+        <!-- SEARCH (home only) -->
+        <div id="homeSearchWrap" class="px-4 pb-3">
+          <div class="flex gap-2">
+            <div class="flex-1 flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3.5 py-3 shadow-sm">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA0B5" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input id="globalSearch" oninput="onSearch(this.value)" placeholder="House name, location, TRL No…" class="flex-1 text-[14px] font-medium bg-transparent border-0 shadow-none placeholder:text-slate-400" style="box-shadow:none!important">
+              <button id="clearSearch" onclick="clearSearch()" class="hidden text-slate-400 font-bold">✕</button>
+            </div>
+            <button onclick="toggleFilters(true)" class="w-[52px] rounded-2xl bg-ink-900 text-white flex items-center justify-center btn-press relative">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              <span id="filterDot" class="hidden absolute top-2 right-2 w-2.5 h-2.5 bg-rehzo-500 rounded-full border-2 border-ink-900"></span>
+            </button>
+          </div>
+          <div class="flex gap-2 mt-2.5 overflow-x-auto no-scrollbar pb-0.5" id="quickChips"></div>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <div id="appMain" class="flex-1 relative">
+
+        <!-- HOME -->
+        <section id="view-home" class="app-view on">
+          <div class="px-4 pt-4">
+            <div id="greetBox"></div>
+            <div class="mt-3 grid grid-cols-4 gap-2">
+              <button onclick="quickNear()" class="rounded-2xl bg-ink-900 text-white p-3 text-center btn-press"><div class="text-lg">📍</div><div class="text-[11px] font-bold mt-1">Near Me</div></button>
+              <button onclick="go('owner');ownerTab('list')" class="rounded-2xl bg-white border border-slate-200 p-3 text-center btn-press"><div class="text-lg">🏠</div><div class="text-[11px] font-bold mt-1">List Room</div></button>
+              <button onclick="go('trl')" class="rounded-2xl bg-white border border-slate-200 p-3 text-center btn-press"><div class="text-lg">🔖</div><div class="text-[11px] font-bold mt-1">Verify TRL</div></button>
+              <button onclick="go('roadmap')" class="rounded-2xl bg-gradient-to-br from-rehzo-500 to-amber-500 text-white p-3 text-center btn-press"><div class="text-lg">🤖</div><div class="text-[11px] font-bold mt-1">Android</div></button>
+            </div>
+            <div class="mt-4 rounded-[20px] overflow-hidden relative bg-ink-900 text-white">
+              <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1000&q=80&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="">
+              <div class="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/70 to-transparent"></div>
+              <div class="relative p-5">
+                <div class="inline-flex items-center gap-1.5 text-[11px] font-extrabold bg-mint/20 text-emerald-200 border border-emerald-300/30 px-2.5 py-1 rounded-full">● <span id="liveCount">0</span>&nbsp;LIVE ROOMS • 90-DAY VERIFIED</div>
+                <h2 class="font-sora font-extrabold text-[22px] leading-tight mt-2">Your House Name<br>Search. Book. Settle.</h2>
+                <p class="text-[12px] text-white/60 mt-1">Search by House / Location / Near Me / TRL No.</p>
+                <div class="flex gap-2 mt-3">
+                  <button onclick="document.getElementById('globalSearch').focus()" class="px-4 py-2.5 rounded-xl bg-rehzo-500 font-extrabold text-[13px] btn-press">Search Rooms</button>
+                  <button onclick="go('owner');ownerTab('list')" class="px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 font-extrabold text-[13px] btn-press">+ List Yours</button>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center mt-5 mb-2.5">
+              <h3 class="font-sora font-extrabold text-[17px]">Available Rooms</h3>
+              <span id="homeCount" class="ml-2 text-[11px] font-bold bg-ink-900 text-white px-2 py-0.5 rounded-full">0</span>
+              <div class="flex-1"></div>
+              <select id="sortSel" onchange="state.sort=this.value;renderHome()" class="text-[12px] font-bold bg-white border border-slate-200 rounded-xl px-2 py-1.5">
+                <option value="new">Newest</option><option value="low">Rent: Low→High</option><option value="high">Rent: High→Low</option><option value="near">Nearest</option>
+              </select>
+            </div>
+          </div>
+          <div id="homeGrid" class="px-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 pb-4"></div>
+          <div class="mx-4 mb-6 rounded-[20px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-4 flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🛡️</div>
+            <div class="text-[12px] leading-snug"><b>Privacy Protected Booking.</b> Owner phone, full address & exact map unlock only after owner accepts.</div>
+          </div>
+          <div class="h-2"></div>
+        </section>
+
+        <!-- NEAR -->
+        <section id="view-near" class="app-view">
+          <div class="px-4 pt-4">
+            <h2 class="font-sora font-extrabold text-[22px]">Near Me <span class="text-rehzo-500">📍</span></h2>
+            <p class="text-[13px] text-slate-500">Nearby rooms • Distance • Rent • Type • Amenities</p>
+            <div class="mt-3 rounded-[20px] overflow-hidden border border-slate-200 shadow-card bg-white">
+              <div id="nearMap" style="height:240px"></div>
+              <div class="p-3 flex gap-2">
+                <button onclick="locateMe()" class="flex-1 py-3 rounded-xl bg-ink-900 text-white text-[13px] font-extrabold btn-press">◎ Use My Location</button>
+                <button onclick="demoLocate()" class="flex-1 py-3 rounded-xl bg-rehzo-50 text-rehzo-700 border border-rehzo-100 text-[13px] font-extrabold btn-press">Demo: Connaught Place</button>
+              </div>
+            </div>
+            <div id="nearStatus" class="mt-3 text-[12px] font-bold text-slate-500">Tap location to sort rooms by distance.</div>
+            <div id="nearList" class="grid gap-3 mt-3 pb-6 sm:grid-cols-2"></div>
+          </div>
+        </section>
+
+        <!-- OWNER -->
+        <section id="view-owner" class="app-view">
+          <div class="px-4 pt-4">
+            <div class="flex items-center gap-2">
+              <h2 class="font-sora font-extrabold text-[22px]">Owner Hub</h2>
+              <span class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">90-DAY LISTING</span>
+            </div>
+            <p class="text-[13px] text-slate-500">List • Track expiry • Accept bookings • Publish again</p>
+            <div id="ownerGate"></div>
+            <div id="ownerBody" class="hidden">
+              <div class="mt-3 grid grid-cols-3 gap-2 bg-white border border-slate-200 rounded-2xl p-1.5">
+                <button data-otab="list" onclick="ownerTab('list')" class="otab py-2.5 rounded-xl text-[13px] font-extrabold bg-ink-900 text-white">+ List Room</button>
+                <button data-otab="mine" onclick="ownerTab('mine')" class="otab py-2.5 rounded-xl text-[13px] font-extrabold text-slate-500">My Listings <span id="mineCount" class="ml-1 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full">0</span></button>
+                <button data-otab="req" onclick="ownerTab('req')" class="otab py-2.5 rounded-xl text-[13px] font-extrabold text-slate-500 relative">Requests <span id="reqCount" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-rehzo-500 text-white text-[10px] rounded-full items-center justify-center">0</span></button>
+              </div>
+              <!-- LIST FORM -->
+              <div id="otab-list" class="otabPane mt-3 pb-8">
+                <form id="listForm" onsubmit="submitListing(event)" class="space-y-3">
+                  <div class="rounded-[20px] bg-white border border-slate-200 p-4">
+                    <div class="font-sora font-bold text-[15px]">1 • Basic Details <span class="text-slate-400 font-medium text-[12px]">— बुनियादी जानकारी</span></div>
+                    <div class="grid grid-cols-2 gap-2.5 mt-3">
+                      <div><label class="lbl">Select Country *</label><select id="fCountry" onchange="onFCountry()" class="inp"></select></div>
+                      <div><label class="lbl">Your Name *</label><input id="fName" class="inp" placeholder="e.g. Priya Sharma" required></div>
+                      <div><label class="lbl">Contact No. *</label><div class="flex"><span id="fDial" class="px-2.5 flex items-center bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-[13px] font-bold">+91</span><input id="fPhone" class="inp rounded-l-none" placeholder="98765 43210" required pattern="[0-9]{7,12}"></div></div>
+                      <div><label class="lbl">Gmail *</label><input id="fGmail" type="email" class="inp" placeholder="you@gmail.com" required></div>
+                    </div>
+                  </div>
+                  <div class="rounded-[20px] bg-white border border-slate-200 p-4">
+                    <div class="font-sora font-bold text-[15px]">2 • Room Details</div>
+                    <div class="mt-3 space-y-2.5">
+                      <div><label class="lbl">Your House Name *</label><input id="fHouse" class="inp" placeholder="e.g. Sharma Villa, Sunrise PG" required></div>
+                      <div class="grid grid-cols-2 gap-2.5">
+                        <div><label class="lbl">Room Type *</label><select id="fType" class="inp" required></select></div>
+                        <div><label class="lbl">Suitable For *</label><select id="fSuit" class="inp" required><option>Anyone</option><option>Students</option><option>Family</option><option>Worker</option></select></div>
+                      </div>
+                      <div><label class="lbl">Amenities (tap to select)</label><div id="fAmen" class="flex flex-wrap gap-1.5 mt-1"></div></div>
+                      <div class="grid grid-cols-2 gap-2.5">
+                        <div><label class="lbl">Monthly Rent * <span id="fCurr1" class="text-rehzo-600">₹</span></label><input id="fRent" type="number" min="500" class="inp" placeholder="8000" required></div>
+                        <div><label class="lbl">Security Deposit (Optional)</label><input id="fDep" type="number" min="0" class="inp" placeholder="16000"></div>
+                      </div>
+                      <div><label class="lbl">Owner Conditions & Rules *</label><textarea id="fRules" class="inp" rows="3" placeholder="e.g. No smoking • Gate closes 10 PM • 1 month notice…" required></textarea></div>
+                    </div>
+                  </div>
+                  <div class="rounded-[20px] bg-white border border-slate-200 p-4">
+                    <div class="font-sora font-bold text-[15px]">3 • Location</div>
+                    <div class="grid grid-cols-2 gap-2.5 mt-3">
+                      <div><label class="lbl">State *</label><input id="fState" class="inp" placeholder="Delhi" required></div>
+                      <div><label class="lbl">City *</label><input id="fCity" class="inp" placeholder="New Delhi" required></div>
+                      <div><label class="lbl">Area Code *</label><input id="fPin" class="inp" placeholder="110001" required></div>
+                      <div><label class="lbl">Max People</label><input id="fCap" type="number" min="1" max="12" value="2" class="inp"></div>
+                    </div>
+                    <div class="mt-2.5"><label class="lbl">Address *</label><input id="fAddr" class="inp" placeholder="House No, Street, Area" required></div>
+                    <div class="mt-2.5"><label class="lbl">Tap map to set exact location *</label><div id="pickMap" style="height:180px" class="mt-1.5 border border-slate-200"></div>
+                    <div id="pickCoord" class="text-[11px] font-bold text-slate-500 mt-1.5">Not set — tap on map</div></div>
+                    <label class="flex items-start gap-2 mt-2.5 text-[13px] font-semibold bg-amber-50 border border-amber-200 rounded-xl p-3"><input id="fExact" type="checkbox" class="mt-1 accent-[#FF4D24]"> <span>Use Exact Map Location * <span class="block text-[11px] font-medium text-amber-800">Required. Hidden from guests until booking is accepted (privacy).</span></span></label>
+                  </div>
+                  <div class="rounded-[20px] bg-white border border-slate-200 p-4">
+                    <div class="font-sora font-bold text-[15px]">4 • Photos & Rules <span class="text-[11px] font-bold text-slate-400">MAX 3</span></div>
+                    <div class="grid grid-cols-3 gap-2 mt-3" id="photoPrev"></div>
+                    <input id="fPhotos" type="file" accept="image/*" multiple class="mt-2.5 text-[12px]">
+                    <p class="text-[11px] text-slate-400 mt-1">JPG/PNG, max 5MB each. Validated automatically.</p>
+                    <div class="flex gap-2 mt-3">
+                      <button type="button" onclick="fillSamplePhotos()" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-[12px] font-extrabold btn-press">Use Sample Photos</button>
+                      <button type="button" onclick="clearPhotos()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-[12px] font-extrabold btn-press">Clear</button>
+                    </div>
+                  </div>
+                  <div class="rounded-[20px] bg-ink-900 text-white p-4 flex gap-3 items-center">
+                    <div class="text-2xl">⏳</div><div class="text-[12px] leading-snug"><b>Listing Duration: 90 Days.</b> Visible only to you. Auto-expires from live search. You can <b>Edit + Publish Again</b>.</div>
+                  </div>
+                  <button id="listSubmitBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white font-sora font-extrabold text-[15px] shadow-pop btn-press">Publish Listing • 90 Days Free</button>
+                  <p class="text-center text-[11px] text-slate-400">Architecture future-payment ready • No in-app payment now</p>
+                </form>
+              </div>
+              <div id="otab-mine" class="otabPane hidden mt-3 pb-8 space-y-3"></div>
+              <div id="otab-req" class="otabPane hidden mt-3 pb-8 space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MORE -->
+        <section id="view-more" class="app-view">
+          <div class="px-4 pt-4 pb-8">
+            <h2 class="font-sora font-extrabold text-[22px]">More</h2>
+            <div id="profileCard"></div>
+            <div id="moreMenu" class="mt-3 space-y-2"></div>
+            <div class="mt-4 rounded-[20px] bg-ink-900 text-white p-4 relative overflow-hidden">
+              <div class="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-rehzo-500/30 blur-2xl"></div>
+              <div class="text-[11px] font-extrabold tracking-widest text-amber-300">REHZO ANDROID • PLAY STORE</div>
+              <div class="font-sora font-bold text-[16px] mt-1">Web App → Android App → Play Store</div>
+              <div class="text-[12px] text-white/60 mt-1">Same account • Same DB • Same TRL • Same PDF • Same security.</div>
+              <button onclick="go('roadmap')" class="mt-3 px-4 py-2.5 rounded-xl bg-white text-ink-900 text-[13px] font-extrabold btn-press">Open Build Plan →</button>
+            </div>
+            <p class="text-center text-[11px] text-slate-400 mt-4">REHZO Web App • Secure • Fast • Mobile-first • Android only (no iOS)</p>
+          </div>
+        </section>
+
+        <!-- BOOKINGS -->
+        <section id="view-bookings" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><h2 class="font-sora font-extrabold text-[22px] mt-1">My Bookings</h2><div class="flex gap-2 mt-3" id="bkTabs"></div><div id="bkList" class="mt-3 space-y-3"></div></div></section>
+
+        <!-- TRL -->
+        <section id="view-trl" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button>
+          <h2 class="font-sora font-extrabold text-[22px] mt-1">TRL Records 🔖</h2><p class="text-[13px] text-slate-500">12-character permanent record. Never deleted.</p>
+          <div class="mt-3 flex gap-2"><input id="trlSearch" placeholder="Enter 12-char TRL No…" class="inp flex-1 uppercase font-mono font-bold tracking-widest" maxlength="12"><button onclick="verifyTRL()" class="px-4 rounded-xl bg-ink-900 text-white font-extrabold text-[13px] btn-press">Verify</button></div>
+          <div id="trlResult" class="mt-3"></div><div id="trlList" class="mt-3 space-y-3"></div></div></section>
+
+        <!-- NOTIFICATIONS -->
+        <section id="view-notifications" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><div class="flex items-center mt-1"><h2 class="font-sora font-extrabold text-[22px]">Notifications</h2><div class="flex-1"></div><button onclick="markAllRead()" class="text-[12px] font-extrabold text-rehzo-600">Mark all read</button></div><div id="notifList" class="mt-3 space-y-2"></div></div></section>
+
+        <!-- AUTH -->
+        <section id="view-auth" class="app-view"><div class="px-4 pt-6 pb-10 max-w-[440px] mx-auto">
+          <div class="text-center"><div class="w-16 h-16 mx-auto rounded-[20px] bg-gradient-to-br from-rehzo-500 to-amber-500 flex items-center justify-center shadow-pop font-sora font-extrabold text-white text-2xl">R</div><h2 class="font-sora font-extrabold text-[24px] mt-3">Welcome to REHZO</h2><p class="text-[13px] text-slate-500">One account — Book rooms & List rooms</p></div>
+          <div class="mt-4 grid grid-cols-3 bg-white border border-slate-200 rounded-2xl p-1 gap-1">
+            <button data-atab="login" onclick="authTab('login')" class="atab py-2.5 rounded-xl text-[13px] font-extrabold bg-ink-900 text-white">Login</button>
+            <button data-atab="register" onclick="authTab('register')" class="atab py-2.5 rounded-xl text-[13px] font-extrabold text-slate-500">Register</button>
+            <button data-atab="forgot" onclick="authTab('forgot')" class="atab py-2.5 rounded-xl text-[13px] font-extrabold text-slate-500">Recover</button>
+          </div>
+          <div id="atab-login" class="atabPane mt-3 rounded-[20px] bg-white border border-slate-200 p-5">
+            <label class="lbl">User ID</label><input id="lUid" class="inp mt-1" placeholder="e.g. aarav_01">
+            <label class="lbl mt-3">Password</label><input id="lPass" type="password" class="inp mt-1" placeholder="••••••••">
+            <button onclick="doLogin()" class="w-full mt-4 py-3.5 rounded-2xl bg-ink-900 text-white font-sora font-extrabold btn-press">Login Securely 🔒</button>
+            <div class="grid grid-cols-2 gap-2 mt-2"><button onclick="quickLogin('demo_user','demo123')" class="py-2.5 rounded-xl bg-rehzo-50 border border-rehzo-100 text-rehzo-700 text-[12px] font-extrabold btn-press">Demo User</button><button onclick="quickLogin('admin','admin123')" class="py-2.5 rounded-xl bg-slate-100 text-[12px] font-extrabold btn-press">Admin Login</button></div>
+            <p class="text-[11px] text-slate-400 mt-3 text-center">Rate-limited • Hashed passwords • Secure session</p>
+          </div>
+          <div id="atab-register" class="atabPane hidden mt-3 rounded-[20px] bg-white border border-slate-200 p-5">
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="col-span-2"><label class="lbl">Your Name *</label><input id="rName" class="inp mt-1" placeholder="Full name"></div>
+              <div><label class="lbl">Choose User ID *</label><input id="rUid" class="inp mt-1" placeholder="unique_id"><div id="uidHint" class="text-[11px] mt-1 font-bold"></div></div>
+              <div><label class="lbl">Country *</label><select id="rCountry" class="inp mt-1"></select></div>
+              <div class="col-span-2"><label class="lbl">Gmail *</label><div class="flex gap-2 mt-1"><input id="rEmail" type="email" class="inp flex-1" placeholder="you@gmail.com"><button onclick="sendRegOTP()" class="px-3 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold btn-press whitespace-nowrap">Verify</button></div></div>
+              <div id="regOtpBox" class="hidden col-span-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3"><label class="lbl text-emerald-800">Enter 6-digit Gmail OTP *</label><div class="flex gap-2 mt-1"><input id="rOtp" class="inp flex-1 font-mono font-bold tracking-[.3em] text-center" maxlength="6" placeholder="------"><button onclick="verifyRegOTP()" class="px-3 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold">Confirm</button></div><div id="regOtpHint" class="text-[11px] text-emerald-700 mt-1 font-semibold"></div></div>
+              <div><label class="lbl">Phone *</label><div class="flex mt-1"><span id="rDial" class="px-2.5 flex items-center bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-[13px] font-bold">+91</span><input id="rPhone" class="inp rounded-l-none" placeholder="98765 43210"></div></div>
+              <div><label class="lbl">Password *</label><input id="rPass" type="password" class="inp mt-1" placeholder="Min 6 chars"></div>
+              <div class="col-span-2"><label class="lbl">Confirm Password *</label><input id="rPass2" type="password" class="inp mt-1" placeholder="Repeat password"></div>
+            </div>
+            <button onclick="doRegister()" class="w-full mt-4 py-3.5 rounded-2xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white font-sora font-extrabold btn-press">Create Verified Account ✓</button>
+          </div>
+          <div id="atab-forgot" class="atabPane hidden mt-3 rounded-[20px] bg-white border border-slate-200 p-5">
+            <div class="grid grid-cols-2 gap-2"><button onclick="forgotMode('id')" id="fmId" class="py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Forgot User ID</button><button onclick="forgotMode('pass')" id="fmPass" class="py-2.5 rounded-xl bg-slate-100 text-[12px] font-extrabold">Forgot Password</button></div>
+            <label class="lbl mt-3">Registered Gmail</label><div class="flex gap-2 mt-1"><input id="fgEmail" type="email" class="inp flex-1" placeholder="you@gmail.com"><button onclick="sendForgotOTP()" class="px-3 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Send OTP</button></div>
+            <div id="fgOtpBox" class="hidden mt-3 rounded-xl bg-amber-50 border border-amber-200 p-3"><label class="lbl">OTP + New details</label><input id="fgOtp" class="inp mt-1 font-mono font-bold tracking-[.3em] text-center" maxlength="6" placeholder="------"><input id="fgNew" class="inp mt-2 hidden" placeholder="New password"><button onclick="doForgotReset()" class="w-full mt-2 py-3 rounded-xl bg-amber-500 text-white font-extrabold text-[13px]">Recover Account</button><div id="fgHint" class="text-[11px] mt-1 font-semibold text-amber-800"></div></div>
+            <div id="fgResult" class="mt-3"></div>
+          </div>
+        </div></section>
+
+        <!-- ADMIN -->
+        <section id="view-admin" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button>
+          <div id="adminGate" class="mt-2 rounded-[20px] bg-white border border-slate-200 p-5 text-center"><div class="text-4xl">🔐</div><h3 class="font-sora font-extrabold text-[18px] mt-2">Secure Admin Panel</h3><p class="text-[12px] text-slate-500">Monitoring • Reports • Block/Suspend • Stats</p><input id="adminCode" type="password" class="inp mt-3 text-center font-mono font-bold" placeholder="Enter admin passcode"><button onclick="unlockAdmin()" class="w-full mt-2 py-3 rounded-xl bg-ink-900 text-white font-extrabold text-[13px]">Unlock Panel</button><p class="text-[11px] text-slate-400 mt-2">Demo code: <b class="font-mono">admin123</b> (or login as admin)</p></div>
+          <div id="adminBody" class="hidden">
+            <h2 class="font-sora font-extrabold text-[22px] mt-2">Admin Dashboard</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3" id="adminStats"></div>
+            <div class="grid sm:grid-cols-2 gap-3 mt-3">
+              <div class="rounded-[20px] bg-white border border-slate-200 p-4"><div class="font-bold text-[13px]">Bookings by Status</div><canvas id="chStatus" height="180"></canvas></div>
+              <div class="rounded-[20px] bg-white border border-slate-200 p-4"><div class="font-bold text-[13px]">Listings by Room Type</div><canvas id="chType" height="180"></canvas></div>
+            </div>
+            <div class="mt-3 flex gap-2 overflow-x-auto no-scrollbar" id="adminTabs"></div>
+            <div id="adminContent" class="mt-3 space-y-2"></div>
+          </div></div></section>
+
+        <!-- LEGAL / MISC -->
+        <section id="view-legal" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><div id="legalBody" class="mt-2"></div></div></section>
+        <section id="view-roadmap" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><div id="roadmapBody"></div></div></section>
+        <section id="view-reports" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><h2 class="font-sora font-extrabold text-[22px] mt-1">Reports & Safety 🚨</h2><div id="reportList" class="space-y-2 mt-3"></div></div></section>
+        <section id="view-fav" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><h2 class="font-sora font-extrabold text-[22px] mt-1">Favourites ❤</h2><div id="favList" class="grid gap-3 mt-3 sm:grid-cols-2"></div></div></section>
+
+      </div>
+
+      <!-- BOTTOM NAV -->
+      <nav class="sticky bottom-0 z-40 px-4 pb-4 pt-1 bg-gradient-to-t from-[#F5F6FB] via-[#F5F6FB]/95 to-transparent">
+        <div class="max-w-[440px] mx-auto grid grid-cols-4 bg-ink-900 rounded-[22px] p-1.5 shadow-app border border-white/10">
+          <button data-nav="home" onclick="go('home')" class="bnav flex flex-col items-center py-2 rounded-2xl text-white bg-white/10"><span class="text-[19px]">🏠</span><span class="text-[10px] font-extrabold tracking-wide">HOME</span></button>
+          <button data-nav="near" onclick="go('near')" class="bnav flex flex-col items-center py-2 rounded-2xl text-white/50"><span class="text-[19px]">📍</span><span class="text-[10px] font-extrabold tracking-wide">NEAR ME</span></button>
+          <button data-nav="owner" onclick="go('owner')" class="bnav flex flex-col items-center py-2 rounded-2xl text-white/50 relative"><span class="absolute -top-4 w-11 h-11 rounded-2xl bg-gradient-to-br from-rehzo-500 to-amber-500 flex items-center justify-center text-xl shadow-pop border-4 border-[#F5F6FB]">+</span><span class="text-[19px] opacity-0">+</span><span class="text-[10px] font-extrabold tracking-wide">OWNER</span></button>
+          <button data-nav="more" onclick="go('more')" class="bnav flex flex-col items-center py-2 rounded-2xl text-white/50"><span class="text-[19px]">☰</span><span class="text-[10px] font-extrabold tracking-wide">MORE</span></button>
+        </div>
+      </nav>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL desktop -->
+  <aside class="hidden xl:flex flex-col w-[280px] shrink-0 sticky top-6 gap-4 text-white">
+    <div class="rounded-[24px] bg-white text-ink-900 p-5 shadow-app">
+      <div class="text-[11px] font-extrabold tracking-widest text-rehzo-600">LIVE ACTIVITY</div>
+      <div id="activityFeed" class="mt-3 space-y-2.5 max-h-[300px] overflow-hidden"></div>
+    </div>
+    <div class="rounded-[24px] border border-white/10 bg-white/[.05] p-5 backdrop-blur-xl">
+      <div class="text-[11px] font-extrabold tracking-widest text-white/50">SECURITY • LIVE</div>
+      <div class="mt-3 space-y-2 text-[12px] font-semibold text-white/80">
+        <div>🔒 Gmail verification <span class="float-right text-emerald-400">ON</span></div>
+        <div>📱 Mobile verification <span class="float-right text-emerald-400">ON</span></div>
+        <div>🧂 Password hashing <span class="float-right text-emerald-400">ON</span></div>
+        <div>🚦 Rate limiting <span class="float-right text-emerald-400">ON</span></div>
+        <div>🖼️ Image validation <span class="float-right text-emerald-400">ON</span></div>
+        <div>⛔ Double-booking guard <span class="float-right text-emerald-400">ON</span></div>
+      </div>
+      <button onclick="go('admin')" class="mt-4 w-full py-2.5 rounded-xl bg-rehzo-500 text-white text-[13px] font-extrabold">Open Admin Panel</button>
+    </div>
+  </aside>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div id="detailOverlay" class="hidden fixed inset-0 z-[70] overflow-y-auto bg-ink-950/60 backdrop-blur-sm p-0 sm:p-6">
+  <div class="max-w-[640px] mx-auto bg-[#F5F6FB] sm:rounded-[28px] overflow-hidden min-h-full sm:min-h-0 shadow-app">
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<!-- FILTER DRAWER -->
+<div id="filterDrawer" class="hidden fixed inset-0 z-[75]">
+  <div class="absolute inset-0 bg-ink-950/60" onclick="toggleFilters(false)"></div>
+  <div class="absolute bottom-0 left-0 right-0 sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px] bg-white rounded-t-[28px] sm:rounded-[24px] p-5 shadow-app fadeUp max-h-[85vh] overflow-y-auto">
+    <div class="flex items-center"><h3 class="font-sora font-extrabold text-[17px]">Filters</h3><div class="flex-1"></div><button onclick="toggleFilters(false)" class="w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button></div>
+    <label class="lbl mt-4">Country</label><select id="fltCountry" class="inp mt-1"><option value="">All Countries</option></select>
+    <label class="lbl mt-3">Suitable For</label><select id="fltSuit" class="inp mt-1"><option value="">Anyone</option><option>Students</option><option>Family</option><option>Worker</option></select>
+    <label class="lbl mt-3">Max Rent: <span id="fltRentLbl" class="text-rehzo-600">₹50,000</span></label><input id="fltRent" type="range" min="2000" max="100000" step="1000" value="50000" class="w-full accent-[#FF4D24]" oninput="document.getElementById('fltRentLbl').textContent='₹'+Number(this.value).toLocaleString('en-IN')">
+    <label class="lbl mt-3">Amenities</label><div id="fltAmen" class="flex flex-wrap gap-1.5 mt-1.5"></div>
+    <div class="flex gap-2 mt-5"><button onclick="resetFilters()" class="flex-1 py-3 rounded-xl bg-slate-100 font-extrabold text-[13px]">Reset</button><button onclick="applyFilters()" class="flex-1 py-3 rounded-xl bg-ink-900 text-white font-extrabold text-[13px]">Show Results</button></div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div id="bookingModal" class="hidden fixed inset-0 z-[80] overflow-y-auto bg-ink-950/70 backdrop-blur-sm p-4">
+  <div class="max-w-[520px] mx-auto bg-white rounded-[24px] overflow-hidden shadow-app fadeUp my-6"><div id="bookingBody"></div></div>
+</div>
+
+<!-- PDF MODAL -->
+<div id="pdfModal" class="hidden fixed inset-0 z-[85] overflow-y-auto bg-ink-950/80 p-4">
+  <div class="max-w-[600px] mx-auto my-6 fadeUp">
+    <div class="flex gap-2 mb-3"><button onclick="closePdf()" class="px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-[13px] font-bold">✕ Close</button><div class="flex-1"></div><button onclick="downloadPDF()" class="px-4 py-2.5 rounded-xl bg-rehzo-500 text-white text-[13px] font-extrabold">⬇ Download PDF</button><button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-white text-ink-900 text-[13px] font-extrabold">🖨 Print</button></div>
+    <div id="pdfPrintArea"></div>
+  </div>
+</div>
+
+<!-- GENERIC MODAL -->
+<div id="genModal" class="hidden fixed inset-0 z-[90] overflow-y-auto bg-ink-950/70 p-4"><div class="max-w-[460px] mx-auto bg-white rounded-[24px] p-5 my-10 fadeUp" id="genBody"></div></div>
+
+<!-- COUNTRY MODAL -->
+<div id="countryModal" class="hidden fixed inset-0 z-[90]"><div class="absolute inset-0 bg-ink-950/60" onclick="closeCountry()"></div><div class="absolute bottom-0 left-0 right-0 sm:relative sm:mx-auto sm:mt-[10vh] sm:max-w-[420px] bg-white rounded-t-[26px] sm:rounded-[24px] p-5 fadeUp max-h-[80vh] overflow-y-auto"><h3 class="font-sora font-extrabold text-[17px]">Select Country</h3><p class="text-[12px] text-slate-500">Auto sets phone code + currency</p><div id="countryList" class="mt-3 space-y-1.5"></div></div></div>
+
+<!-- TOASTS -->
+<div id="toastWrap" class="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-[120] w-[92%] max-w-[420px] space-y-2 pointer-events-none"></div>
+
+<style>
+.lbl{ font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:#6B7280 }
+.inp{ width:100%; background:#F8F9FC; border:1.5px solid #E5E7EB; border-radius:14px; padding:11px 13px; font-size:14px; font-weight:600; transition:.15s }
+.backbtn{ font-size:13px; font-weight:800; color:#6B7280; background:#fff; border:1px solid #E5E7EB; padding:7px 14px; border-radius:99px }
+.amen-pill{ font-size:11px; font-weight:700; background:#F1F2F7; border:1.5px solid #E5E7EB; padding:6px 11px; border-radius:99px; cursor:pointer; user-select:none }
+.amen-pill.on{ background:#0B0E1F; color:#fff; border-color:#0B0E1F }
+.badge{ font-size:10px; font-weight:800; letter-spacing:.05em; padding:4px 10px; border-radius:99px; text-transform:uppercase }
+.timeline-dot{ width:30px; height:30px; border-radius:99px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0 }
+</style>
+
+<script>
+/* ================= DATA ================= */
+const COUNTRIES=[
+ {c:'IN',n:'India',d:'+91',s:'₹',f:'🇮🇳',lat:28.6139,lng:77.2090},
+ {c:'US',n:'United States',d:'+1',s:'$',f:'🇺🇸',lat:40.7128,lng:-74.0060},
+ {c:'GB',n:'United Kingdom',d:'+44',s:'£',f:'🇬🇧',lat:51.5074,lng:-0.1278},
+ {c:'CA',n:'Canada',d:'+1',s:'$',f:'🇨🇦',lat:43.6532,lng:-79.3832},
+ {c:'AU',n:'Australia',d:'+61',s:'A$',f:'🇦🇺',lat:-33.8688,lng:151.2093},
+ {c:'AE',n:'UAE',d:'+971',s:'د.إ',f:'🇦🇪',lat:25.2048,lng:55.2708},
+ {c:'NP',n:'Nepal',d:'+977',s:'₨',f:'🇳🇵',lat:27.7172,lng:85.3240},
+ {c:'DE',n:'Germany',d:'+49',s:'€',f:'🇩🇪',lat:52.52,lng:13.405},
+ {c:'SG',n:'Singapore',d:'+65',s:'S$',f:'🇸🇬',lat:1.3521,lng:103.8198},
+ {c:'BD',n:'Bangladesh',d:'+880',s:'৳',f:'🇧🇩',lat:23.8103,lng:90.4125},
+];
+const ROOM_TYPES=['Single Room','1 RK','2 BHK','3 BHK','PG','Flat','Hostel','Shared Room'];
+const AMENS=['WiFi','AC','Parking','Meals','Laundry','Power Backup','CCTV','Furnished','Attached Washroom','Balcony','Geyser','TV'];
+const DUR_OPTS=[1,2,3,6,12];
+
+let DB=null, currentUser=null, state={q:'',chip:'All',sort:'new',fltCountry:'',fltSuit:'',fltRent:50000,fltAmen:[],bkTab:'all',adminTab:'users',favs:[],geo:null,editingId:null,pickLat:null,pickLng:null,tempPhotos:[],lastPDF:null,hist:['home']};
+let _regOTP=null,_regOTPExp=0,_regVerified=false,_fgOTP=null,_fgMode='id',_loginAttempts={},_pickMap=null,_nearMap=null,_pickMarker=null;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmtMoney=(a,sym)=>sym+' '+Number(a||0).toLocaleString('en-IN');
+const timeAgo=t=>{const s=(Date.now()-t)/1000;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'};
+const fdate=t=>new Date(t).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return 'h'+h.toString(36)+s.length.toString(36)};
+const genOTP=()=>String(Math.floor(100000+Math.random()*900000));
+const genTRL=()=>{const ch='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let t='';do{t='';for(let i=0;i<12;i++)t+=ch[Math.floor(Math.random()*ch.length)];}while(DB.bookings.some(b=>b.trl===t));return t};
+const countryOf=c=>COUNTRIES.find(x=>x.c===c)||COUNTRIES[0];
+const myCountry=()=>countryOf(currentUser?.country||localStorage.getItem('REHZO_COUNTRY')||'IN');
+
+function toast(msg,type='ok'){
+  const w=$('toastWrap');const d=document.createElement('div');
+  const col=type==='ok'?'bg-ink-900 text-white border-white/10':type==='err'?'bg-red-600 text-white':type==='warn'?'bg-amber-500 text-white':'bg-emerald-600 text-white';
+  d.className=`toastIn pointer-events-auto ${col} border rounded-2xl px-4 py-3 text-[13px] font-bold shadow-app flex gap-2 items-center`;
+  d.innerHTML=`<span>${type==='err'?'⛔':type==='warn'?'⚠️':type==='info'?'🔔':'✅'}</span><span>${msg}</span>`;
+  w.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='.4s';setTimeout(()=>d.remove(),400)},3200);
+}
+function notify(uid,title,msg,type='info'){
+  DB.notifications.unshift({id:'n'+Date.now()+Math.floor(Math.random()*999),uid,title,msg,type,time:Date.now(),read:false});
+  saveDB();updateBell();
+  if(currentUser&&currentUser.uid===uid) toast(title+' — '+msg,'info');
+  renderActivity();
+}
+function saveDB(){localStorage.setItem('REHZO_DB',JSON.stringify(DB))}
+function loadDB(){try{DB=JSON.parse(localStorage.getItem('REHZO_DB'))}catch(e){DB=null}}
+
+/* ================= SEED ================= */
+function seed(){
+  const now=Date.now(),D=86400000;
+  DB={users:[
+    {uid:'demo_user',name:'Aarav Demo',email:'demo@gmail.com',phone:'9876543210',country:'IN',pass:hash('demo123'),verified:true,created:now-40*D,blocked:false,role:'user'},
+    {uid:'priya_owner',name:'Priya Sharma',email:'priya@gmail.com',phone:'9811054321',country:'IN',pass:hash('owner123'),verified:true,created:now-90*D,blocked:false,role:'user'},
+    {uid:'john_us',name:'John Carter',email:'john@gmail.com',phone:'2125550199',country:'US',pass:hash('john123'),verified:true,created:now-60*D,blocked:false,role:'user'},
+    {uid:'admin',name:'REHZO Admin',email:'admin@rehzo.com',phone:'9000000000',country:'IN',pass:hash('admin123'),verified:true,created:now-200*D,blocked:false,role:'admin'},
+  ],
+  listings:[
+    mk('L1','priya_owner','Priya Sharma','9811054321','priya@gmail.com','IN','Sharma Villa • Single Room','Single Room','Students',['WiFi','Furnished','Attached Washroom','Power Backup','CCTV'],7500,15000,'Delhi','New Delhi','110001','B-42, Laxmi Nagar, Near Metro Gate 2',28.6692,77.2740,'No smoking • Gate closes 10:30 PM • 1 month notice • Visitors till 8 PM',['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80&auto=format&fit=crop'],now-6*D,'available'),
+    mk('L2','priya_owner','Priya Sharma','9811054321','priya@gmail.com','IN','Sunrise Girls PG','PG','Students',['WiFi','Meals','Laundry','CCTV','Geyser','Power Backup'],6500,6500,'Madhya Pradesh','Indore','452001','2nd Floor, AB Road, Vijay Nagar',22.7196,75.8577,'Only girls • No guests overnight • Monthly mess advance',['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80&auto=format&fit=crop'],now-12*D,'available'),
+    mk('L3','demo_user','Aarav Demo','9876543210','demo@gmail.com','IN','Sunset View 2 BHK','2 BHK','Family',['Parking','AC','Balcony','Furnished','Power Backup','TV'],24000,48000,'Maharashtra','Mumbai','400050','702, Sea Breeze, Bandra West',19.0596,72.8295,'Family only • No pets • 11-month agreement • Society NOC needed',['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80&auto=format&fit=crop'],now-3*D,'pending'),
+    mk('L4','demo_user','Aarav Demo','9876543210','demo@gmail.com','IN','Cozy 1 RK HSR','1 RK','Worker',['WiFi','Attached Washroom','Geyser','Parking'],9500,20000,'Karnataka','Bengaluru','560102','14th Main, HSR Layout Sector 5',12.9116,77.6474,'Working professionals • No loud music after 10 PM',['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=800&q=80&auto=format&fit=crop'],now-20*D,'available'),
+    mk('L5','john_us','John Carter','2125550199','john@gmail.com','US','Brooklyn Heights Flat','Flat','Anyone',['WiFi','AC','Furnished','Laundry','TV','Balcony'],1200,1200,'New York','New York City','11201','55 Clark St, Brooklyn Heights',40.6975,-73.9950,'No parties • Renter insurance required • 30-day notice',['https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80&auto=format&fit=crop'],now-8*D,'available'),
+    mk('L6','john_us','John Carter','2125550199','john@gmail.com','GB','Camden Backpacker Hostel','Hostel','Students',['WiFi','Meals','Laundry','CCTV','Geyser'],450,200,'England','London','NW1 8AH','12 Camden High St',51.5390,-0.1426,'Check-in after 2 PM • ID required • Quiet hours 11 PM–7 AM',['https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80&auto=format&fit=crop'],now-15*D,'available'),
+    mk('L7','priya_owner','Priya Sharma','9811054321','priya@gmail.com','IN','Green Park 3 BHK','3 BHK','Family',['Parking','AC','Power Backup','Balcony','Furnished','CCTV'],42000,84000,'Maharashtra','Pune','411016','C-9, Green Park Society, Baner',18.5590,73.7868,'Pure veg kitchen • Family preferred • 2 months deposit',['https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&auto=format&fit=crop'],now-2*D,'available'),
+    mk('L8','demo_user','Aarav Demo','9876543210','demo@gmail.com','IN','Pink City Shared Room','Shared Room','Worker',['WiFi','Meals','Attached Washroom','Geyser'],3500,3500,'Rajasthan','Jaipur','302001','MI Road, Near Ajmer Pulia',26.9124,75.7873,'Sharing with 1 person • Shift workers welcome • Advance monthly',['https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop'],now-30*D,'available'),
+  ],
+  bookings:[],notifications:[],reports:[],reviews:[]};
+  function mk(id,ou,on,ph,gm,cc,house,type,suit,amen,rent,dep,st,ct,pin,addr,lat,lng,rules,photos,created,status){
+    return{id,ownerUid:ou,ownerName:on,contact:ph,gmail:gm,country:cc,houseName:house,roomType:type,suitableFor:suit,amenities:amen,rent,deposit:dep,state:st,city:ct,areaCode:pin,address:addr,lat,lng,rules,photos,createdAt:created,expiryAt:created+90*D,status,views:Math.floor(80+Math.random()*400)};
+  }
+  // demo confirmed booking with TRL for search demo
+  const b={id:'BK-DEMO01',trl:'RHZ4K8M2P9Q1X',listingId:'L4',userUid:'demo_user',userName:'Aarav Demo',contact:'9876543210',gmail:'demo@gmail.com',address:'Jaipur',people:2,durationMonths:6,startDate:now-50*D,endDate:now+130*D,monthlyRent:9500,totalRent:57000,deposit:20000,status:'confirmed',agree:true,createdAt:now-55*D,ownerName:'Aarav Demo',houseName:'Cozy 1 RK HSR',roomType:'1 RK'};
+  DB.bookings.push(b);
+  DB.notifications.push(
+    {id:'n1',uid:'demo_user',title:'Welcome to REHZO 🎉',msg:'Gmail verified. Your User ID demo_user is active.',type:'account',time:now-2*D,read:false},
+    {id:'n2',uid:'demo_user',title:'Booking Confirmed ✓',msg:'TRL RHZ4K8M2P9Q1X issued. PDF ready in TRL Records.',type:'booking',time:now-50*D,read:false},
+  );
+  saveDB();
+}
+
+/* ================= INIT ================= */
+window.addEventListener('DOMContentLoaded',()=>{
+  loadDB(); if(!DB||!DB.listings) seed();
+  checkExpiry();
+  const sess=localStorage.getItem('REHZO_SESSION');
+  if(sess){currentUser=DB.users.find(u=>u.uid===sess&&!u.blocked)||null}
+  buildStatic(); updateAuthUI(); updateBell(); renderAll();
+  // splash
+  let p=0;const msgs=['Securing session • Verifying listings…','Loading TRL engine • 12-char IDs…','Preparing Near Me maps…','Welcome to REHZO ✦'];
+  const iv=setInterval(()=>{p+=25;$('splashBar').style.width=p+'%';$('splashMsg').textContent=msgs[Math.min(3,p/25|0)];if(p>=100){clearInterval(iv);setTimeout(()=>{$('splash').style.transition='.6s';$('splash').style.opacity='0';setTimeout(()=>$('splash').remove(),600)},350)}},380);
+});
+function checkExpiry(){
+  const now=Date.now();let changed=false;
+  DB.listings.forEach(l=>{ if(l.status!=='expired'&&l.status!=='booked'&&l.expiryAt<now){l.status='expired';changed=true;
+    DB.notifications.unshift({id:'n'+now+Math.random(),uid:l.ownerUid,title:'Listing Expired ⏳',msg:`"${l.houseName}" expired after 90 days. Tap Publish Again.`,type:'expiry',time:now,read:false});
+  } else if(l.status==='available'&&l.expiryAt-now<7*86400000&&!l._warned){l._warned=true;changed=true;
+    DB.notifications.unshift({id:'n'+now+Math.random()+1,uid:l.ownerUid,title:'Listing expiring soon',msg:`"${l.houseName}" expires on ${fdate(l.expiryAt)}.`,type:'expiry',time:now,read:false});
+  }});
+  if(changed)saveDB();
+}
+
+/* ================= NAV ================= */
+function go(v){
+  if(['owner','bookings','trl','notifications'].includes(v)&&!currentUser){toast('Please login first','warn');v='auth'}
+  if(v==='admin'&&!currentUser){toast('Login to access admin','warn');v='auth'}
+  document.querySelectorAll('.app-view').forEach(s=>s.classList.remove('on'));
+  const map={home:'view-home',near:'view-near',owner:'view-owner',more:'view-more',auth:'view-auth',bookings:'view-bookings',trl:'view-trl',notifications:'view-notifications',admin:'view-admin',legal:'view-legal',roadmap:'view-roadmap',reports:'view-reports',fav:'view-fav'};
+  $(map[v]||'view-home').classList.add('on');
+  document.querySelectorAll('.bnav').forEach(b=>{const on=b.dataset.nav===v;b.className=`bnav flex flex-col items-center py-2 rounded-2xl ${on?'text-white bg-white/10':'text-white/50'}`});
+  $('homeSearchWrap').style.display=(v==='home')?'block':'none';
+  if(state.hist[state.hist.length-1]!==v)state.hist.push(v);
+  $('appMain').scrollTop=0;window.scrollTo({top:0});
+  if(v==='near')setTimeout(initNearMap,150);
+  if(v==='owner')setTimeout(initPickMap,200);
+  if(v==='admin')renderAdmin();
+  if(v==='more')renderMore();
+}
+function backTo(){state.hist.pop();go(state.hist.pop()||'home')}
+
+/* ================= STATIC BUILD ================= */
+function buildStatic(){
+  $('fCountry').innerHTML=COUNTRIES.map(c=>`<option value="${c.c}">${c.f} ${c.n} (${c.d} / ${c.s})</option>`).join('');
+  $('rCountry').innerHTML=COUNTRIES.map(c=>`<option value="${c.c}" ${c.c==='IN'?'selected':''}>${c.f} ${c.n}</option>`).join('');
+  $('rCountry').onchange=e=>{$('rDial').textContent=countryOf(e.target.value).d};
+  $('fType').innerHTML=ROOM_TYPES.map(t=>`<option>${t}</option>`).join('');
+  $('fAmen').innerHTML=AMENS.map(a=>`<span class="amen-pill" onclick="this.classList.toggle('on')">${a}</span>`).join('');
+  $('fltAmen').innerHTML=AMENS.map(a=>`<span class="amen-pill" onclick="this.classList.toggle('on');collectFltAmen()">${a}</span>`).join('');
+  $('fltCountry').innerHTML='<option value="">All Countries</option>'+COUNTRIES.map(c=>`<option value="${c.c}">${c.f} ${c.n}</option>`).join('');
+  $('quickChips').innerHTML=['All',...ROOM_TYPES].map(t=>`<button onclick="setChip('${t}')" data-chip="${t}" class="qchip shrink-0 px-3.5 py-2 rounded-full border-[1.5px] border-slate-200 bg-white text-[12px] font-extrabold whitespace-nowrap ${t==='All'?'chip-active':''}">${t}</button>`).join('');
+  $('rUid').addEventListener('input',e=>{const v=e.target.value.trim();const h=$('uidHint');if(!v){h.textContent='';return}if(DB.users.some(u=>u.uid===v)){h.textContent='✕ Already taken';h.className='text-[11px] mt-1 font-bold text-red-600'}else if(!/^[a-zA-Z0-9_]{4,20}$/.test(v)){h.textContent='4–20 chars: letters, numbers, _';h.className='text-[11px] mt-1 font-bold text-amber-600'}else{h.textContent='✓ Available';h.className='text-[11px] mt-1 font-bold text-emerald-600'}});
+  renderCountryList(); renderPhotoPrev(); setHdrCountry();
+  $('sideMarquee').innerHTML=[...DB.listings.slice(0,5),...DB.listings.slice(0,5)].map(l=>`<span class="shrink-0 text-[11px] font-bold bg-white/10 border border-white/10 px-3 py-1.5 rounded-full whitespace-nowrap">🏠 ${esc(l.houseName)} • ${esc(l.city)}</span>`).join('');
+}
+function setHdrCountry(){const c=myCountry();$('hdrFlag').textContent=c.f;$('hdrCurr').textContent=c.s;$('hdrDial').textContent=c.d}
+function collectFltAmen(){state.fltAmen=[...document.querySelectorAll('#fltAmen .on')].map(e=>e.textContent)}
+
+/* ================= AUTH ================= */
+function authTab(t){document.querySelectorAll('.atab').forEach(b=>{const on=b.dataset.atab===t;b.className=`atab py-2.5 rounded-xl text-[13px] font-extrabold ${on?'bg-ink-900 text-white':'text-slate-500'}`});document.querySelectorAll('.atabPane').forEach(p=>p.classList.add('hidden'));$('atab-'+t).classList.remove('hidden')}
+function handleAvatar(){ if(!currentUser)go('auth'); else go('more') }
+function quickLogin(u,p){$('lUid').value=u;$('lPass').value=p;doLogin()}
+function doLogin(){
+  const uid=$('lUid').value.trim(),pw=$('lPass').value;
+  if(!uid||!pw)return toast('Enter User ID + Password','err');
+  const k='l_'+uid;const a=_loginAttempts[k]||{n:0,t:0};
+  if(a.n>=5&&Date.now()-a.t<60000)return toast('Too many attempts. Wait 60s (rate limiting).','err');
+  const u=DB.users.find(x=>x.uid===uid);
+  if(!u||u.pass!==hash(pw)){a.n++;a.t=Date.now();_loginAttempts[k]=a;return toast(`Invalid credentials (${a.n}/5)`,'err')}
+  if(u.blocked)return toast('Account suspended. Contact admin.','err');
+  _loginAttempts[k]={n:0,t:0};
+  currentUser=u;localStorage.setItem('REHZO_SESSION',u.uid);
+  DB.notifications.unshift({id:'n'+Date.now(),uid:u.uid,title:'Login detected 🔐',msg:'Secure session started on this device.',type:'account',time:Date.now(),read:false});saveDB();
+  updateAuthUI();updateBell();renderAll();go('home');toast(`Welcome back, ${u.name.split(' ')[0]}!`);
+}
+function sendRegOTP(){
+  const em=$('rEmail').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return toast('Enter valid Gmail','err');
+  if(DB.users.some(u=>u.email.toLowerCase()===em.toLowerCase()))return toast('Gmail already registered','err');
+  _regOTP=genOTP();_regOTPExp=Date.now()+5*60000;_regVerified=false;
+  $('regOtpBox').classList.remove('hidden');$('regOtpHint').innerHTML=`Demo Gmail OTP: <b class="font-mono text-[15px] tracking-[.3em]">${_regOTP}</b> <button onclick="navigator.clipboard&&navigator.clipboard.writeText('${_regOTP}');$('rOtp').value='${_regOTP}';toast('OTP autofilled')" class="underline">autofill</button> • valid 5 min`;
+  toast('OTP sent to Gmail (demo shown below)','info');
+}
+function verifyRegOTP(){
+  if($('rOtp').value.trim()===_regOTP&&Date.now()<_regOTPExp){_regVerified=true;$('regOtpHint').innerHTML='✓ Gmail verified successfully';toast('Gmail verified ✓')}else toast('Invalid / expired OTP','err');
+}
+function doRegister(){
+  const name=$('rName').value.trim(),uid=$('rUid').value.trim(),cc=$('rCountry').value,em=$('rEmail').value.trim(),ph=$('rPhone').value.trim(),p1=$('rPass').value,p2=$('rPass2').value;
+  if(!name||!uid||!em||!ph||!p1)return toast('Fill all required fields','err');
+  if(!/^[a-zA-Z0-9_]{4,20}$/.test(uid))return toast('User ID: 4–20 chars (a-z, 0-9, _)','err');
+  if(DB.users.some(u=>u.uid===uid))return toast('User ID already taken','err');
+  if(!_regVerified)return toast('Please verify Gmail OTP first','warn');
+  if(p1!==p2)return toast('Passwords do not match','err');
+  if(p1.length<6)return toast('Password min 6 chars','err');
+  const u={uid,name,email:em,phone:ph,country:cc,pass:hash(p1),verified:true,created:Date.now(),blocked:false,role:'user'};
+  DB.users.push(u);DB.notifications.unshift({id:'n'+Date.now(),uid,title:'Account created 🎉',msg:`Unique User ID ${uid} • Gmail + Mobile verified.`,type:'account',time:Date.now(),read:false});
+  saveDB();currentUser=u;localStorage.setItem('REHZO_SESSION',uid);
+  updateAuthUI();updateBell();renderAll();go('home');toast('Account created & logged in ✓');
+}
+function forgotMode(m){_fgMode=m;$('fmId').className=`py-2.5 rounded-xl text-[12px] font-extrabold ${m==='id'?'bg-ink-900 text-white':'bg-slate-100'}`;$('fmPass').className=`py-2.5 rounded-xl text-[12px] font-extrabold ${m==='pass'?'bg-ink-900 text-white':'bg-slate-100'}`;$('fgNew').classList.toggle('hidden',m==='id')}
+function sendForgotOTP(){
+  const em=$('fgEmail').value.trim();const u=DB.users.find(x=>x.email.toLowerCase()===em.toLowerCase());
+  if(!u)return toast('Gmail not found','err');
+  _fgOTP=genOTP();$('fgOtpBox').classList.remove('hidden');$('fgHint').innerHTML=`Demo OTP: <b class="font-mono tracking-[.3em]">${_fgOTP}</b> <button class="underline" onclick="$('fgOtp').value='${_fgOTP}'">autofill</button>`;
+  toast('Recovery OTP sent (demo shown)','info');
+}
+function doForgotReset(){
+  const em=$('fgEmail').value.trim();const u=DB.users.find(x=>x.email.toLowerCase()===em.toLowerCase());
+  if(!u||$('fgOtp').value.trim()!==_fgOTP)return toast('Invalid OTP','err');
+  if(_fgMode==='id'){$('fgResult').innerHTML=`<div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-[13px] font-bold text-emerald-800">Your User ID: <span class="font-mono text-[15px]">${esc(u.uid)}</span></div>`}
+  else{const np=$('fgNew').value;if(np.length<6)return toast('New password min 6 chars','err');u.pass=hash(np);saveDB();$('fgResult').innerHTML=`<div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-[13px] font-bold text-emerald-800">Password reset ✓ — login with User ID <b>${esc(u.uid)}</b></div>`}
+  toast('Recovery successful ✓');
+}
+function logout(){localStorage.removeItem('REHZO_SESSION');currentUser=null;updateAuthUI();renderAll();go('home');toast('Logged out securely')}
+function updateAuthUI(){
+  const b=$('avatarBtn');
+  if(currentUser){b.textContent=currentUser.name[0].toUpperCase();b.title=currentUser.uid}
+  else{b.textContent='?'}
+  renderGreet();
+}
+function renderGreet(){
+  const el=$('greetBox');if(!el)return;
+  if(currentUser){el.innerHTML=`<div class="rounded-[18px] bg-white border border-slate-200 p-3.5 flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-ink-900 to-indigo-600 text-white flex items-center justify-center font-sora font-extrabold text-lg">${esc(currentUser.name[0].toUpperCase())}</div><div class="flex-1"><div class="text-[13px] text-slate-500 font-semibold">Namaste, <b class="text-ink-900">${esc(currentUser.name.split(' ')[0])}</b> 🙏</div><div class="text-[11px] text-slate-400 font-mono">ID: ${esc(currentUser.uid)} • ${countryOf(currentUser.country).f} ${countryOf(currentUser.country).s}</div></div><button onclick="go('bookings')" class="px-3 py-2 rounded-xl bg-rehzo-50 text-rehzo-700 text-[12px] font-extrabold">My Trips →</button></div`}
+  else{el.innerHTML=`<div class="rounded-[18px] bg-gradient-to-r from-ink-900 to-indigo-900 text-white p-3.5 flex items-center gap-3"><div class="flex-1"><div class="font-sora font-bold text-[14px]">Login to book & list rooms</div><div class="text-[11px] text-white/60">One account • Gmail verified • Free</div></div><button onclick="go('auth')" class="px-4 py-2.5 rounded-xl bg-white text-ink-900 text-[12px] font-extrabold btn-press">Login</button></div>`}
+}
+
+/* ================= SEARCH / HOME ================= */
+function onSearch(v){state.q=v.trim();$('clearSearch').classList.toggle('hidden',!v);renderHome()}
+function clearSearch(){$('globalSearch').value='';state.q='';$('clearSearch').classList.add('hidden');renderHome()}
+function setChip(t){state.chip=t;document.querySelectorAll('.qchip').forEach(c=>c.classList.toggle('chip-active',c.dataset.chip===t));renderHome()}
+function toggleFilters(o){$('filterDrawer').classList.toggle('hidden',!o)}
+function resetFilters(){state.fltCountry='';state.fltSuit='';state.fltRent=50000;state.fltAmen=[];$('fltCountry').value='';$('fltSuit').value='';$('fltRent').value=50000;$('fltRentLbl').textContent='₹50,000';document.querySelectorAll('#fltAmen .on').forEach(e=>e.classList.remove('on'));$('filterDot').classList.add('hidden');renderHome()}
+function applyFilters(){state.fltCountry=$('fltCountry').value;state.fltSuit=$('fltSuit').value;state.fltRent=+$('fltRent').value;$('filterDot').classList.toggle('hidden',!(state.fltCountry||state.fltSuit||state.fltRent<50000||state.fltAmen.length));toggleFilters(false);renderHome()}
+function haversine(a,b,c,d){const R=6371,r=x=>x*Math.PI/180;const h=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function distTo(l){if(!state.geo)return null;return haversine(state.geo.lat,state.geo.lng,l.lat,l.lng)}
+function visibleListings(){
+  let arr=DB.listings.filter(l=>l.status==='available'||l.status==='pending');
+  // TRL search
+  if(state.q&&/^[A-Z0-9]{10,14}$/i.test(state.q.replace(/[\s-]/g,''))){
+    const q=state.q.replace(/[\s-]/g,'').toUpperCase();
+    const bk=DB.bookings.find(b=>(b.trl||'').toUpperCase()===q);
+    if(bk){const l=DB.listings.find(x=>x.id===bk.listingId);return l?[l]:[]}
+  }
+  if(state.q){const q=state.q.toLowerCase();arr=arr.filter(l=>(l.houseName+' '+l.city+' '+l.state+' '+l.areaCode+' '+l.roomType).toLowerCase().includes(q))}
+  if(state.chip!=='All')arr=arr.filter(l=>l.roomType===state.chip);
+  if(state.fltCountry)arr=arr.filter(l=>l.country===state.fltCountry);
+  if(state.fltSuit)arr=arr.filter(l=>l.suitableFor===state.fltSuit||l.suitableFor==='Anyone');
+  arr=arr.filter(l=>l.rent<=state.fltRent);
+  if(state.fltAmen.length)arr=arr.filter(l=>state.fltAmen.every(a=>l.amenities.includes(a)));
+  if(state.sort==='low')arr.sort((a,b)=>a.rent-b.rent);
+  else if(state.sort==='high')arr.sort((a,b)=>b.rent-a.rent);
+  else if(state.sort==='near'&&state.geo)arr.sort((a,b)=>distTo(a)-distTo(b));
+  else arr.sort((a,b)=>b.createdAt-a.createdAt);
+  return arr;
+}
+function statusBadge(l){
+  if(l.status==='pending')return `<span class="badge bg-amber-400 text-ink-900">◷ Booking Pending</span>`;
+  if(l.status==='booked')return `<span class="badge bg-slate-800 text-white">Booked</span>`;
+  if(l.status==='expired')return `<span class="badge bg-red-100 text-red-700">Expired</span>`;
+  return `<span class="badge bg-emerald-500 text-white">● Available</span>`;
+}
+function cardHTML(l){
+  const c=countryOf(l.country);const d=distTo(l);const fav=(currentUser&&DB.users.find(u=>u.uid===currentUser.uid)?.favs?.includes(l.id));
+  const revs=DB.reviews.filter(r=>{const b=DB.bookings.find(x=>x.id===r.bookingId);return b&&b.listingId===l.id});
+  const avg=revs.length?(revs.reduce((s,r)=>s+r.rating,0)/revs.length).toFixed(1):null;
+  return `<article class="rounded-[22px] bg-white border border-slate-200 overflow-hidden shadow-card fadeUp">
+    <div class="relative h-[190px] cursor-pointer" onclick="openDetail('${l.id}')">
+      <img src="${l.photos[0]}" onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop'" class="w-full h-full object-cover" loading="lazy">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent"></div>
+      <div class="absolute top-2.5 left-2.5 flex gap-1.5">${statusBadge(l)}<span class="badge bg-white/90 text-ink-900">${esc(l.roomType)}</span></div>
+      <button onclick="event.stopPropagation();toggleFav('${l.id}')" class="absolute top-2.5 right-2.5 w-9 h-9 rounded-full ${fav?'bg-rehzo-500 text-white':'bg-white/90'} flex items-center justify-center font-bold">♥</button>
+      <div class="absolute bottom-2.5 left-3 right-3 flex items-end gap-2">
+        <div class="flex-1"><div class="text-white font-sora font-extrabold text-[16px] leading-tight drop-shadow">${esc(l.houseName)}</div>
+        <div class="text-white/80 text-[11px] font-semibold">📍 ${esc(l.city)}, ${esc(l.state)} ${d!=null?`• ${d.toFixed(1)} km`:''}</div></div>
+        ${avg?`<span class="badge bg-white text-ink-900">★ ${avg}</span>`:''}
+      </div>
+    </div>
+    <div class="p-3.5">
+      <div class="flex items-center gap-2">
+        <div class="font-sora font-extrabold text-[19px]">${fmtMoney(l.rent,c.s)}<span class="text-[11px] font-bold text-slate-400">/mo</span></div>
+        <div class="flex-1"></div><span class="text-[11px] font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">${esc(l.suitableFor)}</span><span class="text-[11px] font-bold bg-slate-100 px-2 py-1 rounded-full">${c.f}</span>
+      </div>
+      <div class="flex flex-wrap gap-1 mt-2">${l.amenities.slice(0,4).map(a=>`<span class="text-[10.5px] font-bold bg-slate-100 px-2 py-1 rounded-full">✓ ${esc(a)}</span>`).join('')}${l.amenities.length>4?`<span class="text-[10.5px] font-bold text-slate-400">+${l.amenities.length-4} more</span>`:''}</div>
+      <div class="flex gap-2 mt-3">
+        <button onclick="openDetail('${l.id}')" class="flex-1 py-2.5 rounded-xl bg-ink-900 text-white text-[13px] font-extrabold btn-press">View Details</button>
+        <button onclick="startBooking('${l.id}')" ${l.status==='pending'?'disabled':''} class="flex-1 py-2.5 rounded-xl ${l.status==='pending'?'bg-slate-200 text-slate-400':'bg-gradient-to-r from-rehzo-500 to-amber-500 text-white shadow-pop'} text-[13px] font-extrabold btn-press">${l.status==='pending'?'Pending…':'Book Now'}</button>
+      </div>
+    </div></article>`;
+}
+function renderHome(){
+  const arr=visibleListings();
+  $('homeGrid').innerHTML=arr.length?arr.map(cardHTML).join(''):`<div class="col-span-full text-center py-12 bg-white rounded-[22px] border border-dashed border-slate-300"><div class="text-5xl">🏚️</div><div class="font-sora font-bold mt-3">No rooms found</div><p class="text-[12px] text-slate-500">Try another house name, city or TRL No.</p><button onclick="resetFilters();clearSearch();setChip('All')" class="mt-3 px-4 py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Clear all</button></div>`;
+  $('homeCount').textContent=arr.length;$('liveCount').textContent=DB.listings.filter(l=>l.status==='available').length;
+  $('statSideRooms').textContent=DB.listings.filter(l=>l.status==='available').length;
+  $('statSideUsers').textContent=DB.users.length;$('statSideTrl').textContent=DB.bookings.filter(b=>b.trl).length;
+}
+function toggleFav(id){
+  if(!currentUser)return toast('Login to save favourites','warn');
+  const u=DB.users.find(x=>x.uid===currentUser.uid);u.favs=u.favs||[];
+  if(u.favs.includes(id)){u.favs=u.favs.filter(f=>f!==id);toast('Removed from favourites')}
+  else{u.favs.push(id);toast('Saved to favourites ❤')}
+  saveDB();renderHome();
+}
+
+/* ================= DETAIL ================= */
+let detailImgs=[],detailIdx=0;
+function openDetail(id){
+  const l=DB.listings.find(x=>x.id===id);if(!l)return;
+  l.views=(l.views||0)+1;saveDB();
+  detailImgs=l.photos;detailIdx=0;
+  const c=countryOf(l.country);
+  const myBk=currentUser?DB.bookings.find(b=>b.listingId===id&&(b.userUid===currentUser.uid)&&['owner_accepted','confirmed'].includes(b.status)):null;
+  const unlocked=myBk||(currentUser&&l.ownerUid===currentUser.uid);
+  const mask=v=>unlocked?esc(v):'•••••• 🔒';
+  const revs=DB.reviews.filter(r=>{const b=DB.bookings.find(x=>x.id===r.bookingId);return b&&b.listingId===id});
+  $('detailBody').innerHTML=`
+   <div class="relative h-[280px] bg-ink-900">
+     <img id="dImg" src="${l.photos[0]}" class="w-full h-full object-cover">
+     <button onclick="closeDetail()" class="absolute top-4 left-4 w-10 h-10 rounded-full glass font-extrabold">←</button>
+     <div class="absolute top-4 right-4 flex gap-2"><button onclick="toggleFav('${l.id}')" class="w-10 h-10 rounded-full glass font-bold">♥</button><button onclick="shareRoom('${l.id}')" class="w-10 h-10 rounded-full glass font-bold">⤴</button></div>
+     <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">${l.photos.map((_,i)=>`<span class="dot ${i===0?'on':''}" data-dot="${i}"></span>`).join('')}</div>
+     <button onclick="dSlide(-1)" class="absolute left-3 top-1/2 w-9 h-9 rounded-full glass font-bold">‹</button>
+     <button onclick="dSlide(1)" class="absolute right-3 top-1/2 w-9 h-9 rounded-full glass font-bold">›</button>
+     <div class="absolute bottom-3 left-4 flex gap-1.5">${statusBadge(l)}</div>
+   </div>
+   <div class="p-5">
+     <div class="flex items-start gap-2"><h2 class="font-sora font-extrabold text-[21px] leading-tight flex-1">${esc(l.houseName)}</h2><span class="badge bg-slate-900 text-white">${c.f} ${c.s}</span></div>
+     <div class="text-[13px] text-slate-500 font-semibold mt-0.5">📍 ${esc(l.city)}, ${esc(l.state)} • ${esc(l.areaCode)} • 👁 ${l.views} views</div>
+     <div class="mt-3 flex items-center gap-2 bg-gradient-to-r from-rehzo-50 to-amber-50 border border-rehzo-100 rounded-2xl p-3.5">
+       <div><div class="font-sora font-extrabold text-[24px] text-rehzo-600">${fmtMoney(l.rent,c.s)}<span class="text-[12px] text-slate-500">/month</span></div><div class="text-[12px] font-bold text-slate-500">Deposit: ${l.deposit?fmtMoney(l.deposit,c.s):'—'}</div></div>
+       <div class="flex-1"></div>
+       <div class="text-right"><div class="badge bg-ink-900 text-white">${esc(l.roomType)}</div><div class="text-[11px] font-bold text-slate-500 mt-1.5">For: ${esc(l.suitableFor)}</div></div>
+     </div>
+     <div class="mt-3"><div class="lbl">Amenities</div><div class="flex flex-wrap gap-1.5 mt-1.5">${l.amenities.map(a=>`<span class="text-[12px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-100 px-2.5 py-1.5 rounded-full">✓ ${esc(a)}</span>`).join('')}</div></div>
+     <div class="mt-4 grid sm:grid-cols-2 gap-2.5">
+       <div class="rounded-2xl bg-white border border-slate-200 p-3.5"><div class="lbl">Owner</div><div class="font-bold text-[14px] mt-1">${esc(l.ownerName)}</div><div class="text-[13px] font-mono font-bold mt-1">${mask(countryOf(l.country).d+' '+l.contact)}</div><div class="text-[11px] text-slate-400 mt-1">📞 Hidden until owner accepts (privacy)</div></div>
+       <div class="rounded-2xl bg-white border border-slate-200 p-3.5"><div class="lbl">Full Address</div><div class="text-[13px] font-semibold mt-1">${unlocked?esc(l.address)+', '+esc(l.city):'Exact address hidden 🔒'}</div><div class="text-[11px] text-slate-400 mt-1">🗺 Exact map ${unlocked?'unlocked ✓':'locked until acceptance'}</div></div>
+     </div>
+     <div class="mt-2.5 rounded-2xl overflow-hidden border border-slate-200"><div id="dMap" style="height:170px"></div>${unlocked?'':'<div class="text-center text-[11px] font-bold text-slate-400 py-2 bg-white">🔒 Map blurred for privacy — unlocks after owner acceptance</div>'}</div>
+     <div class="mt-3 rounded-2xl bg-amber-50 border border-amber-200 p-3.5"><div class="lbl text-amber-800">Owner Conditions & Rules</div><div class="text-[13px] font-medium mt-1 whitespace-pre-line">${esc(l.rules)}</div></div>
+     ${revs.length?`<div class="mt-3"><div class="lbl">Reviews (${revs.length})</div>${revs.map(r=>`<div class="mt-1.5 bg-white border border-slate-200 rounded-xl p-3 text-[13px]"><b>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</b> — ${esc(r.text)}<div class="text-[11px] text-slate-400">by ${esc(r.fromUid)} • ${timeAgo(r.time)}</div></div>`).join('')}</div>`:''}
+     <div class="flex gap-2 mt-4 sticky bottom-3">
+       <button onclick="openReport('${l.id}','listing')" class="px-4 py-3.5 rounded-2xl bg-white border border-slate-200 font-extrabold text-[13px]">🚨 Report</button>
+       <button onclick="closeDetail();startBooking('${l.id}')" ${l.status!=='available'?'disabled':''} class="flex-1 py-3.5 rounded-2xl ${l.status==='available'?'bg-gradient-to-r from-rehzo-500 to-amber-500 text-white shadow-pop':'bg-slate-200 text-slate-400'} font-sora font-extrabold btn-press">${l.status==='available'?'Book This Room →':l.status==='pending'?'Booking Pending…':'Booked'}</button>
+     </div>
+     <p class="text-center text-[11px] text-slate-400 mt-2">TRL No. issued only after full confirmation • Double-booking protected</p>
+   </div>`;
+  $('detailOverlay').classList.remove('hidden');document.body.style.overflow='hidden';
+  setTimeout(()=>{
+    const m=L.map('dMap').setView([l.lat,l.lng],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
+    L.marker([l.lat,l.lng]).addTo(m).bindPopup(esc(l.houseName)).openPopup();
+    if(!unlocked){document.querySelector('#dMap').style.filter='blur(6px) grayscale(.4)'}
+  },120);
+}
+function dSlide(d){detailIdx=(detailIdx+d+detailImgs.length)%detailImgs.length;$('dImg').src=detailImgs[detailIdx];document.querySelectorAll('[data-dot]').forEach((e,i)=>e.classList.toggle('on',i===detailIdx))}
+function closeDetail(){$('detailOverlay').classList.add('hidden');document.body.style.overflow=''}
+function shareRoom(id){const url=location.href.split('#')[0]+'#room-'+id;try{navigator.clipboard.writeText(url)}catch(e){}toast('Room link copied ⤴')}
+
+/* ================= BOOKING ================= */
+let bookingListing=null;
+function startBooking(id){
+  const l=DB.listings.find(x=>x.id===id);if(!l)return;
+  if(!currentUser){toast('Login to book','warn');return go('auth')}
+  if(l.ownerUid===currentUser.uid)return toast('You own this listing','warn');
+  if(l.status!=='available')return toast('Not available (pending/booked guard)','err');
+  const active=DB.bookings.find(b=>b.listingId===id&&['requested','owner_accepted','confirmed'].includes(b.status));
+  if(active)return toast('Double-booking blocked: active request exists','err');
+  bookingListing=l;
+  const c=countryOf(l.country);const today=new Date().toISOString().slice(0,10);
+  $('bookingBody').innerHTML=`
+   <div class="bg-ink-900 text-white p-5 relative overflow-hidden">
+     <div class="absolute -right-8 -top-8 w-36 h-36 bg-rehzo-500/40 blur-3xl rounded-full"></div>
+     <div class="flex items-center gap-2"><button onclick="closeBooking()" class="w-9 h-9 rounded-full bg-white/10 font-bold">✕</button><div class="font-sora font-extrabold text-[17px]">Booking Request</div><div class="flex-1"></div><span class="badge bg-white/15">STEP 1/4</span></div>
+     <div class="mt-2 text-[13px] text-white/70">${esc(l.houseName)} • ${esc(l.roomType)} • <b class="text-white">${fmtMoney(l.rent,c.s)}/mo</b></div>
+     <div class="mt-3 flex items-center gap-1 text-[10px] font-extrabold"><span class="px-2 py-1 rounded-full bg-rehzo-500">REQUEST</span><span class="flex-1 h-0.5 bg-white/15 rounded"></span><span class="px-2 py-1 rounded-full bg-white/15">OWNER OK</span><span class="flex-1 h-0.5 bg-white/15 rounded"></span><span class="px-2 py-1 rounded-full bg-white/15">YOU CONFIRM</span><span class="flex-1 h-0.5 bg-white/15 rounded"></span><span class="px-2 py-1 rounded-full bg-white/15">TRL+PDF</span></div>
+   </div>
+   <div class="p-5 space-y-2.5 max-h-[62vh] overflow-y-auto">
+     <div class="grid grid-cols-2 gap-2.5">
+       <div><label class="lbl">Name *</label><input id="bName" class="inp mt-1" value="${esc(currentUser.name)}"></div>
+       <div><label class="lbl">Contact No. *</label><input id="bPhone" class="inp mt-1" value="${esc(currentUser.phone)}"></div>
+     </div>
+     <div><label class="lbl">Gmail *</label><input id="bMail" class="inp mt-1" value="${esc(currentUser.email)}"></div>
+     <div><label class="lbl">Address *</label><input id="bAddr" class="inp mt-1" placeholder="Current address"></div>
+     <div class="grid grid-cols-2 gap-2.5">
+       <div><label class="lbl">No. of People *</label><input id="bPeople" type="number" min="1" max="12" value="1" class="inp mt-1" oninput="calcBooking()"></div>
+       <div><label class="lbl">Duration *</label><select id="bDur" class="inp mt-1" onchange="calcBooking()">${DUR_OPTS.map(d=>`<option value="${d}">${d} Month${d>1?'s':''}</option>`).join('')}<option value="custom">Custom</option></select></div>
+     </div>
+     <div id="customDur" class="hidden"><label class="lbl">Custom Months *</label><input id="bCustom" type="number" min="1" max="36" value="4" class="inp mt-1" oninput="calcBooking()"></div>
+     <div class="grid grid-cols-2 gap-2.5">
+       <div><label class="lbl">Start Date *</label><input id="bStart" type="date" value="${today}" min="${today}" class="inp mt-1" onchange="calcBooking()"></div>
+       <div><label class="lbl">End Date (auto)</label><input id="bEnd" class="inp mt-1 bg-slate-100" readonly></div>
+     </div>
+     <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 text-[13px] font-bold space-y-1">
+       <div class="flex justify-between"><span>Monthly Rent</span><span id="cRent">${fmtMoney(l.rent,c.s)}</span></div>
+       <div class="flex justify-between"><span>Duration</span><span id="cDur">1 month</span></div>
+       <div class="flex justify-between"><span>Total Rent</span><span id="cTotal" class="text-rehzo-600">${fmtMoney(l.rent,c.s)}</span></div>
+       <div class="flex justify-between"><span>Security Deposit</span><span id="cDep">${l.deposit?fmtMoney(l.deposit,c.s):'—'}</span></div>
+       <div class="border-t border-dashed border-slate-300 pt-1.5 flex justify-between text-[15px] font-sora font-extrabold"><span>Payable</span><span id="cGrand"></span></div>
+     </div>
+     <div class="rounded-2xl bg-amber-50 border border-amber-200 p-3.5"><div class="lbl text-amber-800">Owner Conditions (must agree)</div><div class="text-[12.5px] mt-1 whitespace-pre-line">${esc(l.rules)}</div>
+     <label class="flex gap-2 mt-2 text-[13px] font-bold"><input id="bAgree" type="checkbox" class="accent-[#FF4D24] mt-1"> I agree to Owner Conditions & Rules.</label></div>
+     <div class="rounded-2xl bg-indigo-50 border border-indigo-100 p-3 text-[11.5px] font-semibold text-indigo-900">🔒 Privacy: Owner phone, full address & exact map stay hidden until owner accepts your request.</div>
+   </div>
+   <div class="p-4 border-t border-slate-100"><button onclick="submitBooking()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white font-sora font-extrabold shadow-pop btn-press">Send Booking Request → Pending</button></div>`;
+  $('bookingModal').classList.remove('hidden');calcBooking();
+}
+function closeBooking(){$('bookingModal').classList.add('hidden')}
+function calcBooking(){
+  if(!bookingListing)return;const l=bookingListing,c=countryOf(l.country);
+  let m=+$('bDur').value;$('customDur').classList.toggle('hidden',m!=='custom'||isNaN(m));
+  if(isNaN(m))m=+$('bCustom').value||1;
+  const s=$('bStart').value?new Date($('bStart').value):new Date();
+  const e=new Date(s);e.setMonth(e.getMonth()+m);
+  $('bEnd').value=e.toISOString().slice(0,10);
+  $('cDur').textContent=m+' month'+(m>1?'s':'');$('cTotal').textContent=fmtMoney(l.rent*m,c.s);
+  $('cGrand').textContent=fmtMoney(l.rent*m+(+l.deposit||0),c.s);
+}
+function submitBooking(){
+  const l=bookingListing;
+  if(!$('bAgree').checked)return toast('Please agree to Owner Conditions','err');
+  const name=$('bName').value.trim(),ph=$('bPhone').value.trim(),gm=$('bMail').value.trim(),ad=$('bAddr').value.trim();
+  if(!name||!ph||!gm||!ad)return toast('Fill all booking fields','err');
+  let m=+$('bDur').value;if(isNaN(m))m=+$('bCustom').value||1;
+  const s=$('bStart').value,e=$('bEnd').value;
+  if(!s||!e)return toast('Select dates','err');
+  if(DB.bookings.some(b=>b.listingId===l.id&&['requested','owner_accepted','confirmed'].includes(b.status)))return toast('Double-booking blocked','err');
+  const bk={id:'BK-'+Date.now().toString(36).toUpperCase(),trl:null,listingId:l.id,userUid:currentUser.uid,userName:name,contact:ph,gmail:gm,address:ad,people:+$('bPeople').value||1,durationMonths:m,startDate:new Date(s).getTime(),endDate:new Date(e).getTime(),monthlyRent:l.rent,totalRent:l.rent*m,deposit:l.deposit||0,status:'requested',agree:true,createdAt:Date.now(),ownerName:l.ownerName,houseName:l.houseName,roomType:l.roomType};
+  DB.bookings.unshift(bk);l.status='pending';
+  notify(l.ownerUid,'New Booking Request 📩',`${name} requested "${l.houseName}" for ${m} month(s).`,'booking');
+  notify(currentUser.uid,'Request Sent ◷',`"${l.houseName}" is now Booking Pending. Wait for owner.`,'booking');
+  saveDB();closeBooking();renderAll();toast('Request sent → Booking Pending');go('bookings');
+}
+
+/* ================= BOOKINGS / FLOW ================= */
+function bkStatusMeta(s){
+  return {requested:['◷ Booking Pending','bg-amber-100 text-amber-800'],owner_accepted:['✓ Owner Accepted — Confirm Now','bg-blue-100 text-blue-800'],confirmed:['★ Fully Confirmed • TRL Issued','bg-emerald-100 text-emerald-800'],cancel_requested:['⚠ Cancel Requested','bg-orange-100 text-orange-800'],cancelled:['✕ Cancelled','bg-slate-200 text-slate-600'],completed:['✓ Completed','bg-indigo-100 text-indigo-800'],declined:['✕ Declined','bg-red-100 text-red-700']}[s]||[s,'bg-slate-100'];
+}
+function acceptBooking(id){const b=DB.bookings.find(x=>x.id===id);if(!b)return;b.status='owner_accepted';notify(b.userUid,'Owner Accepted ✓',`Owner accepted "${b.houseName}". Please confirm to get TRL + PDF.`,'booking');notify(currentUser.uid,'You accepted ✓',`Waiting for user confirmation: ${b.houseName}`,'booking');saveDB();renderAll();toast('Accepted — waiting for user confirmation')}
+function declineBooking(id){const b=DB.bookings.find(x=>x.id===id);b.status='declined';const l=DB.listings.find(x=>x.id===b.listingId);if(l)l.status='available';notify(b.userUid,'Request Declined',`Owner declined "${b.houseName}". Room is available again.`,'booking');saveDB();renderAll()}
+function userConfirm(id){
+  const b=DB.bookings.find(x=>x.id===id);if(!b||b.status!=='owner_accepted')return;
+  b.status='confirmed';b.trl=genTRL();b.confirmedAt=Date.now();
+  const l=DB.listings.find(x=>x.id===b.listingId);if(l)l.status='booked';
+  notify(b.userUid,'Fully Confirmed ★',`TRL ${b.trl} issued. PDF ready. Room booked!`,'booking');
+  notify(l.ownerUid,'Booking Fully Confirmed ★',`TRL ${b.trl} for "${l.houseName}". PDF ready.`,'booking');
+  saveDB();renderAll();toast('Fully Confirmed ★ TRL + PDF generated');openPDF(b.id);
+}
+function requestCancel(id){const b=DB.bookings.find(x=>x.id===id);if(!['confirmed','owner_accepted','requested'].includes(b.status))return toast('Cannot cancel now','err');
+  openGen(`<h3 class="font-sora font-extrabold text-[17px]">Request Cancellation?</h3><p class="text-[13px] text-slate-500 mt-1">Fully confirmed bookings need <b>both-side acceptance</b>. Room becomes Available only after approval.</p><textarea id="cxReason" class="inp mt-3" rows="3" placeholder="Reason for cancellation…"></textarea><button onclick="doRequestCancel('${id}')" class="w-full mt-3 py-3 rounded-xl bg-ink-900 text-white font-extrabold text-[13px]">Send Cancellation Request</button>`)}
+function doRequestCancel(id){const b=DB.bookings.find(x=>x.id===id);b.status='cancel_requested';b.cancelBy=currentUser.uid;b.cancelReason=($('cxReason')||{}).value||'—';const other=b.userUid===currentUser.uid?DB.listings.find(l=>l.id===b.listingId).ownerUid:b.userUid;notify(other,'Cancellation Requested ⚠',`${currentUser.name} wants to cancel TRL ${b.trl||b.id}. Reason: ${b.cancelReason}`,'cancel');notify(currentUser.uid,'Cancel Request Sent',`Waiting for other party to accept.`,'cancel');saveDB();closeGen();renderAll()}
+function approveCancel(id){const b=DB.bookings.find(x=>x.id===id);b.status='cancelled';const l=DB.listings.find(x=>x.id===b.listingId);if(l)l.status='available';notify(b.userUid,'Booking Cancelled ✕',`"${b.houseName}" cancelled. Room is Available again.`,'cancel');notify(l.ownerUid,'Booking Cancelled ✕',`"${b.houseName}" is Available again.`,'cancel');saveDB();renderAll();toast('Cancelled — room Available again')}
+function completeBooking(id){const b=DB.bookings.find(x=>x.id===id);b.status='completed';notify(b.userUid,'Stay Completed ✓',`Please rate your owner for "${b.houseName}".`,'booking');const l=DB.listings.find(x=>x.id===b.listingId);notify(l.ownerUid,'Stay Completed ✓',`Please rate your guest ${b.userName}.`,'booking');saveDB();renderAll()}
+function renderBookingsTabs(){
+  const mine=DB.bookings.filter(b=>b.userUid===currentUser?.uid);
+  const asOwner=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&l.ownerUid===currentUser?.uid});
+  const tabs=[['all',`All (${mine.length+asOwner.length})`],['mine',`As Guest (${mine.length})`],['owner',`As Owner (${asOwner.length})`],['trl',`TRL Issued (${DB.bookings.filter(b=>b.trl&&(b.userUid===currentUser?.uid||DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUser?.uid)).length})`]];
+  $('bkTabs').innerHTML=tabs.map(([k,l])=>`<button onclick="state.bkTab='${k}';renderBookingsTabs();renderBkList()" class="px-3.5 py-2 rounded-full text-[12px] font-extrabold whitespace-nowrap ${state.bkTab===k?'bg-ink-900 text-white':'bg-white border border-slate-200'}">${l}</button>`).join('');
+}
+function bkCard(b){
+  const l=DB.listings.find(x=>x.id===b.listingId)||{};const c=countryOf(l.country||'IN');
+  const isOwner=l.ownerUid===currentUser?.uid;const [lbl,cls]=bkStatusMeta(b.status);
+  const steps=[['Request',true],['Owner Accept',b.status!=='requested'],['You Confirm',b.status==='confirmed'||b.status==='completed'],['TRL+PDF',!!b.trl]];
+  return `<div class="rounded-[20px] bg-white border border-slate-200 overflow-hidden">
+    <div class="flex gap-3 p-3.5">
+      <img src="${l.photos?.[0]||''}" class="w-[86px] h-[86px] rounded-2xl object-cover shrink-0 bg-slate-100">
+      <div class="flex-1 min-w-0"><div class="font-sora font-bold text-[14px] leading-tight truncate">${esc(b.houseName||l.houseName)}</div>
+      <div class="text-[11px] text-slate-500 font-semibold">${esc(b.roomType||'')} • ${b.durationMonths} mo • ${fdate(b.startDate)} → ${fdate(b.endDate)}</div>
+      <div class="mt-1.5"><span class="badge ${cls}">${lbl}</span></div>
+      ${b.trl?`<div class="mt-1.5 font-mono font-extrabold text-[13px] tracking-[.15em] text-rehzo-600">TRL: ${b.trl} <button onclick="navigator.clipboard&&navigator.clipboard.writeText('${b.trl}');toast('TRL copied')" class="text-[10px] underline">copy</button></div>`:''}</div>
+    </div>
+    <div class="px-3.5 pb-1 flex items-center gap-0">${steps.map(([t,d],i)=>`<div class="flex items-center ${i<3?'flex-1':''}"><span class="timeline-dot ${d?'bg-emerald-500 text-white':'bg-slate-200 text-slate-400'}">${d?'✓':i+1}</span>${i<3?'<span class="flex-1 h-0.5 mx-1 '+(d?'bg-emerald-400':'bg-slate-200')+'"></span>':''}</div>`).join('')}</div>
+    <div class="px-3.5 py-1 text-[12px] font-bold text-slate-600">Total ${fmtMoney(b.totalRent,c.s)} + Deposit ${b.deposit?fmtMoney(b.deposit,c.s):'—'} • ${isOwner?'Role: <b class="text-indigo-700">OWNER</b> (guest: '+esc(b.userName)+')':'Role: <b class="text-rehzo-600">GUEST</b>'}</div>
+    <div class="p-3.5 pt-2 flex flex-wrap gap-1.5">
+      ${b.status==='requested'&&isOwner?`<button onclick="acceptBooking('${b.id}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold">Accept ✓</button><button onclick="declineBooking('${b.id}')" class="px-3.5 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 text-[12px] font-extrabold">Decline</button>`:''}
+      ${b.status==='owner_accepted'&&!isOwner?`<button onclick="userConfirm('${b.id}')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white text-[12px] font-extrabold shadow-pop">Confirm → Get TRL + PDF</button>`:''}
+      ${b.status==='owner_accepted'&&isOwner?`<span class="text-[12px] font-bold text-slate-400 px-2 py-2">Waiting for guest confirmation…</span>`:''}
+      ${b.trl?`<button onclick="openPDF('${b.id}')" class="px-3.5 py-2 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">📄 View PDF</button>`:''}
+      ${['requested','owner_accepted','confirmed'].includes(b.status)?`<button onclick="requestCancel('${b.id}')" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-[12px] font-extrabold">Request Cancel</button>`:''}
+      ${b.status==='cancel_requested'?(((b.cancelBy!==currentUser.uid))?`<button onclick="approveCancel('${b.id}')" class="px-3.5 py-2 rounded-xl bg-amber-500 text-white text-[12px] font-extrabold">Accept Cancellation</button>`:`<span class="text-[12px] font-bold text-amber-700 px-2 py-2">Waiting for other party…</span>`):''}
+      ${b.status==='confirmed'?`<button onclick="completeBooking('${b.id}')" class="px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-[12px] font-extrabold">Mark Completed (demo)</button>`:''}
+      ${b.status==='completed'?`<button onclick="openReview('${b.id}')" class="px-3.5 py-2 rounded-xl bg-amber-400 text-ink-900 text-[12px] font-extrabold">★ Rate & Review</button>`:''}
+      ${b.status==='confirmed'&&isOwner?`<div class="w-full rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 text-[12px] font-bold text-emerald-800">🔓 Unlocked for guest: ${countryOf(l.country).d} ${esc(l.contact)} • ${esc(l.address)}</div>`:''}
+    </div></div>`;
+}
+function renderBkList(){
+  if(!currentUser){$('bkList').innerHTML='';return}
+  let arr=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);const own=l&&l.ownerUid===currentUser.uid;const mine=b.userUid===currentUser.uid;
+    if(state.bkTab==='mine')return mine;if(state.bkTab==='owner')return own;if(state.bkTab==='trl')return b.trl&&(mine||own);return mine||own});
+  arr.sort((a,b)=>b.createdAt-a.createdAt);
+  $('bkList').innerHTML=arr.length?arr.map(bkCard).join(''):`<div class="text-center py-12 bg-white rounded-[20px] border border-dashed border-slate-300"><div class="text-4xl">🧳</div><div class="font-bold mt-2">No bookings here</div><button onclick="go('home')" class="mt-2 px-4 py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Browse Rooms</button></div>`;
+}
+
+/* ================= OWNER ================= */
+function onFCountry(){const c=countryOf($('fCountry').value);$('fDial').textContent=c.d;$('fCurr1').textContent=c.s}
+function ownerTab(t){
+  document.querySelectorAll('.otab').forEach(b=>{const on=b.dataset.otab===t;b.className=`otab py-2.5 rounded-xl text-[13px] font-extrabold ${on?'bg-ink-900 text-white':'text-slate-500'}`});
+  document.querySelectorAll('.otabPane').forEach(p=>p.classList.add('hidden'));$('otab-'+t).classList.remove('hidden');
+  if(t==='list')setTimeout(initPickMap,150);
+}
+function renderPhotoPrev(){
+  const w=$('photoPrev');if(!w)return;
+  w.innerHTML=[0,1,2].map(i=>`<div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative">${state.tempPhotos[i]?`<img src="${state.tempPhotos[i]}" class="w-full h-full object-cover">`:`<div class="w-full h-full flex flex-col items-center justify-center text-slate-300 text-2xl">+</div>`}${state.tempPhotos[i]?`<button type="button" onclick="state.tempPhotos.splice(${i},1);renderPhotoPrev()" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-ink-900 text-white text-[11px]">✕</button>`:''}</div>`).join('');
+}
+document.addEventListener('change',e=>{
+  if(e.target.id==='fPhotos'){
+    const files=[...e.target.files].slice(0,3-state.tempPhotos.length);
+    for(const f of files){
+      if(!f.type.startsWith('image/')){toast('Only images allowed','err');continue}
+      if(f.size>5*1024*1024){toast(f.name+' exceeds 5MB','err');continue}
+      const r=new FileReader();r.onload=ev=>{if(state.tempPhotos.length<3){state.tempPhotos.push(ev.target.result);renderPhotoPrev()}};r.readAsDataURL(f);
+    }
+  }
+});
+function fillSamplePhotos(){state.tempPhotos=['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&auto=format&fit=crop'].slice(0,3);renderPhotoPrev();toast('Sample photos added')}
+function clearPhotos(){state.tempPhotos=[];renderPhotoPrev()}
+function submitListing(e){
+  e.preventDefault();
+  if(!currentUser)return toast('Login first','warn');
+  if(state.pickLat==null)return toast('Tap map to set exact location','err');
+  if(!$('fExact').checked)return toast('Please tick "Use Exact Map Location"','err');
+  if(state.tempPhotos.length===0)return toast('Add at least 1 room photo','err');
+  const amen=[...document.querySelectorAll('#fAmen .on')].map(x=>x.textContent);
+  const data={ownerUid:currentUser.uid,ownerName:$('fName').value.trim()||currentUser.name,contact:$('fPhone').value.trim(),gmail:$('fGmail').value.trim(),country:$('fCountry').value,houseName:$('fHouse').value.trim(),roomType:$('fType').value,suitableFor:$('fSuit').value,amenities:amen.length?amen:['WiFi','Furnished'],rent:+$('fRent').value,deposit:+$('fDep').value||0,state:$('fState').value.trim(),city:$('fCity').value.trim(),areaCode:$('fPin').value.trim(),address:$('fAddr').value.trim(),lat:state.pickLat,lng:state.pickLng,rules:$('fRules').value.trim(),photos:[...state.tempPhotos],cap:+$('fCap').value||2};
+  if(state.editingId){
+    Object.assign(DB.listings.find(l=>l.id===state.editingId),data);state.editingId=null;$('listSubmitBtn').textContent='Publish Listing • 90 Days Free';
+    notify(currentUser.uid,'Listing Updated ✏️',`"${data.houseName}" updated.`,'listing');toast('Listing updated ✓');
+  }else{
+    const l={id:'L'+Date.now().toString(36).toUpperCase(),...data,createdAt:Date.now(),expiryAt:Date.now()+90*86400000,status:'available',views:0};
+    DB.listings.unshift(l);notify(currentUser.uid,'Listing Live 🏠',`"${l.houseName}" published for 90 days till ${fdate(l.expiryAt)}.`,'listing');toast('Published for 90 days 🎉');
+  }
+  saveDB();e.target.reset();state.tempPhotos=[];state.pickLat=null;state.pickLng=null;renderPhotoPrev();$('pickCoord').textContent='Not set — tap on map';renderAll();ownerTab('mine');
+}
+function editListing(id){const l=DB.listings.find(x=>x.id===id);if(!l)return;state.editingId=id;ownerTab('list');
+  $('fCountry').value=l.country;onFCountry();$('fName').value=l.ownerName;$('fPhone').value=l.contact;$('fGmail').value=l.gmail;$('fHouse').value=l.houseName;$('fType').value=l.roomType;$('fSuit').value=l.suitableFor;$('fRent').value=l.rent;$('fDep').value=l.deposit;$('fState').value=l.state;$('fCity').value=l.city;$('fPin').value=l.areaCode;$('fAddr').value=l.address;$('fRules').value=l.rules;$('fCap').value=l.cap||2;
+  document.querySelectorAll('#fAmen .amen-pill').forEach(p=>p.classList.toggle('on',l.amenities.includes(p.textContent)));
+  state.tempPhotos=[...l.photos];renderPhotoPrev();state.pickLat=l.lat;state.pickLng=l.lng;$('pickCoord').textContent=`${l.lat.toFixed(4)}, ${l.lng.toFixed(4)} ✓`;$('fExact').checked=true;
+  $('listSubmitBtn').textContent='Save Changes ✓';window.scrollTo({top:0});toast('Editing — save to update')}
+function publishAgain(id){const l=DB.listings.find(x=>x.id===id);l.status='available';l.createdAt=Date.now();l.expiryAt=Date.now()+90*86400000;delete l._warned;notify(l.ownerUid,'Re-published 🔁',`"${l.houseName}" live again for 90 days.`,'listing');saveDB();renderAll();toast('Published again for 90 days 🔁')}
+function deleteListing(id){openGen(`<h3 class="font-sora font-extrabold">Delete listing?</h3><p class="text-[13px] text-slate-500 mt-1">Bookings history & TRL records stay permanent.</p><div class="flex gap-2 mt-4"><button onclick="closeGen()" class="flex-1 py-3 rounded-xl bg-slate-100 font-extrabold text-[13px]">Keep</button><button onclick="DB.listings=DB.listings.filter(l=>l.id!=='${id}');saveDB();closeGen();renderAll();toast('Deleted')" class="flex-1 py-3 rounded-xl bg-red-600 text-white font-extrabold text-[13px]">Delete</button></div>`)}
+function renderOwner(){
+  const gate=$('ownerGate'),body=$('ownerBody');
+  if(!currentUser){gate.innerHTML=`<div class="mt-3 rounded-[20px] bg-white border border-slate-200 p-6 text-center"><div class="text-4xl">🏠</div><div class="font-sora font-extrabold mt-2">Login as Owner / User</div><p class="text-[12px] text-slate-500">Same account lists rooms & books rooms.</p><button onclick="go('auth')" class="mt-3 px-6 py-3 rounded-xl bg-ink-900 text-white text-[13px] font-extrabold">Login / Register</button></div>`;body.classList.add('hidden');return}
+  gate.innerHTML='';body.classList.remove('hidden');
+  const mine=DB.listings.filter(l=>l.ownerUid===currentUser.uid);
+  $('mineCount').textContent=mine.length;
+  const reqs=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&l.ownerUid===currentUser.uid&&['requested','cancel_requested'].includes(b.status)});
+  const badge=$('reqCount');badge.textContent=reqs.length;badge.classList.toggle('hidden',!reqs.length);badge.classList.toggle('flex',!!reqs.length);
+  $('otab-mine').innerHTML=mine.length?mine.map(l=>{
+    const days=Math.max(0,Math.ceil((l.expiryAt-Date.now())/86400000));const pct=Math.max(0,Math.min(100,days/90*100));
+    const lb=DB.bookings.filter(b=>b.listingId===l.id&&['requested','owner_accepted'].includes(b.status)).length;
+    return `<div class="rounded-[20px] bg-white border border-slate-200 overflow-hidden">
+      <div class="flex gap-3 p-3"><img src="${l.photos[0]}" class="w-[92px] h-[92px] rounded-2xl object-cover"><div class="flex-1"><div class="font-sora font-bold text-[14px]">${esc(l.houseName)}</div><div class="text-[11px] text-slate-500 font-semibold">${esc(l.roomType)} • ${fmtMoney(l.rent,countryOf(l.country).s)}/mo • ${esc(l.city)}</div><div class="mt-1 flex gap-1.5 flex-wrap">${statusBadge(l)}${lb?`<span class="badge bg-rehzo-500 text-white">${lb} request(s)</span>`:''}</div></div></div>
+      <div class="px-3 pb-1"><div class="flex justify-between text-[11px] font-bold text-slate-500"><span>📅 Listed: ${fdate(l.createdAt)}</span><span>⏳ Expires: ${fdate(l.expiryAt)}</span></div>
+      <div class="h-2 bg-slate-100 rounded-full mt-1 overflow-hidden"><div class="h-full rounded-full ${days<10?'bg-red-500':'bg-emerald-500'}" style="width:${pct}%"></div></div>
+      <div class="text-[11px] font-bold ${days<10?'text-red-600':'text-emerald-700'} mt-1">${l.status==='expired'?'Expired — publish again to go live':l.status==='booked'?'Booked — hidden from search':days+' days left (owner-only visibility)'}</div></div>
+      <div class="p-3 pt-2 flex gap-1.5 flex-wrap">
+        <button onclick="openDetail('${l.id}')" class="px-3 py-2 rounded-xl bg-slate-100 text-[12px] font-extrabold">Preview</button>
+        <button onclick="editListing('${l.id}')" class="px-3 py-2 rounded-xl bg-indigo-50 text-indigo-700 text-[12px] font-extrabold">✏ Edit</button>
+        ${l.status==='expired'?`<button onclick="publishAgain('${l.id}')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold">🔁 Publish Again</button>`:''}
+        <button onclick="deleteListing('${l.id}')" class="px-3 py-2 rounded-xl bg-red-50 text-red-600 text-[12px] font-extrabold">Delete</button>
+      </div></div>`}).join(''):`<div class="text-center py-10 bg-white rounded-[20px] border border-dashed border-slate-300"><div class="text-4xl">🏠</div><div class="font-bold mt-2">No listings yet</div><p class="text-[12px] text-slate-500">Publish your first room — 90 days free.</p></div>`;
+  const allReq=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&l.ownerUid===currentUser.uid}).sort((a,b)=>b.createdAt-a.createdAt);
+  $('otab-req').innerHTML=allReq.length?allReq.map(b=>{const l=DB.listings.find(x=>x.id===b.listingId);const[lb,cl]=bkStatusMeta(b.status);
+    return `<div class="rounded-[20px] bg-white border border-slate-200 p-3.5">
+      <div class="flex items-center gap-2"><div class="font-bold text-[14px] flex-1">${esc(b.userName)} <span class="text-slate-400 font-semibold">→ ${esc(b.houseName)}</span></div><span class="badge ${cl}">${lb}</span></div>
+      <div class="text-[12px] text-slate-500 font-semibold mt-1">${b.people} people • ${b.durationMonths} mo • ${fdate(b.startDate)} → ${fdate(b.endDate)} • Total ${fmtMoney(b.totalRent,countryOf(l?.country||'IN').s)}</div>
+      ${b.status==='requested'?`<div class="flex gap-2 mt-2.5"><button onclick="acceptBooking('${b.id}')" class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold">Accept ✓</button><button onclick="declineBooking('${b.id}')" class="flex-1 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-100 text-[12px] font-extrabold">Decline</button></div>`:''}
+      ${b.status==='cancel_requested'?`<div class="mt-2 rounded-xl bg-orange-50 border border-orange-200 p-2.5 text-[12px] font-semibold">Cancel reason: “${esc(b.cancelReason||'—')}”<button onclick="approveCancel('${b.id}')" class="ml-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white font-extrabold">Approve</button></div>`:''}
+      ${b.trl?`<button onclick="openPDF('${b.id}')" class="mt-2 px-3 py-2 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">📄 PDF • ${b.trl}</button>`:''}
+    </div>`}).join(''):`<div class="text-center py-10 bg-white rounded-[20px] border border-dashed border-slate-300"><div class="text-4xl">📥</div><div class="font-bold mt-2">No requests yet</div></div>`;
+}
+
+/* ================= MAPS ================= */
+function initPickMap(){
+  if($('view-owner').classList.contains('on')===false&&true){}
+  try{
+    if(_pickMap){_pickMap.invalidateSize();return}
+    _pickMap=L.map('pickMap').setView([28.6139,77.2090],11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_pickMap);
+    _pickMap.on('click',e=>{state.pickLat=e.latlng.lat;state.pickLng=e.latlng.lng;
+      if(_pickMarker)_pickMap.removeLayer(_pickMarker);
+      _pickMarker=L.marker([state.pickLat,state.pickLng]).addTo(_pickMap);
+      $('pickCoord').innerHTML=`📍 ${state.pickLat.toFixed(5)}, ${state.pickLng.toFixed(5)} ✓ <span class="text-emerald-600">locked</span>`;});
+    setTimeout(()=>_pickMap.invalidateSize(),300);
+  }catch(e){}
+}
+function initNearMap(){
+  try{
+    if(!_nearMap){
+      _nearMap=L.map('nearMap').setView([28.6139,77.2090],11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_nearMap);
+      setTimeout(()=>_nearMap.invalidateSize(),250);
+    }else _nearMap.invalidateSize();
+    plotNearMarkers();renderNearList();
+  }catch(e){}
+}
+function plotNearMarkers(){
+  if(!_nearMap)return;
+  _nearMap.eachLayer(l=>{if(l instanceof L.Marker)_nearMap.removeLayer(l)});
+  visibleListings().forEach(l=>{L.marker([l.lat,l.lng]).addTo(_nearMap).bindPopup(`<b>${esc(l.houseName)}</b><br>${fmtMoney(l.rent,countryOf(l.country).s)}/mo`)});
+  if(state.geo){L.circleMarker([state.geo.lat,state.geo.lng],{radius:10,color:'#FF4D24',fillColor:'#FF4D24',fillOpacity:1}).addTo(_nearMap).bindPopup('You are here').openPopup();_nearMap.setView([state.geo.lat,state.geo.lng],11)}
+}
+function locateMe(){
+  $('nearStatus').textContent='Locating…';
+  if(!navigator.geolocation)return demoLocate();
+  navigator.geolocation.getCurrentPosition(p=>{state.geo={lat:p.coords.latitude,lng:p.coords.longitude};$('nearStatus').innerHTML=`✓ Located: ${state.geo.lat.toFixed(3)}, ${state.geo.lng.toFixed(3)} — sorted nearest first`;plotNearMarkers();renderNearList();renderHome()},()=>demoLocate(),{timeout:6000});
+}
+function demoLocate(){state.geo={lat:28.6315,lng:77.2167};$('nearStatus').innerHTML=`✓ Demo location: <b>Connaught Place, New Delhi</b> — sorted nearest first`;plotNearMarkers();renderNearList();renderHome();toast('Demo location set: CP, Delhi')}
+function quickNear(){go('near');setTimeout(()=>{if(!state.geo)demoLocate()},300)}
+function renderNearList(){
+  const arr=visibleListings().map(l=>({...l,_d:distTo(l)})).sort((a,b)=>(a._d??9999)-(b._d??9999));
+  $('nearList').innerHTML=arr.map(l=>{const c=countryOf(l.country);
+    return `<div class="rounded-[18px] bg-white border border-slate-200 overflow-hidden flex gap-3 p-3">
+      <img src="${l.photos[0]}" class="w-[96px] h-[96px] rounded-2xl object-cover shrink-0 cursor-pointer" onclick="openDetail('${l.id}')">
+      <div class="flex-1 min-w-0"><div class="font-sora font-bold text-[13.5px] truncate">${esc(l.houseName)}</div>
+      <div class="text-[11px] font-bold text-rehzo-600">${l._d!=null?'📍 '+l._d.toFixed(1)+' km away':'📍 '+esc(l.city)}</div>
+      <div class="text-[12px] font-extrabold mt-0.5">${fmtMoney(l.rent,c.s)}/mo <span class="font-bold text-slate-400">• ${esc(l.roomType)} • ${esc(l.suitableFor)}</span></div>
+      <div class="flex gap-1.5 mt-1.5"><button onclick="openDetail('${l.id}')" class="px-3 py-1.5 rounded-lg bg-ink-900 text-white text-[11px] font-extrabold">View</button><button onclick="startBooking('${l.id}')" class="px-3 py-1.5 rounded-lg bg-rehzo-50 text-rehzo-700 text-[11px] font-extrabold">Book</button></div></div></div>`}).join('')||'<div class="text-center text-slate-400 text-[13px]">No rooms</div>';
+}
+
+/* ================= TRL + PDF ================= */
+function renderTRL(){
+  if(!currentUser)return;
+  const arr=DB.bookings.filter(b=>b.trl&&(b.userUid===currentUser.uid||DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUser.uid));
+  $('trlList').innerHTML=arr.length?arr.map(b=>{const l=DB.listings.find(x=>x.id===b.listingId);
+    return `<div class="rounded-[20px] bg-gradient-to-br from-ink-900 to-indigo-900 text-white p-4 relative overflow-hidden">
+      <div class="absolute -right-6 -top-6 w-28 h-28 bg-rehzo-500/40 blur-2xl rounded-full"></div>
+      <div class="flex items-center gap-2"><span class="text-[11px] font-extrabold tracking-widest text-emerald-300">● PERMANENT • NEVER DELETED</span><div class="flex-1"></div><span class="badge bg-white/15">${esc(b.status.toUpperCase())}</span></div>
+      <div class="font-mono font-extrabold text-[20px] tracking-[.12em] mt-1.5">${b.trl}</div>
+      <div class="text-[13px] font-bold mt-1">${esc(b.houseName)} • ${esc(b.roomType)}</div>
+      <div class="text-[11.5px] text-white/60">${esc(b.userName)} ↔ ${esc(l?.ownerName||'')} • ${fdate(b.startDate)} → ${fdate(b.endDate)}</div>
+      <div class="flex gap-2 mt-3"><button onclick="openPDF('${b.id}')" class="flex-1 py-2.5 rounded-xl bg-white text-ink-900 text-[12px] font-extrabold">📄 Booking PDF</button><button onclick="navigator.clipboard&&navigator.clipboard.writeText('${b.trl}');toast('TRL copied')" class="px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-[12px] font-extrabold">Copy</button></div></div>`}).join(''):`<div class="text-center py-10 bg-white rounded-[20px] border border-dashed border-slate-300 text-[13px] text-slate-500">No TRL records yet.<br>Complete a booking to earn a permanent 12-char TRL.</div>`;
+}
+function verifyTRL(){
+  const q=$('trlSearch').value.replace(/[\s-]/g,'').toUpperCase();
+  if(q.length!==12)return toast('TRL must be 12 characters','err');
+  const b=DB.bookings.find(x=>(x.trl||'').toUpperCase()===q);
+  $('trlResult').innerHTML=b?`<div class="rounded-[20px] bg-emerald-50 border-2 border-emerald-300 p-4 fadeUp"><div class="font-extrabold text-emerald-700 text-[14px]">✓ VERIFIED • Authentic REHZO Booking</div><div class="font-mono font-extrabold text-[18px] tracking-widest mt-1">${b.trl}</div><div class="text-[12px] font-semibold mt-1">${esc(b.houseName)} • ${esc(b.userName)} • ${fdate(b.startDate)} → ${fdate(b.endDate)} • ${b.status}</div><button onclick="openPDF('${b.id}')" class="mt-2 px-4 py-2 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold">View PDF →</button></div>`:`<div class="rounded-[20px] bg-red-50 border-2 border-red-200 p-4 text-[13px] font-bold text-red-700">✕ No record found for “${esc(q)}”. Check 12 characters.</div>`;
+}
+function openPDF(bid){
+  const b=DB.bookings.find(x=>x.id===bid);if(!b)return;
+  const l=DB.listings.find(x=>x.id===b.listingId)||{};const c=countryOf(l.country||'IN');
+  state.lastPDF=b;
+  $('pdfPrintArea').innerHTML=`
+  <div class="pdf-paper rounded-[18px] overflow-hidden shadow-app">
+    <div class="bg-ink-900 text-white p-6 flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rehzo-500 to-amber-500 flex items-center justify-center font-sora font-extrabold text-2xl shrink-0">R</div>
+      <div><div class="font-sora font-extrabold text-[24px] tracking-tight">REHZO</div><div class="text-[10px] tracking-[.25em] text-white/60 font-bold">BOOKING CONFIRMATION • VERIFIED</div></div>
+      <div class="flex-1"></div><div class="text-right"><div class="badge bg-emerald-500 text-white">★ CONFIRMED</div><div class="text-[10px] text-white/50 mt-1 font-mono">${esc(b.id)}</div></div>
+    </div>
+    <div class="p-6">
+      <div class="rounded-2xl border-2 border-dashed border-rehzo-500 bg-rehzo-50 p-4 text-center"><div class="text-[10px] font-extrabold tracking-[.25em] text-rehzo-600">TRL NUMBER • PERMANENT • 12-CHAR</div><div class="font-mono font-extrabold text-[30px] tracking-[.12em]">${b.trl}</div><div class="text-[11px] font-bold text-slate-500">Booking ID: ${esc(b.id)} • Issued: ${fdate(b.confirmedAt||b.createdAt)}</div></div>
+      <div class="grid grid-cols-2 gap-3 mt-4 text-[13px]">
+        <div class="rounded-xl bg-slate-50 p-3"><div class="lbl">Guest (User)</div><b>${esc(b.userName)}</b><div class="text-slate-500">${esc(b.gmail)}<br>${esc(b.contact)} • ${b.people} person(s)</div></div>
+        <div class="rounded-xl bg-slate-50 p-3"><div class="lbl">Owner</div><b>${esc(l.ownerName||b.ownerName||'—')}</b><div class="text-slate-500">${esc(l.gmail||'—')}<br>${esc(l.contact||'—')}</div></div>
+        <div class="rounded-xl bg-slate-50 p-3"><div class="lbl">House / Room</div><b>${esc(b.houseName)}</b><div class="text-slate-500">${esc(b.roomType)} • ${esc(l.city||'')}, ${esc(l.state||'')}</div></div>
+        <div class="rounded-xl bg-slate-50 p-3"><div class="lbl">Duration</div><b>${b.durationMonths} month(s)</b><div class="text-slate-500">${fdate(b.startDate)} → ${fdate(b.endDate)}</div></div>
+      </div>
+      <table class="w-full mt-4 text-[13px] font-semibold"><tr class="text-left text-slate-400 text-[11px] uppercase"><td class="py-1.5">Item</td><td class="text-right">Amount</td></tr>
+      <tr class="border-t"><td class="py-2">Monthly Rent × ${b.durationMonths}</td><td class="text-right">${fmtMoney(b.monthlyRent,c.s)} × ${b.durationMonths}</td></tr>
+      <tr class="border-t font-extrabold"><td class="py-2">Total Rent</td><td class="text-right">${fmtMoney(b.totalRent,c.s)}</td></tr>
+      <tr class="border-t"><td class="py-2">Security Deposit</td><td class="text-right">${b.deposit?fmtMoney(b.deposit,c.s):'—'}</td></tr>
+      <tr class="border-t bg-ink-900 text-white"><td class="py-2.5 px-2 rounded-l-lg font-sora">Grand Payable</td><td class="text-right px-2 font-sora font-extrabold">${fmtMoney(b.totalRent+(+b.deposit||0),c.s)}</td></tr></table>
+      <div class="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-3 text-[12px]"><b>Owner Rules:</b> ${esc(l.rules||'—')}</div>
+      <div class="mt-3 text-[11px] text-slate-500 leading-relaxed">Status: <b>FULLY CONFIRMED → BOOKED</b> • Double-booking protected • TRL never deleted • Cancellation needs both-side acceptance • Subject to <b>rehzo.app/terms</b> & <b>rehzo.app/privacy-policy</b> • Booking date: ${fdate(b.createdAt)}</div>
+      <div class="mt-4 flex items-center justify-between border-t border-dashed pt-3"><div class="font-sora font-extrabold">REHZO ✓ Verified Stay</div><div class="font-mono text-[11px] text-slate-400">Verify at Search → TRL No.</div></div>
+    </div></div>`;
+  $('pdfModal').classList.remove('hidden');
+}
+function closePdf(){$('pdfModal').classList.add('hidden')}
+function downloadPDF(){
+  const b=state.lastPDF;if(!b)return toast('No PDF','err');
+  try{
+    const {jsPDF}=window.jspdf;const doc=new jsPDF();
+    const l=DB.listings.find(x=>x.id===b.listingId)||{};const c=countryOf(l.country||'IN');
+    doc.setFillColor(11,14,31);doc.rect(0,0,210,42,'F');
+    doc.setTextColor(255,77,36);doc.setFont('helvetica','bold');doc.setFontSize(24);doc.text('REHZO',14,20);
+    doc.setTextColor(255,255,255);doc.setFontSize(9);doc.text('BOOKING CONFIRMATION  •  VERIFIED STAY',14,28);
+    doc.setFontSize(11);doc.text('CONFIRMED',170,20);
+    doc.setTextColor(11,14,31);doc.setFontSize(10);
+    let y=52;doc.setFontSize(13);doc.text('TRL: '+b.trl,14,y);y+=8;doc.setFontSize(10);
+    const rows=[['Booking ID',b.id],['Guest',b.userName+' | '+b.gmail+' | '+b.contact],['Owner',(l.ownerName||'')+' | '+(l.gmail||'')],['House',b.houseName+' | '+b.roomType],['Duration',b.durationMonths+' months'],['Period',fdate(b.startDate)+'  ->  '+fdate(b.endDate)],['Monthly Rent',fmtMoney(b.monthlyRent,c.s)],['Total Rent',fmtMoney(b.totalRent,c.s)],['Deposit',b.deposit?fmtMoney(b.deposit,c.s):'-'],['Status','FULLY CONFIRMED / BOOKED'],['Booking Date',fdate(b.createdAt)],['Rules',(l.rules||'').slice(0,120)]];
+    rows.forEach(([k,v])=>{doc.setFont('helvetica','bold');doc.text(k+':',14,y);doc.setFont('helvetica','normal');doc.text(String(v),55,y,{maxWidth:140});y+=7});
+    y+=4;doc.setFontSize(8);doc.setTextColor(120);doc.text('Verify: search TRL No. in REHZO app  •  Terms: /terms  •  Privacy: /privacy-policy',14,y);
+    doc.save('REHZO_'+b.trl+'.pdf');toast('PDF downloaded ⬇');
+  }catch(e){toast('PDF error — use Print instead','err')}
+}
+
+/* ================= NOTIFS / REPORTS / REVIEWS ================= */
+function updateBell(){const n=currentUser?DB.notifications.filter(x=>x.uid===currentUser.uid&&!x.read).length:0;const b=$('bellBadge');b.textContent=n;b.classList.toggle('hidden',!n)}
+function markAllRead(){DB.notifications.forEach(n=>{if(n.uid===currentUser?.uid)n.read=true});saveDB();renderNotifs();updateBell()}
+function renderNotifs(){
+  if(!currentUser)return;
+  const arr=DB.notifications.filter(n=>n.uid===currentUser.uid).sort((a,b)=>b.time-a.time);
+  const ic={booking:'📩',cancel:'⚠',listing:'🏠',expiry:'⏳',account:'🔐',report:'🚨',admin:'📢',review:'★'};
+  $('notifList').innerHTML=arr.length?arr.map(n=>`<div class="rounded-2xl ${n.read?'bg-white border border-slate-200':'bg-ink-900 text-white border border-ink-900'} p-3.5 flex gap-3">
+    <div class="w-10 h-10 rounded-2xl ${n.read?'bg-slate-100':'bg-white/10'} flex items-center justify-center text-xl shrink-0">${ic[n.type]||'🔔'}</div>
+    <div class="flex-1"><div class="font-extrabold text-[13.5px]">${esc(n.title)}</div><div class="text-[12.5px] ${n.read?'text-slate-500':'text-white/70'}">${esc(n.msg)}</div><div class="text-[11px] ${n.read?'text-slate-400':'text-white/40'} mt-1">${timeAgo(n.time)} ${n.read?'':'• NEW'}</div></div>
+    ${n.read?'':`<button onclick="DB.notifications.find(x=>x.id==='${n.id}').read=true;saveDB();renderNotifs();updateBell()" class="text-[11px] font-extrabold underline shrink-0">Read</button>`}</div>`).join(''):`<div class="text-center py-12 text-slate-400 text-[13px]">No notifications yet 🔔</div>`;
+}
+function openReport(targetId,kind){
+  if(!currentUser){toast('Login to report','warn');return go('auth')}
+  openGen(`<h3 class="font-sora font-extrabold text-[17px]">🚨 Report ${kind==='listing'?'Room / Listing':'User'}</h3>
+  <label class="lbl mt-3">Report Type *</label><select id="rpType" class="inp mt-1"><option>Fake Room Report</option><option>Suspicious Listing Report</option><option>User Report</option><option>Owner Report</option></select>
+  <label class="lbl mt-3">Details *</label><textarea id="rpReason" rows="3" class="inp mt-1" placeholder="Describe the issue…"></textarea>
+  <button onclick="submitReport('${targetId}')" class="w-full mt-3 py-3.5 rounded-xl bg-red-600 text-white font-extrabold text-[13px]">Submit Report → Admin</button>`);
+}
+function submitReport(targetId){
+  const r=$('rpReason').value.trim();if(!r)return toast('Describe issue','err');
+  DB.reports.unshift({id:'R'+Date.now(),reporterUid:currentUser.uid,type:$('rpType').value,targetId,reason:r,status:'open',time:Date.now()});
+  saveDB();closeGen();toast('Report sent to Admin 🚨');
+  notify(currentUser.uid,'Report Received 🚨','Admin will review within 24–48h.','report');
+}
+function renderReportsView(){
+  const arr=currentUser?DB.reports.filter(r=>r.reporterUid===currentUser.uid):[];
+  $('reportList').innerHTML=(arr.length?arr.map(r=>`<div class="rounded-2xl bg-white border border-slate-200 p-3.5"><div class="flex items-center gap-2"><span class="badge ${r.status==='open'?'bg-amber-100 text-amber-800':'bg-emerald-100 text-emerald-800'}">${r.status.toUpperCase()}</span><b class="text-[13px]">${esc(r.type)}</b><div class="flex-1"></div><span class="text-[11px] text-slate-400">${timeAgo(r.time)}</span></div><div class="text-[13px] mt-1.5">Target: <span class="font-mono font-bold">${esc(r.targetId)}</span> — ${esc(r.reason)}</div></div>`).join(''):'<div class="text-center py-8 text-slate-400 text-[13px]">No reports filed by you.</div>')
+  +`<button onclick="openReport('general','listing')" class="w-full py-3.5 rounded-2xl bg-red-600 text-white font-extrabold text-[13px]">+ New Report</button>`;
+}
+function openReview(bid){
+  openGen(`<h3 class="font-sora font-extrabold text-[17px]">★ Rate & Review</h3><p class="text-[12px] text-slate-500">Real completed booking — two-way rating.</p>
+  <div class="flex gap-1.5 mt-3 text-3xl" id="starRow">${[1,2,3,4,5].map(i=>`<span class="star ${i<=5?'on':''}" data-s="${i}" onclick="setStars(${i})">★</span>`).join('')}</div>
+  <textarea id="rvText" rows="3" class="inp mt-3" placeholder="Write honest review…"></textarea>
+  <button onclick="submitReview('${bid}')" class="w-full mt-3 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-rehzo-500 text-white font-extrabold text-[13px]">Submit Review ★</button>`);
+  window._stars=5;
+}
+function setStars(n){window._stars=n;document.querySelectorAll('#starRow .star').forEach(s=>s.classList.toggle('on',+s.dataset.s<=n))}
+function submitReview(bid){
+  const b=DB.bookings.find(x=>x.id===bid);const l=DB.listings.find(x=>x.id===b.listingId);
+  const toUid=b.userUid===currentUser.uid?l.ownerUid:b.userUid;
+  DB.reviews.unshift({id:'V'+Date.now(),bookingId:bid,fromUid:currentUser.uid,toUid,rating:window._stars||5,text:$('rvText').value.trim()||'Good experience.',time:Date.now()});
+  saveDB();closeGen();toast('Review published ★');notify(toUid,'New Review ★',`${currentUser.name} rated you ${window._stars}/5.`,'review');renderAll();
+}
+
+/* ================= MORE / LEGAL / ROADMAP ================= */
+function renderMore(){
+  const u=currentUser;
+  $('profileCard').innerHTML=u?`<div class="mt-3 rounded-[22px] bg-gradient-to-br from-ink-900 to-indigo-900 text-white p-4 flex items-center gap-3">
+    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rehzo-500 to-amber-400 flex items-center justify-center font-sora font-extrabold text-2xl">${esc(u.name[0].toUpperCase())}</div>
+    <div class="flex-1"><div class="font-sora font-bold">${esc(u.name)}</div><div class="text-[11px] text-white/60 font-mono">ID: ${esc(u.uid)} • ${esc(u.email)}</div><div class="text-[11px] text-white/60">${countryOf(u.country).f} ${countryOf(u.country).n} • ${countryOf(u.country).d} ${esc(u.phone)}</div></div>
+    <button onclick="logout()" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-[11px] font-extrabold">Logout</button></div>`
+   :`<div class="mt-3 rounded-[22px] bg-white border border-slate-200 p-4 text-center"><div class="font-sora font-bold">You're browsing as guest</div><button onclick="go('auth')" class="mt-2 px-5 py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Login / Register</button></div>`;
+  const favN=u?(DB.users.find(x=>x.uid===u.uid)?.favs?.length||0):0;
+  const items=[
+    ['🧳','My Bookings','Requests • Confirmations • Cancellations',`go('bookings')`],
+    ['🔖','TRL Records','Permanent 12-char verified bookings',`go('trl')`],
+    ['🔔','Notifications','Booking • Expiry • Account alerts',`go('notifications')`],
+    ['❤','Favourites',favN+' saved rooms',`go('fav')`],
+    ['🚨','Reports & Safety','Fake room • User • Owner reports',`go('reports')`],
+    ['🔐','Admin Panel','Users • Listings • Monitoring',`go('admin')`],
+    ['🛣','Build Roadmap','GitHub → Netlify → Android → Play Store',`go('roadmap')`],
+    ['📜','Privacy Policy','Public • No login needed',`openLegal('privacy')`],
+    ['📋','Terms & Conditions','Booking • Listing rules',`openLegal('terms')`],
+    ['🛡','Safety Guidelines','Stay safe checklist',`openLegal('safety')`],
+    ['⚖','Report / Account Rules','Complaint & content policy',`openLegal('rules')`],
+    ['🌍','Country & Currency',myCountry().f+' '+myCountry().n+' • '+myCountry().s,`openCountry()`],
+    ['♻','Reset Demo Data','Restore sample rooms & users',`resetDemo()`],
+  ];
+  $('moreMenu').innerHTML=items.map(([e,t,s,fn])=>`<button onclick="${fn}" class="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-2xl p-3.5 text-left btn-press"><span class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${e}</span><span class="flex-1"><span class="block font-extrabold text-[13.5px]">${t}</span><span class="block text-[11.5px] text-slate-500">${s}</span></span><span class="text-slate-300 font-bold">›</span></button>`).join('');
+}
+function renderFav(){
+  const u=DB.users.find(x=>x.uid===currentUser?.uid);const ids=u?.favs||[];
+  const arr=DB.listings.filter(l=>ids.includes(l.id));
+  $('favList').innerHTML=arr.length?arr.map(cardHTML).join(''):'<div class="col-span-full text-center py-10 text-slate-400 text-[13px]">No favourites yet — tap ♥ on any room.</div>';
+}
+const LEGAL={
+ privacy:{t:'Privacy Policy',u:'/privacy-policy',b:`<p><b>Effective:</b> 2026 • Public page — no login required.</p><h4>1. Data we collect</h4><p>Name, User ID, Gmail (verified via OTP), phone, country, listings, bookings, TRL records, device session.</p><h4>2. Private by design</h4><p>Owner phone, full address & exact map stay <b>hidden until owner accepts</b> a booking. Only the authorized guest + owner see them.</p><h4>3. Use</h4><p>Search, booking flow, TRL issuance, PDF generation, notifications, fraud & expiry monitoring.</p><h4>4. Never sold</h4><p>Data is never sold. Shared only for booking fulfilment, legal compliance, admin moderation.</p><h4>5. Security</h4><p>Gmail OTP, hashed passwords, secure sessions, rate limiting, input + image validation, double-booking locks.</p><h4>6. Rights</h4><p>Request export / correction / deletion (TRL records retained for fraud prevention) at <b>care@rehzo.app</b>.</p>`},
+ terms:{t:'Terms & Conditions',u:'/terms',b:`<h4>1. One account</h4><p>Single User ID works as Guest + Owner. You are responsible for your credentials.</p><h4>2. Listings</h4><p>90-day duration, auto-expiry from live search, Edit + Publish Again allowed. False listings → suspension.</p><h4>3. Booking flow</h4><p>Request → Pending → Owner Accept → User Confirm → Fully Confirmed (Booked). TRL + PDF auto-generated. Double booking blocked technically.</p><h4>4. Cancellation</h4><p>Confirmed bookings cancel only via mutual request + acceptance; room auto-returns to Available.</p><h4>5. Payments</h4><p>No in-app payments currently. Rent/deposit settled directly; architecture is payment-ready.</p><h4>6. Conduct</h4><p>No fake rooms, harassment, or bypassing privacy. Violations → block/suspend via Admin.</p>`},
+ safety:{t:'Safety Guidelines',u:'/safety',b:`<p>• Never pay advance before <b>Fully Confirmed + TRL</b>.<br>• Meet in daytime; verify ID both sides.<br>• Check exact map only after unlock; confirm house physically.<br>• Report fake/suspicious listings instantly via 🚨 Report.<br>• Keep chat inside REHZO records; save your PDF.<br>• Owners: verify guest ID at check-in; Guests: verify ownership proof.</p>`},
+ rules:{t:'Report / Complaint & Account Rules',u:'/account-rules',b:`<h4>Report types</h4><p>Fake Room • Suspicious Listing • User • Owner. Admin reviews in 24–48h.</p><h4>Actions</h4><p>Warning → Listing removal → Suspend → Permanent block.</p><h4>Account rules</h4><p>One person one ID; valid Gmail; no impersonation; no scraping; no obscene content in photos/rules.</p><h4>Appeal</h4><p>Write to <b>appeals@rehzo.app</b> with User ID + TRL (if any).</p>`}
+};
+function openLegal(k){const L=LEGAL[k];$('legalBody').innerHTML=`<div class="rounded-[20px] bg-ink-900 text-white p-5"><div class="text-[11px] font-bold tracking-widest text-white/50">REHZO ${esc(L.u).toUpperCase()}</div><h2 class="font-sora font-extrabold text-[22px]">${esc(L.t)}</h2></div><div class="mt-3 rounded-[20px] bg-white border border-slate-200 p-5 text-[13.5px] leading-relaxed space-y-2 legal">${L.b}</div><div class="grid grid-cols-2 gap-2 mt-3">${Object.keys(LEGAL).map(x=>`<button onclick="openLegal('${x}')" class="py-2.5 rounded-xl ${x===k?'bg-ink-900 text-white':'bg-white border border-slate-200'} text-[12px] font-extrabold">${LEGAL[x].t}</button>`).join('')}</div><style>.legal h4{font-weight:800;margin-top:10px}</style>`;go('legal')}
+function renderRoadmap(){
+  $('roadmapBody').innerHTML=`
+  <h2 class="font-sora font-extrabold text-[22px] mt-1">Build Plan 🛣</h2><p class="text-[13px] text-slate-500">Design Arena → GitHub → Netlify → Android → Play Store</p>
+  <div class="mt-4 space-y-0">${[
+    ['✓','Design Arena (this Web App)','Mobile-first • Bottom nav • TRL • PDF • Admin','DONE','emerald'],
+    ['✓','GitHub Source','Secure code • versioned • update-ready','READY','emerald'],
+    ['●','Netlify Web App','Temporary public URL → custom domain later','LIVE NOW','rehzo'],
+    ['→','Android App (AAB)','Same account • DB • TRL • PDF • security. Android only, no iOS.','NEXT','slate'],
+    ['★','Play Console → Production','Internal testing → closed → production release','QUEUED','slate'],
+    ['✦','After Play Store','New countries • filters • payments later • admin++','ROADMAP','amber'],
+  ].map(([i,t,d,s,c])=>`<div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-9 h-9 rounded-full ${c==='emerald'?'bg-emerald-500 text-white':c==='rehzo'?'bg-rehzo-500 text-white map-pin-pulse':c==='amber'?'bg-amber-400':'bg-slate-200'} flex items-center justify-center font-extrabold shrink-0">${i}</div><div class="w-0.5 flex-1 bg-slate-200"></div></div><div class="pb-5 flex-1"><div class="rounded-2xl bg-white border border-slate-200 p-3.5"><div class="flex items-center gap-2"><b class="text-[14px]">${t}</b><div class="flex-1"></div><span class="badge ${c==='emerald'?'bg-emerald-100 text-emerald-700':c==='rehzo'?'bg-rehzo-500 text-white':c==='amber'?'bg-amber-100 text-amber-800':'bg-slate-100 text-slate-500'}">${s}</span></div><div class="text-[12px] text-slate-500 mt-1">${d}</div></div></div></div>`).join('')}</div>
+  <div class="rounded-[20px] bg-ink-900 text-white p-4"><div class="text-[11px] font-extrabold tracking-widest text-amber-300">GITHUB → NETLIFY COMMANDS</div><div class="mt-2 font-mono text-[11.5px] bg-black/40 rounded-xl p-3 leading-relaxed">git init<br>git add .<br>git commit -m "REHZO web app v2"<br>git push -u origin main<br><span class="text-emerald-300"># Netlify: import repo → build: (none) → publish: / → deploy ✓</span></div><button onclick="toast('Commands copied — paste in terminal')" class="mt-2 w-full py-2.5 rounded-xl bg-white text-ink-900 text-[12px] font-extrabold">Copy Commands</button></div>`;
+  go('roadmap');
+}
+
+/* ================= ADMIN ================= */
+let adminOK=false;
+function unlockAdmin(){if($('adminCode').value==='admin123'||currentUser?.role==='admin'){adminOK=true;$('adminGate').classList.add('hidden');$('adminBody').classList.remove('hidden');renderAdmin();toast('Admin unlocked 🔐')}else toast('Wrong passcode','err')}
+function renderAdmin(){
+  if(!adminOK){if(currentUser?.role==='admin'){adminOK=true;$('adminGate').classList.add('hidden');$('adminBody').classList.remove('hidden')}else return}
+  const rev=DB.bookings.filter(b=>b.status==='confirmed').reduce((s,b)=>s+b.totalRent,0);
+  const stats=[['👥',DB.users.length,'Users'],['🏠',DB.listings.length,'Listings'],['🧳',DB.bookings.length,'Bookings'],['💰','₹'+(rev/1000).toFixed(0)+'k','Booked value']];
+  $('adminStats').innerHTML=stats.map(([e,v,l])=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 text-center"><div class="text-xl">${e}</div><div class="font-sora font-extrabold text-[18px]">${v}</div><div class="text-[10px] font-bold text-slate-400 uppercase">${l}</div></div>`).join('');
+  const tabs=[['users','Users'],['listings','Listings'],['bookings','Bookings'],['reports','Reports'],['reviews','Reviews']];
+  $('adminTabs').innerHTML=tabs.map(([k,l])=>`<button onclick="state.adminTab='${k}';renderAdmin()" class="px-4 py-2 rounded-full text-[12px] font-extrabold whitespace-nowrap ${state.adminTab===k?'bg-ink-900 text-white':'bg-white border border-slate-200'}">${l}${k==='reports'&&DB.reports.filter(r=>r.status==='open').length?` (${DB.reports.filter(r=>r.status==='open').length})`:''}</button>`).join('');
+  const c=$('adminContent');
+  if(state.adminTab==='users')c.innerHTML=DB.users.map(u=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold">${esc(u.name[0])}</div><div class="flex-1"><b class="text-[13px]">${esc(u.name)}</b> <span class="font-mono text-[11px] text-slate-400">${esc(u.uid)}</span><div class="text-[11px] text-slate-500">${esc(u.email)} • ${u.blocked?'<b class="text-red-600">SUSPENDED</b>':'<b class="text-emerald-600">ACTIVE</b>'} ${u.role==='admin'?'• ADMIN':''}</div></div><button onclick="toggleBlock('${u.uid}')" class="px-3 py-2 rounded-xl ${u.blocked?'bg-emerald-600 text-white':'bg-red-50 text-red-600 border border-red-100'} text-[11px] font-extrabold">${u.blocked?'Unblock':'Block'}</button></div>`).join('');
+  if(state.adminTab==='listings')c.innerHTML=DB.listings.map(l=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 flex gap-3 items-center"><img src="${l.photos[0]}" class="w-14 h-14 rounded-xl object-cover"><div class="flex-1"><b class="text-[13px]">${esc(l.houseName)}</b><div class="text-[11px] text-slate-500">${esc(l.city)} • ${l.status} • exp ${fdate(l.expiryAt)}</div></div><button onclick="deleteListing('${l.id}')" class="px-3 py-2 rounded-xl bg-red-50 text-red-600 text-[11px] font-extrabold">Remove</button></div>`).join('');
+  if(state.adminTab==='bookings')c.innerHTML=DB.bookings.map(b=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 text-[13px]"><b class="font-mono">${b.trl||b.id}</b> — ${esc(b.houseName)}<div class="text-[11px] text-slate-500">${esc(b.userName)} • ${b.status} • ${fmtMoney(b.totalRent,'₹')}</div></div>`).join('')||'<div class="text-slate-400 text-[13px]">No bookings</div>';
+  if(state.adminTab==='reports')c.innerHTML=DB.reports.map(r=>`<div class="rounded-2xl bg-white border border-slate-200 p-3"><div class="flex gap-2 items-center"><b class="text-[13px]">${esc(r.type)}</b><span class="badge ${r.status==='open'?'bg-amber-100 text-amber-800':'bg-emerald-100 text-emerald-800'}">${r.status}</span><div class="flex-1"></div>${r.status==='open'?`<button onclick="resolveReport('${r.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold">Resolve</button>`:''}</div><div class="text-[12px] text-slate-500 mt-1">By ${esc(r.reporterUid)} → ${esc(r.targetId)}: ${esc(r.reason)}</div></div>`).join('')||'<div class="text-slate-400 text-[13px]">No reports 🎉</div>';
+  if(state.adminTab==='reviews')c.innerHTML=DB.reviews.map(r=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 text-[13px]"><b>${'★'.repeat(r.rating)}</b> ${esc(r.text)}<div class="text-[11px] text-slate-400">${esc(r.fromUid)} → ${esc(r.toUid)}</div></div>`).join('')||'<div class="text-slate-400 text-[13px]">No reviews</div>';
+  drawCharts();
+}
+function toggleBlock(uid){const u=DB.users.find(x=>x.uid===uid);if(u.role==='admin')return toast('Cannot block admin','err');u.blocked=!u.blocked;saveDB();renderAdmin();toast(u.blocked?'User suspended ⛔':'User unblocked ✓')}
+function resolveReport(id){DB.reports.find(r=>r.id===id).status='resolved';saveDB();renderAdmin();toast('Report resolved ✓')}
+let ch1,ch2;
+function drawCharts(){
+  try{
+    if(ch1)ch1.destroy();if(ch2)ch2.destroy();
+    const sts={};DB.bookings.forEach(b=>sts[b.status]=(sts[b.status]||0)+1);
+    ch1=new Chart($('chStatus'),{type:'doughnut',data:{labels:Object.keys(sts),datasets:[{data:Object.values(sts),backgroundColor:['#FBBF24','#3B82F6','#10B981','#F97316','#94A3B8','#6366F1','#EF4444']}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}});
+    const ts={};DB.listings.forEach(l=>ts[l.roomType]=(ts[l.roomType]||0)+1);
+    ch2=new Chart($('chType'),{type:'bar',data:{labels:Object.keys(ts),datasets:[{data:Object.values(ts),backgroundColor:'#FF4D24',borderRadius:8}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}}}}}});
+  }catch(e){}
+}
+
+/* ================= MISC ================= */
+function openGen(html){$('genBody').innerHTML=html;$('genModal').classList.remove('hidden')}
+function closeGen(){$('genModal').classList.add('hidden')}
+function openCountry(){
+  $('countryList').innerHTML=COUNTRIES.map(c=>{const on=myCountry().c===c.c;return `<button onclick="setCountry('${c.c}')" class="w-full flex items-center gap-3 p-3 rounded-2xl border ${on?'border-rehzo-500 bg-rehzo-50':'border-slate-200 bg-white'} btn-press"><span class="text-2xl">${c.f}</span><span class="flex-1 text-left"><b class="text-[14px]">${c.n}</b><span class="block text-[11px] text-slate-500 font-bold">${c.d} • ${c.s} currency</span></span>${on?'<span class="text-rehzo-600 font-extrabold">✓</span>':''}</button>`}).join('');
+  $('countryModal').classList.remove('hidden');
+}
+function closeCountry(){$('countryModal').classList.add('hidden')}
+function setCountry(cc){localStorage.setItem('REHZO_COUNTRY',cc);if(currentUser){currentUser.country=cc;saveDB()}setHdrCountry();closeCountry();renderAll();toast(`Country: ${countryOf(cc).n} ${countryOf(cc).f} • ${countryOf(cc).d} • ${countryOf(cc).s}`)}
+function renderCountryList(){}
+function resetDemo(){openGen(`<h3 class="font-sora font-extrabold">Reset demo data?</h3><p class="text-[13px] text-slate-500">Sample rooms, users & TRL will be restored.</p><div class="flex gap-2 mt-4"><button onclick="closeGen()" class="flex-1 py-3 rounded-xl bg-slate-100 font-extrabold text-[13px]">Cancel</button><button onclick="localStorage.removeItem('REHZO_DB');localStorage.removeItem('REHZO_SESSION');location.reload()" class="flex-1 py-3 rounded-xl bg-ink-900 text-white font-extrabold text-[13px]">Reset ♻</button></div>`)}
+function renderActivity(){
+  const el=$('activityFeed');if(!el)return;
+  const acts=[...DB.bookings].slice(0,6).map(b=>({t:`${b.userName.split(' ')[0]} booked ${b.houseName}`,s:b.trl?'TRL '+b.trl:b.status, time:b.createdAt}));
+  el.innerHTML=acts.map(a=>`<div class="flex gap-2.5 items-center"><div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center text-sm">✓</div><div class="flex-1"><div class="text-[12px] font-bold text-ink-900">${esc(a.t)}</div><div class="text-[10.5px] text-slate-400 font-mono">${esc(a.s)} • ${timeAgo(a.time)}</div></div></div>`).join('')||'<div class="text-[12px] text-slate-400">No activity</div>';
+}
+function renderAll(){renderHome();renderOwner();renderBookingsTabs();renderBkList();renderTRL();renderNotifs();renderMore();renderReportsView();renderFav();renderActivity();updateAuthUI();updateBell()}
+$('genModal')?.addEventListener('click',e=>{if(e.target.id==='genModal')closeGen()});
+</script>
+</body>
+</html>
