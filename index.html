@@ -58,6 +58,17 @@ input,select,textarea{ outline:none } input:focus,select:focus,textarea:focus{ b
 .map-pin-pulse{ animation:pinPulse 1.6s ease-out infinite } @keyframes pinPulse{ 0%{ box-shadow:0 0 0 0 rgba(255,77,36,.5)} 100%{ box-shadow:0 0 0 18px rgba(255,77,36,0)} }
 @media print{ body *{ visibility:hidden } #pdfPrintArea, #pdfPrintArea *{ visibility:visible } #pdfPrintArea{ position:absolute; inset:0; margin:0 } }
 </style>
+  <!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const REHZO_SUPABASE_URL = "YOUR_PROJECT_URL";https://kucrovemctcswaazbwxb.supabase.co
+  const REHZO_SUPABASE_PUBLISHABLE_KEY = "YOUR_PUBLISHABLE_KEY";sb_publishable_-Rtx-97g9pWMF4bUqeP7Jg_6483k7Wu
+
+  window.rehzoSupabase = window.supabase.createClient(
+    REHZO_SUPABASE_URL,
+    REHZO_SUPABASE_PUBLISHABLE_KEY
+  );
+</script>
 </head>
 <body class="min-h-screen text-slate-900">
 
