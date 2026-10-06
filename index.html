@@ -671,18 +671,46 @@ function collectFltAmen(){state.fltAmen=[...document.querySelectorAll('#fltAmen 
 function authTab(t){document.querySelectorAll('.atab').forEach(b=>{const on=b.dataset.atab===t;b.className=`atab py-2.5 rounded-xl text-[13px] font-extrabold ${on?'bg-ink-900 text-white':'text-slate-500'}`});document.querySelectorAll('.atabPane').forEach(p=>p.classList.add('hidden'));$('atab-'+t).classList.remove('hidden')}
 function handleAvatar(){ if(!currentUser)go('auth'); else go('more') }
 function quickLogin(u,p){$('lUid').value=u;$('lPass').value=p;doLogin()}
-function doLogin(){
-  const uid=$('lUid').value.trim(),pw=$('lPass').value;
-  if(!uid||!pw)return toast('Enter User ID + Password','err');
-  const k='l_'+uid;const a=_loginAttempts[k]||{n:0,t:0};
-  if(a.n>=5&&Date.now()-a.t<60000)return toast('Too many attempts. Wait 60s (rate limiting).','err');
-  const u=DB.users.find(x=>x.uid===uid);
-  if(!u||u.pass!==hash(pw)){a.n++;a.t=Date.now();_loginAttempts[k]=a;return toast(`Invalid credentials (${a.n}/5)`,'err')}
-  if(u.blocked)return toast('Account suspended. Contact admin.','err');
-  _loginAttempts[k]={n:0,t:0};
-  currentUser=u;localStorage.setItem('REHZO_SESSION',u.uid);
-  DB.notifications.unshift({id:'n'+Date.now(),uid:u.uid,title:'Login detected 🔐',msg:'Secure session started on this device.',type:'account',time:Date.now(),read:false});saveDB();
-  updateAuthUI();updateBell();renderAll();go('home');toast(`Welcome back, ${u.name.split(' ')[0]}!`);
+async function doLogin(){
+  const uid = document.getElementById('lUid').value.trim();
+  const pw = document.getElementById('lPass').value;
+
+  if(!uid || !pw){
+    return toast('Enter User ID and Password','err');
+  }
+
+  if(!window.rehzoSupabase){
+    return toast('Supabase not connected','err');
+  }
+
+  const { data: profile, error: profileError } =
+    await window.rehzoSupabase
+      .from('profiles')
+      .select('*')
+      .eq('uid', uid)
+      .maybeSingle();
+
+  if(profileError || !profile){
+    return toast('Invalid User ID or Password','err');
+  }
+
+  const { data, error } =
+    await window.rehzoSupabase.auth.signInWithPassword({
+      email: profile.email,
+      password: pw
+    });
+
+  if(error){
+    return toast('Invalid User ID or Password','err');
+  }
+
+  currentUser = profile;
+  localStorage.setItem('REHZO_SESSION', data.user.id);
+
+  toast('Login successful ✅','ok');
+  updateAuthUI();
+  renderAll();
+  go('home');
 }
 function sendRegOTP(){
   const em=$('rEmail').value.trim();
