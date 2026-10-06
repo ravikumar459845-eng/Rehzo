@@ -396,6 +396,9 @@ div[class*="rounded-[20px]"][class*="bg-ink-900"] h2 {
             <label class="lbl">User ID</label><input id="lUid" class="inp mt-1" placeholder="e.g. aarav_01">
             <label class="lbl mt-3">Password</label><input id="lPass" type="password" class="inp mt-1" placeholder="••••••••">
             <button onclick="doLogin()" class="w-full mt-4 py-3.5 rounded-2xl bg-ink-900 text-white font-sora font-extrabold btn-press">Login Securely 🔒</button>
+            <button onclick="loginWithGoogle()" class="w-full mt-2 py-3.5 rounded-2xl border border-slate-200 bg-white text-ink-900 font-extrabold btn-press">
+  Continue with Google
+</button>
             <div class="grid grid-cols-2 gap-2 mt-2"><button onclick="quickLogin('demo_user','demo123')" class="py-2.5 rounded-xl bg-rehzo-50 border border-rehzo-100 text-rehzo-700 text-[12px] font-extrabold btn-press">Demo User</button><button onclick="quickLogin('admin','admin123')" class="py-2.5 rounded-xl bg-slate-100 text-[12px] font-extrabold btn-press">Admin Login</button></div>
             <p class="text-[11px] text-slate-400 mt-3 text-center">Rate-limited • Hashed passwords • Secure session</p>
           </div>
