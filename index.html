@@ -712,6 +712,22 @@ async function doLogin(){
   renderAll();
   go('home');
 }
+  async function loginWithGoogle(){
+  if(!window.rehzoSupabase){
+    return toast('Supabase is not connected','err');
+  }
+
+  const { error } = await window.rehzoSupabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+
+  if(error){
+    toast(error.message,'err');
+  }
+}
 function sendRegOTP(){
   const em=$('rEmail').value.trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return toast('Enter valid Gmail','err');
