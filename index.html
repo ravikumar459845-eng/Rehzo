@@ -11,8 +11,7 @@ tailwind.config = {
     extend: {
       colors: {
         forest: { 800: '#064E3B', 900: '#043A2C', 950: '#02231A' },
-        emeraldBrand: '#006A4E',
-        accentGreen: '#00D1B2'
+        emeraldBrand: '#006A4E'
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
@@ -27,18 +26,18 @@ tailwind.config = {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { -webkit-tap-highlight-color: transparent; }
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 .glass-header { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(14px); }
 .app-view { display: none; }
-.app-view.on { display: block; animation: fadeUp .2s ease both; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.room-card-img { height: 115px; width: 100%; object-fit: cover; }
+.app-view.on { display: block; animation: fadeIn .2s ease-out both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.room-card-img { height: 110px; width: 100%; object-fit: cover; }
 .barcode-strip {
   background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px);
-  height: 36px;
+  height: 34px;
 }
 @media print {
   body * { visibility: hidden; }
@@ -46,18 +45,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
   #pdfPrintWrapper { position: absolute; inset: 0; margin: 0; padding: 0; }
 }
 </style>
-<script>
-  const REHZO_SUPABASE_URL = "https://kucrovemctcswaazbwxb.supabase.co";
-  const REHZO_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-Rtx-97g9pWMF4bUqeP7Jg_6483k7Wu";
-  window.rehzoSupabase = window.supabase.createClient(REHZO_SUPABASE_URL, REHZO_SUPABASE_PUBLISHABLE_KEY);
-</script>
 </head>
 <body class="text-slate-800 pb-[84px]">
 
-<!-- FIXED TOPBAR WITH SVG LOGO -->
+<!-- ================= FIXED TOPBAR HEADER ================= -->
 <header class="sticky top-0 z-40 glass-header border-b border-slate-100 shadow-sm">
   <div class="max-w-[500px] mx-auto px-4 py-2.5 flex items-center justify-between">
     <div class="flex items-center gap-2.5 cursor-pointer" onclick="go('home')">
+      <!-- Permanent High-Def SVG House Logo -->
       <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#044E3B] to-[#006A4E] flex items-center justify-center text-white shadow-sm shrink-0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -81,19 +76,20 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
   </div>
 </header>
 
+<!-- ================= MAIN CONTAINER ================= -->
 <main class="max-w-[500px] mx-auto min-h-screen">
 
-  <!-- ================= VIEW: HOME ================= -->
+  <!-- VIEW 1: HOME SCREEN -->
   <section id="view-home" class="app-view on px-3.5 pt-2.5">
     
-    <!-- Compact Banner -->
+    <!-- Compact Sleek Green Banner -->
     <div class="rounded-[20px] bg-gradient-to-br from-[#044E3B] via-[#055B45] to-[#013527] text-white p-3.5 shadow-sm relative overflow-hidden">
       <div>
         <h1 class="font-sora font-extrabold text-[17px] leading-tight">Better Rooms, Brighter Days</h1>
         <p class="text-[10.5px] text-emerald-100/80 mt-0.5 font-medium">Find, book & settle in your verified space.</p>
       </div>
       
-      <!-- Live Search & TRL Bar -->
+      <!-- Live Search & Instant TRL Verification Bar -->
       <div class="mt-2.5 flex items-center bg-white rounded-full px-3 py-1 shadow-md">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input id="homeSearchInput" oninput="onHomeSearch(this.value)" placeholder="Search city, house or 12-digit TRL No…" class="flex-1 text-[12px] text-slate-800 font-semibold px-2 py-1 bg-transparent outline-none">
@@ -101,10 +97,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       </div>
     </div>
 
-    <!-- TRL Result -->
+    <!-- TRL Live Match Container -->
     <div id="trlCheckResultWrap" class="hidden mt-2"></div>
 
-    <!-- Filter Pills Row -->
+    <!-- Country & Room Type Dropdowns -->
     <div class="grid grid-cols-2 gap-2 mt-2">
       <div class="relative">
         <select id="homeCountrySelect" onchange="onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none">
@@ -131,7 +127,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       </div>
     </div>
 
-    <!-- Category Chips -->
+    <!-- Category Filter Chips -->
     <div class="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-1 text-[11px] font-bold">
       <button onclick="filterCategory('all', this)" class="cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm">All Rooms</button>
       <button onclick="filterCategory('Students', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap">For Students</button>
@@ -142,24 +138,24 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
     <!-- Available Rooms Header -->
     <div class="flex items-center justify-between mt-2.5 mb-1.5 px-1">
       <h3 class="font-sora font-extrabold text-[15px] text-slate-900">Available Rooms</h3>
-      <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="go('search')">View All</span>
+      <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="resetFiltersAndShowAll()">Reset & View All</span>
     </div>
 
     <!-- 2x2 Rooms Grid -->
     <div id="roomsGrid" class="grid grid-cols-2 gap-2.5 pb-6"></div>
   </section>
 
-  <!-- ================= VIEW: SEARCH ================= -->
+  <!-- VIEW 2: SEARCH -->
   <section id="view-search" class="app-view px-3.5 pt-3">
     <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Search Stays</h2>
-    <p class="text-[11px] text-slate-500 mb-2.5">Find verified rooms across cities</p>
+    <p class="text-[11px] text-slate-500 mb-2.5">Find verified rooms across all cities</p>
     <div class="bg-white rounded-full border border-slate-200 px-3.5 py-1.5 flex items-center shadow-sm mb-3">
       <input id="searchInputField" oninput="onSearchScreenInput(this.value)" placeholder="Search city, area, house name…" class="flex-1 text-[12.5px] outline-none">
     </div>
     <div id="searchGridList" class="grid grid-cols-2 gap-2.5 pb-6"></div>
   </section>
 
-  <!-- ================= VIEW: NEAR ME (10 KM STRICT) ================= -->
+  <!-- VIEW 3: NEAR ME (10 KM STRICT RADIUS) -->
   <section id="view-near" class="app-view px-3.5 pt-3">
     <div class="flex items-center justify-between">
       <div>
@@ -169,28 +165,30 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       <button onclick="getUserGeoLocation()" class="px-3 py-1 bg-[#044E3B] text-white text-[10.5px] font-extrabold rounded-full shadow-sm">Refresh GPS</button>
     </div>
     <div id="nearMap" class="mt-2.5 rounded-[18px] overflow-hidden border border-slate-200 shadow-sm" style="height: 180px;"></div>
-    <div id="nearStatusText" class="text-[10.5px] font-bold text-slate-500 mt-2">Locating nearby rooms…</div>
+    <div id="nearStatusText" class="text-[10.5px] font-bold text-slate-500 mt-2">Checking GPS location…</div>
     <div id="nearRoomsList" class="grid grid-cols-2 gap-2.5 mt-2.5 pb-6"></div>
   </section>
 
-  <!-- ================= VIEW: MY BOOKINGS ================= -->
+  <!-- VIEW 4: MY BOOKINGS -->
   <section id="view-bookings" class="app-view px-3.5 pt-3 pb-8">
     <h2 class="font-sora font-extrabold text-[19px] text-slate-900">My Bookings</h2>
     <div class="mt-3 space-y-2.5" id="userBookingsList"></div>
   </section>
 
-  <!-- ================= VIEW: OWNER LIST PROPERTY ================= -->
+  <!-- VIEW 5: OWNER HUB -->
   <section id="view-owner" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
       <h2 class="font-sora font-extrabold text-[19px] text-slate-900">List Your Property</h2>
       <button onclick="toggleOwnerView('mine')" id="toggleOwnerListBtn" class="text-[11.5px] font-bold text-emerald-800">My Listings (0)</button>
     </div>
 
+    <!-- Owner Listings Drawer -->
     <div id="ownerMyListingsWrap" class="hidden space-y-2 mb-3">
       <div id="ownerListingsContainer"></div>
       <button onclick="toggleOwnerView('form')" class="w-full py-2 bg-slate-100 rounded-full font-bold text-xs text-slate-600">+ Add New Listing</button>
     </div>
 
+    <!-- 8-Point Listing Form Matching Screenshot 2 -->
     <form id="ownerListingForm" onsubmit="handleOwnerSubmit(event)" class="space-y-3">
       <div class="grid grid-cols-2 gap-2">
         <div>
@@ -296,6 +294,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
         </div>
       </div>
 
+      <!-- Exact Map Lock Button Matching Screenshot 2 -->
       <div class="pt-1 text-center">
         <button type="button" onclick="lockExactMapLocation()" id="mapLockBtn" class="w-full py-2.5 px-3 rounded-full border border-slate-300 bg-white text-slate-700 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 hover:bg-slate-50">
           <span>📍</span> <span id="mapLockText">Use Exact Map Location *</span>
@@ -320,7 +319,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
     </form>
   </section>
 
-  <!-- ================= VIEW: ADMIN CONTROL ================= -->
+  <!-- VIEW 6: ADMIN FULL CONTROL -->
   <section id="view-admin" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
       <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Admin Control Panel 🔐</h2>
@@ -340,7 +339,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
     </div>
   </section>
 
-  <!-- ================= VIEW: NOTIFICATIONS ================= -->
+  <!-- VIEW 7: NOTIFICATIONS -->
   <section id="view-notifications" class="app-view px-3.5 pt-3 pb-8">
     <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Notifications</h2>
     <div id="notifListWrap" class="mt-2.5 space-y-2"></div>
@@ -437,7 +436,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
   </div>
 </div>
 
-<!-- ================= 12-DIGIT TRL & PDF MODAL ================= -->
+<!-- ================= 12-DIGIT TRL & PDF MODAL (MATCHING SCREENSHOT 3) ================= -->
 <div id="pdfModal" class="hidden fixed inset-0 z-[80] bg-slate-950/70 backdrop-blur-sm p-3 overflow-y-auto">
   <div class="max-w-[420px] mx-auto bg-white rounded-[24px] p-4 shadow-2xl my-6">
     <div class="flex justify-between items-center mb-2.5">
@@ -445,7 +444,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       <button onclick="window.print()" class="px-3 py-1 bg-[#044E3B] text-white text-[11px] font-bold rounded-full">🖨 Print / PDF</button>
     </div>
 
-    <!-- Official PDF Slip -->
+    <!-- Official PDF Slip matching Screenshot 3 -->
     <div id="pdfPrintWrapper" class="bg-white p-3.5 border border-slate-200 rounded-xl text-slate-800 text-[11px]">
       <div class="flex items-center justify-between border-b pb-2">
         <div class="flex items-center gap-1.5">
@@ -509,9 +508,7 @@ const COUNTRY_CONFIG = {
 };
 
 function initSeed() {
-  // Clear old conflicting local cache to force rich demo data
-  localStorage.removeItem('REHZO_MASTER_DATA');
-  
+  // Guaranteed Master Rooms Pool (All Categories Pre-Populated)
   DB.listings = [
     {
       id: 'L-101',
@@ -526,7 +523,7 @@ function initSeed() {
       state: 'Maharashtra',
       address: 'Andheri West, Mumbai',
       lat: 28.6200,
-      lng: 77.2100, // within 10 km
+      lng: 77.2100,
       rules: 'No loud music after 10 PM.',
       ownerName: 'Sunita Mehra',
       contact: '9820012345',
@@ -547,7 +544,7 @@ function initSeed() {
       state: 'Delhi',
       address: 'Green Park, New Delhi',
       lat: 28.6400,
-      lng: 77.2200, // within 10 km
+      lng: 77.2200,
       rules: 'Gate closes 10:30 PM. Only students.',
       ownerName: 'Rajesh Verma',
       contact: '9811054321',
@@ -568,7 +565,7 @@ function initSeed() {
       state: 'Delhi',
       address: 'Pahar Ganj, Central Delhi',
       lat: 28.6430,
-      lng: 77.2150, // within 10 km
+      lng: 77.2150,
       rules: 'Valid ID required. Quiet hours 11 PM to 7 AM.',
       ownerName: 'Vikram Joshi',
       contact: '9899123456',
@@ -629,7 +626,7 @@ function initSeed() {
 }
 
 function saveDB() {
-  localStorage.setItem('REHZO_MASTER_DATA', JSON.stringify(DB));
+  try { localStorage.setItem('REHZO_MASTER_DATA', JSON.stringify(DB)); } catch(e) {}
 }
 
 function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -667,7 +664,17 @@ function handleAvatar() {
 
 function renderHomeGrid(items = null) {
   const list = items || DB.listings.filter(l => l.status === 'available');
-  $('roomsGrid').innerHTML = list.map(l => createRoomCardHTML(l)).join('') || '<div class="col-span-2 text-center py-6 text-xs text-slate-400 font-bold">No rooms available</div>';
+  const container = $('roomsGrid');
+  if (!container) return;
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-2 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200">
+        <p class="text-xs text-slate-500 font-bold mb-2">No matching rooms found in this category.</p>
+        <button onclick="resetFiltersAndShowAll()" class="px-4 py-1.5 bg-[#044E3B] text-white text-[11px] font-extrabold rounded-full">Reset Filters</button>
+      </div>`;
+    return;
+  }
+  container.innerHTML = list.map(l => createRoomCardHTML(l)).join('');
 }
 
 function createRoomCardHTML(l) {
@@ -675,7 +682,7 @@ function createRoomCardHTML(l) {
   return `
     <div class="bg-white border border-slate-200 rounded-[16px] overflow-hidden shadow-sm flex flex-col justify-between">
       <div class="relative">
-        <img src="${l.photos[0]}" class="room-card-img" alt="${esc(l.houseName)}">
+        <img src="${l.photos[0]}" class="room-card-img" alt="${esc(l.houseName)}" onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'">
         <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-white/90 text-emerald-800 font-extrabold text-[8.5px]">● Available</span>
       </div>
       <div class="p-2.5 flex flex-col justify-between flex-1">
@@ -688,12 +695,24 @@ function createRoomCardHTML(l) {
             <span class="px-1.5 py-0.5 rounded bg-slate-100 text-[8.5px] font-bold text-slate-600 truncate">${esc(l.suitableFor)}</span>
           </div>
         </div>
-        <button onclick="openBookingModal('${l.id}')" class="mt-2 w-full py-1.5 bg-[#044E3B] text-white rounded-full text-[10.5px] font-extrabold shadow-sm">
+        <button onclick="openBookingModal('${l.id}')" class="mt-2 w-full py-1.5 bg-[#044E3B] text-white rounded-full text-[10.5px] font-extrabold shadow-sm active:scale-95 transition-transform">
           Book Now
         </button>
       </div>
     </div>
   `;
+}
+
+function resetFiltersAndShowAll() {
+  if ($('homeCountrySelect'))$('homeCountrySelect').value = '';
+  if ($('homeTypeSelect'))$('homeTypeSelect').value = '';
+  if ($('homeSearchInput'))$('homeSearchInput').value = '';
+  document.querySelectorAll('.cat-chip').forEach((b, i) => {
+    b.className = i === 0 
+      ? 'cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm'
+      : 'cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap';
+  });
+  renderHomeGrid();
 }
 
 function onHomeSearch(val) {
@@ -761,37 +780,41 @@ function renderNearMeView() {
   $('nearStatusText').innerHTML = `Scanning 10 km radius around: ${currentGeo.lat.toFixed(4)}, ${currentGeo.lng.toFixed(4)}`;
   
   setTimeout(() => {
-    if (!nearMapInstance) {
-      nearMapInstance = L.map('nearMap').setView([currentGeo.lat, currentGeo.lng], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearMapInstance);
-    } else {
-      nearMapInstance.setView([currentGeo.lat, currentGeo.lng], 12);
-      nearMapInstance.invalidateSize();
-    }
-
-    nearMapInstance.eachLayer(layer => {
-      if (layer instanceof L.Marker) nearMapInstance.removeLayer(layer);
-    });
-
-    L.marker([currentGeo.lat, currentGeo.lng]).addTo(nearMapInstance).bindPopup("You are here").openPopup();
-
-    const nearRooms = [];
-    DB.listings.forEach(l => {
-      if (l.status === 'available' && l.lat && l.lng) {
-        const dist = getDistanceKm(currentGeo.lat, currentGeo.lng, l.lat, l.lng);
-        if (dist <= 10) {
-          nearRooms.push({ ...l, distKm: dist });
-          L.marker([l.lat, l.lng]).addTo(nearMapInstance).bindPopup(`<b>${l.houseName}</b><br>${dist.toFixed(1)} km`);
-        }
+    try {
+      if (!nearMapInstance) {
+        nearMapInstance = L.map('nearMap').setView([currentGeo.lat, currentGeo.lng], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearMapInstance);
+      } else {
+        nearMapInstance.setView([currentGeo.lat, currentGeo.lng], 12);
+        nearMapInstance.invalidateSize();
       }
-    });
 
-    if (nearRooms.length > 0) {
-      $('nearStatusText').innerHTML = `<span class="text-emerald-700 font-bold">✓ ${nearRooms.length} room(s) within 10 km</span>`;
-      $('nearRoomsList').innerHTML = nearRooms.map(l => createRoomCardHTML(l)).join('');
-    } else {
-      $('nearStatusText').innerHTML = `<span class="text-amber-700 font-bold">No rooms available within 10 km radius.</span>`;
-      $('nearRoomsList').innerHTML = '<div class="col-span-2 text-center py-6 text-xs text-slate-400">Try exploring other cities via Search.</div>';
+      nearMapInstance.eachLayer(layer => {
+        if (layer instanceof L.Marker) nearMapInstance.removeLayer(layer);
+      });
+
+      L.marker([currentGeo.lat, currentGeo.lng]).addTo(nearMapInstance).bindPopup("You are here").openPopup();
+
+      const nearRooms = [];
+      DB.listings.forEach(l => {
+        if (l.status === 'available' && l.lat && l.lng) {
+          const dist = getDistanceKm(currentGeo.lat, currentGeo.lng, l.lat, l.lng);
+          if (dist <= 10) {
+            nearRooms.push({ ...l, distKm: dist });
+            L.marker([l.lat, l.lng]).addTo(nearMapInstance).bindPopup(`<b>${l.houseName}</b><br>${dist.toFixed(1)} km`);
+          }
+        }
+      });
+
+      if (nearRooms.length > 0) {
+        $('nearStatusText').innerHTML = `<span class="text-emerald-700 font-bold">✓ ${nearRooms.length} room(s) within 10 km</span>`;
+        $('nearRoomsList').innerHTML = nearRooms.map(l => createRoomCardHTML(l)).join('');
+      } else {
+        $('nearStatusText').innerHTML = `<span class="text-amber-700 font-bold">No rooms available within 10 km radius.</span>`;
+        $('nearRoomsList').innerHTML = '<div class="col-span-2 text-center py-6 text-xs text-slate-400">Try exploring other cities via Search.</div>';
+      }
+    } catch(err) {
+      console.warn("Map error", err);
     }
   }, 100);
 }
@@ -804,7 +827,6 @@ function getUserGeoLocation() {
       currentGeo.lng = pos.coords.longitude;
       renderNearMeView();
     }, () => {
-      alert("GPS not available, using default location.");
       renderNearMeView();
     });
   } else {
@@ -883,12 +905,14 @@ function submitBookingRequest() {
 }
 
 function renderUserBookings() {
+  const container = $('userBookingsList');
+  if (!container) return;
   if (DB.bookings.length === 0) {
-    $('userBookingsList').innerHTML = '<div class="text-center py-8 text-xs text-slate-400 font-bold">No bookings requested yet.</div>';
+    container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400 font-bold">No bookings requested yet.</div>';
     return;
   }
 
-  $('userBookingsList').innerHTML = DB.bookings.map(b => {
+  container.innerHTML = DB.bookings.map(b => {
     const isAccepted = b.status === 'owner_accepted' || b.status === 'confirmed';
     const currSym = COUNTRY_CONFIG[b.country]?.sym || '₹';
     return `
@@ -992,15 +1016,15 @@ function lockExactMapLocation() {
     navigator.geolocation.getCurrentPosition(pos => {
       lockedExactCoord = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       $('mapLockText').textContent = `✓ Coordinates Locked (${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)})`;
-      $('mapLockBtn').classList.add('border-emerald-600', 'text-emerald-700', 'bg-emerald-50');
+      $('mapLockBtn').className = "w-full py-2.5 px-3 rounded-full border border-emerald-600 bg-emerald-50 text-emerald-800 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5";
     }, () => {
       lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
-      $('mapLockText').textContent = `✓ Map Location Locked (Default)`;
-      $('mapLockBtn').classList.add('border-emerald-600', 'text-emerald-700', 'bg-emerald-50');
+      $('mapLockText').textContent = `✓ Coordinates Locked (Default)`;
+      $('mapLockBtn').className = "w-full py-2.5 px-3 rounded-full border border-emerald-600 bg-emerald-50 text-emerald-800 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5";
     });
   } else {
     lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
-    $('mapLockText').textContent = `✓ Map Location Locked`;
+    $('mapLockText').textContent = `✓ Coordinates Locked`;
   }
 }
 
