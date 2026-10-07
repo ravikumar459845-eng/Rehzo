@@ -114,6 +114,49 @@ div[class*="rounded-[20px]"][class*="bg-ink-900"] h2 {
     REHZO_SUPABASE_URL,
     REHZO_SUPABASE_PUBLISHABLE_KEY
   );
+// Google Login aur Page Load par Session Restore karne ka code
+async function initSessionRestore() {
+  if (!window.rehzoSupabase) return;
+
+  const { data: { session } } = await window.rehzoSupabase.auth.getSession();
+
+  if (session && session.user) {
+    const { data: profile } = await window.rehzoSupabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    currentUser = profile || {
+      id: session.user.id,
+      email: session.user.email,
+      full_name: session.user.user_metadata?.full_name || session.user.email.split('@')[0]
+    };
+
+    localStorage.setItem('REHZO_SESSION', session.user.id);
+
+    if (typeof updateAuthUI === 'function') updateAuthUI();
+    if (typeof renderAll === 'function') renderAll();
+  }
+
+  window.rehzoSupabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      const { data: profile } = await window.rehzoSupabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      currentUser = profile || session.user;
+      localStorage.setItem('REHZO_SESSION', session.user.id);
+
+      if (typeof updateAuthUI === 'function') updateAuthUI();
+      if (typeof renderAll === 'function') renderAll();
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', initSessionRestore);
 </script>
 </head>
 <body class="min-h-screen text-slate-900">
