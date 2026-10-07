@@ -25,6 +25,7 @@ tailwind.config = {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{ -webkit-tap-highlight-color:transparent; }
 body{ font-family:'Plus Jakarta Sans',sans-serif; background:#070912; }
@@ -57,7 +58,6 @@ input,select,textarea{ outline:none } input:focus,select:focus,textarea:focus{ b
 .btn-press:active{ transform:scale(.97) }
 .map-pin-pulse{ animation:pinPulse 1.6s ease-out infinite } @keyframes pinPulse{ 0%{ box-shadow:0 0 0 0 rgba(255,77,36,.5)} 100%{ box-shadow:0 0 0 18px rgba(255,77,36,0)} }
 @media print{ body *{ visibility:hidden } #pdfPrintArea, #pdfPrintArea *{ visibility:visible } #pdfPrintArea{ position:absolute; inset:0; margin:0 } }
-  /* --- COMPACT HOME & 2x2 GRID --- */
 #roomsContainer, .rooms-wrapper, #roomsList {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -65,7 +65,6 @@ input,select,textarea{ outline:none } input:focus,select:focus,textarea:focus{ b
   padding: 8px 10px !important;
   width: 100% !important;
 }
-
 .room-card {
   width: 100% !important;
   margin: 0 !important;
@@ -76,23 +75,18 @@ input,select,textarea{ outline:none } input:focus,select:focus,textarea:focus{ b
   display: flex !important;
   flex-direction: column !important;
 }
-
 .room-card img {
   height: 110px !important;
   width: 100% !important;
   object-fit: cover !important;
 }
-
 .room-card .p-4, .room-card-content {
   padding: 8px !important;
 }
-  /* Quick Actions Compact */
 div[class*="grid-cols-4"] > button {
   padding: 8px 4px !important;
   min-height: 56px !important;
 }
-
-/* Hero Banner Compact */
 div[class*="rounded-[20px]"][class*="bg-ink-900"] {
   margin-top: 8px !important;
   padding: 12px 14px !important;
@@ -101,62 +95,15 @@ div[class*="rounded-[20px]"][class*="bg-ink-900"] h2 {
   font-size: 16px !important;
   line-height: 1.25 !important;
 }
-
-
 </style>
-  <!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const REHZO_SUPABASE_URL="https://kucrovemctcswaazbwxb.supabase.co";
+  const REHZO_SUPABASE_URL = "https://kucrovemctcswaazbwxb.supabase.co";
   const REHZO_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-Rtx-97g9pWMF4bUqeP7Jg_6483k7Wu";
 
   window.rehzoSupabase = window.supabase.createClient(
     REHZO_SUPABASE_URL,
     REHZO_SUPABASE_PUBLISHABLE_KEY
   );
-// Google Login aur Page Load par Session Restore karne ka code
-async function initSessionRestore() {
-  if (!window.rehzoSupabase) return;
-
-  const { data: { session } } = await window.rehzoSupabase.auth.getSession();
-
-  if (session && session.user) {
-    const { data: profile } = await window.rehzoSupabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-
-    currentUser = profile || {
-      id: session.user.id,
-      email: session.user.email,
-      full_name: session.user.user_metadata?.full_name || session.user.email.split('@')[0]
-    };
-
-    localStorage.setItem('REHZO_SESSION', session.user.id);
-
-    if (typeof updateAuthUI === 'function') updateAuthUI();
-    if (typeof renderAll === 'function') renderAll();
-  }
-
-  window.rehzoSupabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      const { data: profile } = await window.rehzoSupabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      currentUser = profile || session.user;
-      localStorage.setItem('REHZO_SESSION', session.user.id);
-
-      if (typeof updateAuthUI === 'function') updateAuthUI();
-      if (typeof renderAll === 'function') renderAll();
-    }
-  });
-}
-
-window.addEventListener('DOMContentLoaded', initSessionRestore);
 </script>
 </head>
 <body class="min-h-screen text-slate-900">
@@ -184,7 +131,7 @@ window.addEventListener('DOMContentLoaded', initSessionRestore);
 <!-- APP SHELL -->
 <div class="relative z-10 max-w-[1120px] mx-auto lg:py-6 px-0 lg:px-6 flex gap-6 items-start">
 
-  <!-- LEFT MARKETING (desktop) -->
+  <!-- LEFT MARKETING -->
   <aside class="hidden lg:flex flex-col w-[300px] shrink-0 sticky top-6 text-white">
     <div class="rounded-[28px] overflow-hidden bg-gradient-to-b from-white/10 to-white/[.03] border border-white/10 p-6 backdrop-blur-xl">
       <div class="flex items-center gap-3">
@@ -216,33 +163,28 @@ window.addEventListener('DOMContentLoaded', initSessionRestore);
     </div>
   </aside>
 
-  <!-- MAIN PHONE / WEB CONTAINER -->
+  <!-- MAIN CONTAINER -->
   <main class="flex-1 min-w-0">
     <div class="bg-[#F5F6FB] lg:rounded-[32px] overflow-hidden shadow-app border border-white/20 min-h-[100dvh] lg:min-h-[92vh] flex flex-col relative">
 
       <!-- TOPBAR -->
       <header class="sticky top-0 z-40 glass border-b border-slate-200/70">
         <div class="px-4 pt-3 pb-2 flex items-center gap-3">
-                               <div class="flex items-center gap-2 cursor-pointer" onclick="go('home')">
-                                                    <img src="file_000000003eb88211aab290a06f8ead27.png" alt="REHZO" class="w-9 h-9 object-contain rounded-xl shrink-0">        
+          <div class="flex items-center gap-2 cursor-pointer" onclick="go('home')">
+            <img src="file_000000003eb88211aab290a06f8ead27.png" alt="REHZO" class="w-9 h-9 object-contain rounded-xl shrink-0" onerror="this.style.display='none'">        
             <div class="leading-none">
               <div class="font-bold text-lg text-slate-900 leading-none">REHZO</div>
               <span class="text-[9px] font-bold text-rehzo-600 tracking-wider">STAY VERIFIED</span>
             </div>
           </div>
           <div class="flex-1"></div>
-            
-              
           <button onclick="openCountry()" class="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-ink-900 text-white text-[12px] font-bold btn-press"><span id="hdrFlag">🇮🇳</span><span id="hdrCurr">₹</span><span id="hdrDial" class="text-white/60 font-semibold">+91</span><span class="text-white/40">▾</span></button>
-
-
           <button onclick="go('notifications')" class="relative w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center btn-press">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B0E1F" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
             <span id="bellBadge" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rehzo-500 text-white text-[11px] font-extrabold flex items-center justify-center">0</span>
           </button>
           <button id="avatarBtn" onclick="handleAvatar()" class="w-10 h-10 rounded-full bg-gradient-to-br from-ink-900 to-indigo-700 text-white font-sora font-bold text-sm flex items-center justify-center border-2 border-white shadow btn-press overflow-hidden">?</button>
         </div>
-        <!-- SEARCH (home only) -->
         <div id="homeSearchWrap" class="px-4 pb-3">
           <div class="flex gap-2">
             <div class="flex-1 flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3.5 py-3 shadow-sm">
@@ -436,14 +378,20 @@ window.addEventListener('DOMContentLoaded', initSessionRestore);
             <button data-atab="forgot" onclick="authTab('forgot')" class="atab py-2.5 rounded-xl text-[13px] font-extrabold text-slate-500">Recover</button>
           </div>
           <div id="atab-login" class="atabPane mt-3 rounded-[20px] bg-white border border-slate-200 p-5">
-            <label class="lbl">User ID</label><input id="lUid" class="inp mt-1" placeholder="e.g. aarav_01">
+            <button onclick="loginWithGoogle()" class="w-full py-3.5 rounded-2xl border border-slate-200 bg-white text-ink-900 font-extrabold btn-press flex items-center justify-center gap-2 shadow-sm mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+              Continue with Google
+            </button>
+            <div class="relative flex py-2 items-center">
+              <div class="flex-grow border-t border-slate-200"></div>
+              <span class="flex-shrink mx-3 text-slate-400 text-xs font-bold">OR USER ID</span>
+              <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+            <label class="lbl">User ID / Email</label><input id="lUid" class="inp mt-1" placeholder="e.g. priya@gmail.com or demo_user">
             <label class="lbl mt-3">Password</label><input id="lPass" type="password" class="inp mt-1" placeholder="••••••••">
             <button onclick="doLogin()" class="w-full mt-4 py-3.5 rounded-2xl bg-ink-900 text-white font-sora font-extrabold btn-press">Login Securely 🔒</button>
-            <button onclick="loginWithGoogle()" class="w-full mt-2 py-3.5 rounded-2xl border border-slate-200 bg-white text-ink-900 font-extrabold btn-press">
-  Continue with Google
-</button>
             <div class="grid grid-cols-2 gap-2 mt-2"><button onclick="quickLogin('demo_user','demo123')" class="py-2.5 rounded-xl bg-rehzo-50 border border-rehzo-100 text-rehzo-700 text-[12px] font-extrabold btn-press">Demo User</button><button onclick="quickLogin('admin','admin123')" class="py-2.5 rounded-xl bg-slate-100 text-[12px] font-extrabold btn-press">Admin Login</button></div>
-            <p class="text-[11px] text-slate-400 mt-3 text-center">Rate-limited • Hashed passwords • Secure session</p>
+            <p class="text-[11px] text-slate-400 mt-3 text-center">Supabase Protected • Rate-limited • Secure session</p>
           </div>
           <div id="atab-register" class="atabPane hidden mt-3 rounded-[20px] bg-white border border-slate-200 p-5">
             <div class="grid grid-cols-2 gap-2.5">
@@ -592,7 +540,7 @@ const AMENS=['WiFi','AC','Parking','Meals','Laundry','Power Backup','CCTV','Furn
 const DUR_OPTS=[1,2,3,6,12];
 
 let DB=null, currentUser=null, state={q:'',chip:'All',sort:'new',fltCountry:'',fltSuit:'',fltRent:50000,fltAmen:[],bkTab:'all',adminTab:'users',favs:[],geo:null,editingId:null,pickLat:null,pickLng:null,tempPhotos:[],lastPDF:null,hist:['home']};
-let _regOTP=null,_regOTPExp=0,_regVerified=false,_fgOTP=null,_fgMode='id',_loginAttempts={},_pickMap=null,_nearMap=null,_pickMarker=null;
+let _regOTP=null,_regOTPExp=0,_regVerified=false,_fgOTP=null,_fgMode='id',_pickMap=null,_nearMap=null,_pickMarker=null;
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -615,7 +563,7 @@ function toast(msg,type='ok'){
 function notify(uid,title,msg,type='info'){
   DB.notifications.unshift({id:'n'+Date.now()+Math.floor(Math.random()*999),uid,title,msg,type,time:Date.now(),read:false});
   saveDB();updateBell();
-  if(currentUser&&currentUser.uid===uid) toast(title+' — '+msg,'info');
+  if(currentUser&&(currentUser.uid===uid||currentUser.id===uid)) toast(title+' — '+msg,'info');
   renderActivity();
 }
 function saveDB(){localStorage.setItem('REHZO_DB',JSON.stringify(DB))}
@@ -644,7 +592,6 @@ function seed(){
   function mk(id,ou,on,ph,gm,cc,house,type,suit,amen,rent,dep,st,ct,pin,addr,lat,lng,rules,photos,created,status){
     return{id,ownerUid:ou,ownerName:on,contact:ph,gmail:gm,country:cc,houseName:house,roomType:type,suitableFor:suit,amenities:amen,rent,deposit:dep,state:st,city:ct,areaCode:pin,address:addr,lat,lng,rules,photos,createdAt:created,expiryAt:created+90*D,status,views:Math.floor(80+Math.random()*400)};
   }
-  // demo confirmed booking with TRL for search demo
   const b={id:'BK-DEMO01',trl:'RHZ4K8M2P9Q1X',listingId:'L4',userUid:'demo_user',userName:'Aarav Demo',contact:'9876543210',gmail:'demo@gmail.com',address:'Jaipur',people:2,durationMonths:6,startDate:now-50*D,endDate:now+130*D,monthlyRent:9500,totalRent:57000,deposit:20000,status:'confirmed',agree:true,createdAt:now-55*D,ownerName:'Aarav Demo',houseName:'Cozy 1 RK HSR',roomType:'1 RK'};
   DB.bookings.push(b);
   DB.notifications.push(
@@ -654,34 +601,97 @@ function seed(){
   saveDB();
 }
 
-/* ================= INIT ================= */
-window.addEventListener('DOMContentLoaded',()=>{
-  loadDB(); if(!DB||!DB.listings) seed();
-  checkExpiry();
-  const sess=localStorage.getItem('REHZO_SESSION');
+/* ================= USER NORMALIZER ================= */
+function buildUserObject(rawUser, profile){
+  const meta = rawUser?.user_metadata || {};
+  const email = profile?.email || rawUser?.email || '';
+  const fullName = profile?.full_name || profile?.name || meta.full_name || meta.name || email.split('@')[0] || 'User';
+  const uid = profile?.uid || email.split('@')[0] || rawUser?.id || 'user';
+  return {
+    id: rawUser?.id || profile?.id,
+    uid: uid,
+    name: fullName,
+    full_name: fullName,
+    email: email,
+    phone: profile?.phone || meta.phone || '9876543210',
+    country: profile?.country || localStorage.getItem('REHZO_COUNTRY') || 'IN',
+    role: profile?.role || 'user'
+  };
+}
 
-if(sess && window.rehzoSupabase){
-  window.rehzoSupabase.auth.getSession().then(async ({data})=>{
-    if(data.session?.user){
-      const {data:profile}=await window.rehzoSupabase
+/* ================= SESSION RESTORE ================= */
+async function syncSession(session){
+  if(session && session.user){
+    let profile = null;
+    if(window.rehzoSupabase){
+      const { data } = await window.rehzoSupabase
         .from('profiles')
         .select('*')
-        .eq('id', data.session.user.id)
+        .eq('id', session.user.id)
         .maybeSingle();
-
-      if(profile){
-        currentUser=profile;
-        updateAuthUI();
-        renderAll();
-      }
+      profile = data;
     }
-  });
+    currentUser = buildUserObject(session.user, profile);
+    localStorage.setItem('REHZO_SESSION', session.user.id);
+  } else {
+    const localUid = localStorage.getItem('REHZO_SESSION');
+    if(localUid && DB && DB.users){
+      currentUser = DB.users.find(u => u.uid === localUid || u.id === localUid) || null;
+    }
+  }
+  updateAuthUI();
+  renderAll();
 }
-  buildStatic(); updateAuthUI(); updateBell(); renderAll();
-  // splash
-  let p=0;const msgs=['Securing session • Verifying listings…','Loading TRL engine • 12-char IDs…','Preparing Near Me maps…','Welcome to REHZO ✦'];
-  const iv=setInterval(()=>{p+=25;$('splashBar').style.width=p+'%';$('splashMsg').textContent=msgs[Math.min(3,p/25|0)];if(p>=100){clearInterval(iv);setTimeout(()=>{$('splash').style.transition='.6s';$('splash').style.opacity='0';setTimeout(()=>$('splash').remove(),600)},350)}},380);
+
+/* ================= INIT ================= */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  loadDB(); 
+  if(!DB || !DB.listings) seed();
+  checkExpiry();
+  buildStatic();
+
+  if(window.rehzoSupabase){
+    try {
+      const { data: { session } } = await window.rehzoSupabase.auth.getSession();
+      await syncSession(session);
+      window.rehzoSupabase.auth.onAuthStateChange(async (event, session) => {
+        if(event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED'){
+          await syncSession(session);
+        } else if(event === 'SIGNED_OUT'){
+          currentUser = null;
+          localStorage.removeItem('REHZO_SESSION');
+          updateAuthUI();
+          renderAll();
+        }
+      });
+    } catch(e){
+      console.warn('Supabase Session Init:', e);
+    }
+  } else {
+    await syncSession(null);
+  }
+
+  updateBell();
+  renderAll();
+
+  // splash animation
+  let p=0;
+  const msgs=['Securing session • Verifying listings…','Loading TRL engine • 12-char IDs…','Preparing Near Me maps…','Welcome to REHZO ✦'];
+  const iv=setInterval(()=>{
+    p+=25;
+    $('splashBar').style.width=p+'%';
+    $('splashMsg').textContent=msgs[Math.min(3,p/25|0)];
+    if(p>=100){
+      clearInterval(iv);
+      setTimeout(()=>{
+        $('splash').style.transition='.6s';
+        $('splash').style.opacity='0';
+        setTimeout(()=>$('splash').remove(),600);
+      },350);
+    }
+  },380);
 });
+
 function checkExpiry(){
   const now=Date.now();let changed=false;
   DB.listings.forEach(l=>{ if(l.status!=='expired'&&l.status!=='booked'&&l.expiryAt<now){l.status='expired';changed=true;
@@ -731,63 +741,58 @@ function collectFltAmen(){state.fltAmen=[...document.querySelectorAll('#fltAmen 
 function authTab(t){document.querySelectorAll('.atab').forEach(b=>{const on=b.dataset.atab===t;b.className=`atab py-2.5 rounded-xl text-[13px] font-extrabold ${on?'bg-ink-900 text-white':'text-slate-500'}`});document.querySelectorAll('.atabPane').forEach(p=>p.classList.add('hidden'));$('atab-'+t).classList.remove('hidden')}
 function handleAvatar(){ if(!currentUser)go('auth'); else go('more') }
 function quickLogin(u,p){$('lUid').value=u;$('lPass').value=p;doLogin()}
-async function doLogin(){
-  const uid = document.getElementById('lUid').value.trim();
-  const pw = document.getElementById('lPass').value;
 
-  if(!uid || !pw){
-    return toast('Enter User ID and Password','err');
-  }
-
-  if(!window.rehzoSupabase){
-    return toast('Supabase not connected','err');
-  }
-
-  const { data: profile, error: profileError } =
-    await window.rehzoSupabase
-      .from('profiles')
-      .select('*')
-      .eq('uid', uid)
-      .maybeSingle();
-
-  if(profileError || !profile){
-    return toast('Invalid User ID or Password','err');
-  }
-
-  const { data, error } =
-    await window.rehzoSupabase.auth.signInWithPassword({
-      email: profile.email,
-      password: pw
-    });
-
-  if(error){
-    return toast('Invalid User ID or Password','err');
-  }
-
-  currentUser = profile;
-  localStorage.setItem('REHZO_SESSION', data.user.id);
-
-  toast('Login successful ✅','ok');
-  updateAuthUI();
-  renderAll();
-  go('home');
-}
-  async function loginWithGoogle(){
+async function loginWithGoogle(){
   if(!window.rehzoSupabase){
     return toast('Supabase is not connected','err');
   }
-
   const { error } = await window.rehzoSupabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: window.location.origin
     }
   });
-
-  if(error){
-    toast(error.message,'err');
-  }
+  if(error) toast(error.message,'err');
 }
+
+async function doLogin(){
+  const uid = document.getElementById('lUid').value.trim();
+  const pw = document.getElementById('lPass').value;
+  if(!uid || !pw) return toast('Enter User ID and Password','err');
+
+  // Supabase Auth
+  if(window.rehzoSupabase){
+    let emailToUse = uid;
+    if(!uid.includes('@')){
+      const { data: profile } = await window.rehzoSupabase.from('profiles').select('*').eq('uid', uid).maybeSingle();
+      if(profile && profile.email) emailToUse = profile.email;
+    }
+    const { data, error } = await window.rehzoSupabase.auth.signInWithPassword({
+      email: emailToUse,
+      password: pw
+    });
+    if(!error && data?.user){
+      await syncSession(data.session);
+      toast('Login successful ✅','ok');
+      go('home');
+      return;
+    }
+  }
+
+  // Fallback to local DB
+  const localUser = DB.users.find(u => (u.uid === uid || u.email.toLowerCase() === uid.toLowerCase()) && u.pass === hash(pw));
+  if(localUser){
+    currentUser = localUser;
+    localStorage.setItem('REHZO_SESSION', localUser.uid);
+    toast('Login successful ✅','ok');
+    updateAuthUI();
+    renderAll();
+    go('home');
+    return;
+  }
+  toast('Invalid User ID or Password','err');
+}
+
 function sendRegOTP(){
   const em=$('rEmail').value.trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return toast('Enter valid Gmail','err');
@@ -826,17 +831,35 @@ function doForgotReset(){
   else{const np=$('fgNew').value;if(np.length<6)return toast('New password min 6 chars','err');u.pass=hash(np);saveDB();$('fgResult').innerHTML=`<div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-[13px] font-bold text-emerald-800">Password reset ✓ — login with User ID <b>${esc(u.uid)}</b></div>`}
   toast('Recovery successful ✓');
 }
-function logout(){localStorage.removeItem('REHZO_SESSION');currentUser=null;updateAuthUI();renderAll();go('home');toast('Logged out securely')}
+async function logout(){
+  if(window.rehzoSupabase) await window.rehzoSupabase.auth.signOut();
+  localStorage.removeItem('REHZO_SESSION');
+  currentUser=null;
+  updateAuthUI();
+  renderAll();
+  go('home');
+  toast('Logged out securely');
+}
 function updateAuthUI(){
   const b=$('avatarBtn');
-  if(currentUser){b.textContent=currentUser.name[0].toUpperCase();b.title=currentUser.uid}
-  else{b.textContent='?'}
+  if(currentUser && currentUser.name){
+    b.textContent=currentUser.name[0].toUpperCase();
+    b.title=currentUser.name;
+  } else {
+    b.textContent='?';
+  }
   renderGreet();
 }
 function renderGreet(){
   const el=$('greetBox');if(!el)return;
-  if(currentUser){el.innerHTML=`<div class="rounded-[18px] bg-white border border-slate-200 p-3.5 flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-ink-900 to-indigo-600 text-white flex items-center justify-center font-sora font-extrabold text-lg">${esc(currentUser.name[0].toUpperCase())}</div><div class="flex-1"><div class="text-[13px] text-slate-500 font-semibold">Namaste, <b class="text-ink-900">${esc(currentUser.name.split(' ')[0])}</b> 🙏</div><div class="text-[11px] text-slate-400 font-mono">ID: ${esc(currentUser.uid)} • ${countryOf(currentUser.country).f} ${countryOf(currentUser.country).s}</div></div><button onclick="go('bookings')" class="px-3 py-2 rounded-xl bg-rehzo-50 text-rehzo-700 text-[12px] font-extrabold">My Trips →</button></div`}
-  else{el.innerHTML=`<div class="rounded-[18px] bg-gradient-to-r from-ink-900 to-indigo-900 text-white p-3.5 flex items-center gap-3"><div class="flex-1"><div class="font-sora font-bold text-[14px]">Login to book & list rooms</div><div class="text-[11px] text-white/60">One account • Gmail verified • Free</div></div><button onclick="go('auth')" class="px-4 py-2.5 rounded-xl bg-white text-ink-900 text-[12px] font-extrabold btn-press">Login</button></div>`}
+  if(currentUser && currentUser.name){
+    const initial = (currentUser.name[0] || 'U').toUpperCase();
+    const shortName = currentUser.name.split(' ')[0] || 'User';
+    const c = countryOf(currentUser.country);
+    el.innerHTML=`<div class="rounded-[18px] bg-white border border-slate-200 p-3.5 flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-ink-900 to-indigo-600 text-white flex items-center justify-center font-sora font-extrabold text-lg">${esc(initial)}</div><div class="flex-1"><div class="text-[13px] text-slate-500 font-semibold">Namaste, <b class="text-ink-900">${esc(shortName)}</b> 🙏</div><div class="text-[11px] text-slate-400 font-mono">ID: ${esc(currentUser.uid)} • ${c.f} ${c.s}</div></div><button onclick="go('bookings')" class="px-3 py-2 rounded-xl bg-rehzo-50 text-rehzo-700 text-[12px] font-extrabold">My Trips →</button></div>`;
+  } else {
+    el.innerHTML=`<div class="rounded-[18px] bg-gradient-to-r from-ink-900 to-indigo-900 text-white p-3.5 flex items-center gap-3"><div class="flex-1"><div class="font-sora font-bold text-[14px]">Login to book & list rooms</div><div class="text-[11px] text-white/60">One account • Gmail verified • Free</div></div><button onclick="go('auth')" class="px-4 py-2.5 rounded-xl bg-white text-ink-900 text-[12px] font-extrabold btn-press">Login</button></div>`;
+  }
 }
 
 /* ================= SEARCH / HOME ================= */
@@ -850,7 +873,6 @@ function haversine(a,b,c,d){const R=6371,r=x=>x*Math.PI/180;const h=Math.sin(r(c
 function distTo(l){if(!state.geo)return null;return haversine(state.geo.lat,state.geo.lng,l.lat,l.lng)}
 function visibleListings(){
   let arr=DB.listings.filter(l=>l.status==='available'||l.status==='pending');
-  // TRL search
   if(state.q&&/^[A-Z0-9]{10,14}$/i.test(state.q.replace(/[\s-]/g,''))){
     const q=state.q.replace(/[\s-]/g,'').toUpperCase();
     const bk=DB.bookings.find(b=>(b.trl||'').toUpperCase()===q);
@@ -875,7 +897,7 @@ function statusBadge(l){
   return `<span class="badge bg-emerald-500 text-white">● Available</span>`;
 }
 function cardHTML(l){
-  const c=countryOf(l.country);const d=distTo(l);const fav=(currentUser&&DB.users.find(u=>u.uid===currentUser.uid)?.favs?.includes(l.id));
+  const c=countryOf(l.country);const d=distTo(l);const fav=(currentUser&&DB.users.find(u=>(u.uid===currentUser.uid||u.id===currentUser.id))?.favs?.includes(l.id));
   const revs=DB.reviews.filter(r=>{const b=DB.bookings.find(x=>x.id===r.bookingId);return b&&b.listingId===l.id});
   const avg=revs.length?(revs.reduce((s,r)=>s+r.rating,0)/revs.length).toFixed(1):null;
   return `<article class="rounded-[22px] bg-white border border-slate-200 overflow-hidden shadow-card fadeUp">
@@ -911,7 +933,9 @@ function renderHome(){
 }
 function toggleFav(id){
   if(!currentUser)return toast('Login to save favourites','warn');
-  const u=DB.users.find(x=>x.uid===currentUser.uid);u.favs=u.favs||[];
+  const u=DB.users.find(x=>x.uid===currentUser.uid||x.id===currentUser.id);
+  if(!u) return toast('Saved to favourites ❤');
+  u.favs=u.favs||[];
   if(u.favs.includes(id)){u.favs=u.favs.filter(f=>f!==id);toast('Removed from favourites')}
   else{u.favs.push(id);toast('Saved to favourites ❤')}
   saveDB();renderHome();
@@ -924,8 +948,8 @@ function openDetail(id){
   l.views=(l.views||0)+1;saveDB();
   detailImgs=l.photos;detailIdx=0;
   const c=countryOf(l.country);
-  const myBk=currentUser?DB.bookings.find(b=>b.listingId===id&&(b.userUid===currentUser.uid)&&['owner_accepted','confirmed'].includes(b.status)):null;
-  const unlocked=myBk||(currentUser&&l.ownerUid===currentUser.uid);
+  const myBk=currentUser?DB.bookings.find(b=>b.listingId===id&&(b.userUid===currentUser.uid||b.userUid===currentUser.id)&&['owner_accepted','confirmed'].includes(b.status)):null;
+  const unlocked=myBk||(currentUser&&(l.ownerUid===currentUser.uid||l.ownerUid===currentUser.id));
   const mask=v=>unlocked?esc(v):'•••••• 🔒';
   const revs=DB.reviews.filter(r=>{const b=DB.bookings.find(x=>x.id===r.bookingId);return b&&b.listingId===id});
   $('detailBody').innerHTML=`
@@ -977,7 +1001,7 @@ let bookingListing=null;
 function startBooking(id){
   const l=DB.listings.find(x=>x.id===id);if(!l)return;
   if(!currentUser){toast('Login to book','warn');return go('auth')}
-  if(l.ownerUid===currentUser.uid)return toast('You own this listing','warn');
+  if(l.ownerUid===currentUser.uid||l.ownerUid===currentUser.id)return toast('You own this listing','warn');
   if(l.status!=='available')return toast('Not available (pending/booked guard)','err');
   const active=DB.bookings.find(b=>b.listingId===id&&['requested','owner_accepted','confirmed'].includes(b.status));
   if(active)return toast('Double-booking blocked: active request exists','err');
@@ -1040,10 +1064,11 @@ function submitBooking(){
   const s=$('bStart').value,e=$('bEnd').value;
   if(!s||!e)return toast('Select dates','err');
   if(DB.bookings.some(b=>b.listingId===l.id&&['requested','owner_accepted','confirmed'].includes(b.status)))return toast('Double-booking blocked','err');
-  const bk={id:'BK-'+Date.now().toString(36).toUpperCase(),trl:null,listingId:l.id,userUid:currentUser.uid,userName:name,contact:ph,gmail:gm,address:ad,people:+$('bPeople').value||1,durationMonths:m,startDate:new Date(s).getTime(),endDate:new Date(e).getTime(),monthlyRent:l.rent,totalRent:l.rent*m,deposit:l.deposit||0,status:'requested',agree:true,createdAt:Date.now(),ownerName:l.ownerName,houseName:l.houseName,roomType:l.roomType};
+  const currentUid = currentUser.uid || currentUser.id;
+  const bk={id:'BK-'+Date.now().toString(36).toUpperCase(),trl:null,listingId:l.id,userUid:currentUid,userName:name,contact:ph,gmail:gm,address:ad,people:+$('bPeople').value||1,durationMonths:m,startDate:new Date(s).getTime(),endDate:new Date(e).getTime(),monthlyRent:l.rent,totalRent:l.rent*m,deposit:l.deposit||0,status:'requested',agree:true,createdAt:Date.now(),ownerName:l.ownerName,houseName:l.houseName,roomType:l.roomType};
   DB.bookings.unshift(bk);l.status='pending';
   notify(l.ownerUid,'New Booking Request 📩',`${name} requested "${l.houseName}" for ${m} month(s).`,'booking');
-  notify(currentUser.uid,'Request Sent ◷',`"${l.houseName}" is now Booking Pending. Wait for owner.`,'booking');
+  notify(currentUid,'Request Sent ◷',`"${l.houseName}" is now Booking Pending. Wait for owner.`,'booking');
   saveDB();closeBooking();renderAll();toast('Request sent → Booking Pending');go('bookings');
 }
 
@@ -1051,7 +1076,7 @@ function submitBooking(){
 function bkStatusMeta(s){
   return {requested:['◷ Booking Pending','bg-amber-100 text-amber-800'],owner_accepted:['✓ Owner Accepted — Confirm Now','bg-blue-100 text-blue-800'],confirmed:['★ Fully Confirmed • TRL Issued','bg-emerald-100 text-emerald-800'],cancel_requested:['⚠ Cancel Requested','bg-orange-100 text-orange-800'],cancelled:['✕ Cancelled','bg-slate-200 text-slate-600'],completed:['✓ Completed','bg-indigo-100 text-indigo-800'],declined:['✕ Declined','bg-red-100 text-red-700']}[s]||[s,'bg-slate-100'];
 }
-function acceptBooking(id){const b=DB.bookings.find(x=>x.id===id);if(!b)return;b.status='owner_accepted';notify(b.userUid,'Owner Accepted ✓',`Owner accepted "${b.houseName}". Please confirm to get TRL + PDF.`,'booking');notify(currentUser.uid,'You accepted ✓',`Waiting for user confirmation: ${b.houseName}`,'booking');saveDB();renderAll();toast('Accepted — waiting for user confirmation')}
+function acceptBooking(id){const b=DB.bookings.find(x=>x.id===id);if(!b)return;b.status='owner_accepted';notify(b.userUid,'Owner Accepted ✓',`Owner accepted "${b.houseName}". Please confirm to get TRL + PDF.`,'booking');notify(currentUser.uid||currentUser.id,'You accepted ✓',`Waiting for user confirmation: ${b.houseName}`,'booking');saveDB();renderAll();toast('Accepted — waiting for user confirmation')}
 function declineBooking(id){const b=DB.bookings.find(x=>x.id===id);b.status='declined';const l=DB.listings.find(x=>x.id===b.listingId);if(l)l.status='available';notify(b.userUid,'Request Declined',`Owner declined "${b.houseName}". Room is available again.`,'booking');saveDB();renderAll()}
 function userConfirm(id){
   const b=DB.bookings.find(x=>x.id===id);if(!b||b.status!=='owner_accepted')return;
@@ -1063,18 +1088,20 @@ function userConfirm(id){
 }
 function requestCancel(id){const b=DB.bookings.find(x=>x.id===id);if(!['confirmed','owner_accepted','requested'].includes(b.status))return toast('Cannot cancel now','err');
   openGen(`<h3 class="font-sora font-extrabold text-[17px]">Request Cancellation?</h3><p class="text-[13px] text-slate-500 mt-1">Fully confirmed bookings need <b>both-side acceptance</b>. Room becomes Available only after approval.</p><textarea id="cxReason" class="inp mt-3" rows="3" placeholder="Reason for cancellation…"></textarea><button onclick="doRequestCancel('${id}')" class="w-full mt-3 py-3 rounded-xl bg-ink-900 text-white font-extrabold text-[13px]">Send Cancellation Request</button>`)}
-function doRequestCancel(id){const b=DB.bookings.find(x=>x.id===id);b.status='cancel_requested';b.cancelBy=currentUser.uid;b.cancelReason=($('cxReason')||{}).value||'—';const other=b.userUid===currentUser.uid?DB.listings.find(l=>l.id===b.listingId).ownerUid:b.userUid;notify(other,'Cancellation Requested ⚠',`${currentUser.name} wants to cancel TRL ${b.trl||b.id}. Reason: ${b.cancelReason}`,'cancel');notify(currentUser.uid,'Cancel Request Sent',`Waiting for other party to accept.`,'cancel');saveDB();closeGen();renderAll()}
+function doRequestCancel(id){const b=DB.bookings.find(x=>x.id===id);b.status='cancel_requested';b.cancelBy=currentUser.uid||currentUser.id;b.cancelReason=($('cxReason')||{}).value||'—';const currentUid = currentUser.uid||currentUser.id;const other=b.userUid===currentUid?DB.listings.find(l=>l.id===b.listingId).ownerUid:b.userUid;notify(other,'Cancellation Requested ⚠',`${currentUser.name} wants to cancel TRL ${b.trl||b.id}. Reason: ${b.cancelReason}`,'cancel');notify(currentUid,'Cancel Request Sent',`Waiting for other party to accept.`,'cancel');saveDB();closeGen();renderAll()}
 function approveCancel(id){const b=DB.bookings.find(x=>x.id===id);b.status='cancelled';const l=DB.listings.find(x=>x.id===b.listingId);if(l)l.status='available';notify(b.userUid,'Booking Cancelled ✕',`"${b.houseName}" cancelled. Room is Available again.`,'cancel');notify(l.ownerUid,'Booking Cancelled ✕',`"${b.houseName}" is Available again.`,'cancel');saveDB();renderAll();toast('Cancelled — room Available again')}
 function completeBooking(id){const b=DB.bookings.find(x=>x.id===id);b.status='completed';notify(b.userUid,'Stay Completed ✓',`Please rate your owner for "${b.houseName}".`,'booking');const l=DB.listings.find(x=>x.id===b.listingId);notify(l.ownerUid,'Stay Completed ✓',`Please rate your guest ${b.userName}.`,'booking');saveDB();renderAll()}
 function renderBookingsTabs(){
-  const mine=DB.bookings.filter(b=>b.userUid===currentUser?.uid);
-  const asOwner=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&l.ownerUid===currentUser?.uid});
-  const tabs=[['all',`All (${mine.length+asOwner.length})`],['mine',`As Guest (${mine.length})`],['owner',`As Owner (${asOwner.length})`],['trl',`TRL Issued (${DB.bookings.filter(b=>b.trl&&(b.userUid===currentUser?.uid||DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUser?.uid)).length})`]];
+  const currentUid = currentUser?.uid || currentUser?.id;
+  const mine=DB.bookings.filter(b=>b.userUid===currentUid);
+  const asOwner=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&(l.ownerUid===currentUid)});
+  const tabs=[['all',`All (${mine.length+asOwner.length})`],['mine',`As Guest (${mine.length})`],['owner',`As Owner (${asOwner.length})`],['trl',`TRL Issued (${DB.bookings.filter(b=>b.trl&&(b.userUid===currentUid||DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUid)).length})`]];
   $('bkTabs').innerHTML=tabs.map(([k,l])=>`<button onclick="state.bkTab='${k}';renderBookingsTabs();renderBkList()" class="px-3.5 py-2 rounded-full text-[12px] font-extrabold whitespace-nowrap ${state.bkTab===k?'bg-ink-900 text-white':'bg-white border border-slate-200'}">${l}</button>`).join('');
 }
 function bkCard(b){
   const l=DB.listings.find(x=>x.id===b.listingId)||{};const c=countryOf(l.country||'IN');
-  const isOwner=l.ownerUid===currentUser?.uid;const [lbl,cls]=bkStatusMeta(b.status);
+  const currentUid = currentUser?.uid || currentUser?.id;
+  const isOwner=(l.ownerUid===currentUid);const [lbl,cls]=bkStatusMeta(b.status);
   const steps=[['Request',true],['Owner Accept',b.status!=='requested'],['You Confirm',b.status==='confirmed'||b.status==='completed'],['TRL+PDF',!!b.trl]];
   return `<div class="rounded-[20px] bg-white border border-slate-200 overflow-hidden">
     <div class="flex gap-3 p-3.5">
@@ -1092,7 +1119,7 @@ function bkCard(b){
       ${b.status==='owner_accepted'&&isOwner?`<span class="text-[12px] font-bold text-slate-400 px-2 py-2">Waiting for guest confirmation…</span>`:''}
       ${b.trl?`<button onclick="openPDF('${b.id}')" class="px-3.5 py-2 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">📄 View PDF</button>`:''}
       ${['requested','owner_accepted','confirmed'].includes(b.status)?`<button onclick="requestCancel('${b.id}')" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-[12px] font-extrabold">Request Cancel</button>`:''}
-      ${b.status==='cancel_requested'?(((b.cancelBy!==currentUser.uid))?`<button onclick="approveCancel('${b.id}')" class="px-3.5 py-2 rounded-xl bg-amber-500 text-white text-[12px] font-extrabold">Accept Cancellation</button>`:`<span class="text-[12px] font-bold text-amber-700 px-2 py-2">Waiting for other party…</span>`):''}
+      ${b.status==='cancel_requested'?(((b.cancelBy!==currentUid))?`<button onclick="approveCancel('${b.id}')" class="px-3.5 py-2 rounded-xl bg-amber-500 text-white text-[12px] font-extrabold">Accept Cancellation</button>`:`<span class="text-[12px] font-bold text-amber-700 px-2 py-2">Waiting for other party…</span>`):''}
       ${b.status==='confirmed'?`<button onclick="completeBooking('${b.id}')" class="px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-[12px] font-extrabold">Mark Completed (demo)</button>`:''}
       ${b.status==='completed'?`<button onclick="openReview('${b.id}')" class="px-3.5 py-2 rounded-xl bg-amber-400 text-ink-900 text-[12px] font-extrabold">★ Rate & Review</button>`:''}
       ${b.status==='confirmed'&&isOwner?`<div class="w-full rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 text-[12px] font-bold text-emerald-800">🔓 Unlocked for guest: ${countryOf(l.country).d} ${esc(l.contact)} • ${esc(l.address)}</div>`:''}
@@ -1100,7 +1127,8 @@ function bkCard(b){
 }
 function renderBkList(){
   if(!currentUser){$('bkList').innerHTML='';return}
-  let arr=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);const own=l&&l.ownerUid===currentUser.uid;const mine=b.userUid===currentUser.uid;
+  const currentUid = currentUser.uid || currentUser.id;
+  let arr=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);const own=l&&(l.ownerUid===currentUid);const mine=(b.userUid===currentUid);
     if(state.bkTab==='mine')return mine;if(state.bkTab==='owner')return own;if(state.bkTab==='trl')return b.trl&&(mine||own);return mine||own});
   arr.sort((a,b)=>b.createdAt-a.createdAt);
   $('bkList').innerHTML=arr.length?arr.map(bkCard).join(''):`<div class="text-center py-12 bg-white rounded-[20px] border border-dashed border-slate-300"><div class="text-4xl">🧳</div><div class="font-bold mt-2">No bookings here</div><button onclick="go('home')" class="mt-2 px-4 py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Browse Rooms</button></div>`;
@@ -1136,13 +1164,14 @@ function submitListing(e){
   if(!$('fExact').checked)return toast('Please tick "Use Exact Map Location"','err');
   if(state.tempPhotos.length===0)return toast('Add at least 1 room photo','err');
   const amen=[...document.querySelectorAll('#fAmen .on')].map(x=>x.textContent);
-  const data={ownerUid:currentUser.uid,ownerName:$('fName').value.trim()||currentUser.name,contact:$('fPhone').value.trim(),gmail:$('fGmail').value.trim(),country:$('fCountry').value,houseName:$('fHouse').value.trim(),roomType:$('fType').value,suitableFor:$('fSuit').value,amenities:amen.length?amen:['WiFi','Furnished'],rent:+$('fRent').value,deposit:+$('fDep').value||0,state:$('fState').value.trim(),city:$('fCity').value.trim(),areaCode:$('fPin').value.trim(),address:$('fAddr').value.trim(),lat:state.pickLat,lng:state.pickLng,rules:$('fRules').value.trim(),photos:[...state.tempPhotos],cap:+$('fCap').value||2};
+  const currentUid = currentUser.uid || currentUser.id;
+  const data={ownerUid:currentUid,ownerName:$('fName').value.trim()||currentUser.name,contact:$('fPhone').value.trim(),gmail:$('fGmail').value.trim(),country:$('fCountry').value,houseName:$('fHouse').value.trim(),roomType:$('fType').value,suitableFor:$('fSuit').value,amenities:amen.length?amen:['WiFi','Furnished'],rent:+$('fRent').value,deposit:+$('fDep').value||0,state:$('fState').value.trim(),city:$('fCity').value.trim(),areaCode:$('fPin').value.trim(),address:$('fAddr').value.trim(),lat:state.pickLat,lng:state.pickLng,rules:$('fRules').value.trim(),photos:[...state.tempPhotos],cap:+$('fCap').value||2};
   if(state.editingId){
     Object.assign(DB.listings.find(l=>l.id===state.editingId),data);state.editingId=null;$('listSubmitBtn').textContent='Publish Listing • 90 Days Free';
-    notify(currentUser.uid,'Listing Updated ✏️',`"${data.houseName}" updated.`,'listing');toast('Listing updated ✓');
+    notify(currentUid,'Listing Updated ✏️',`"${data.houseName}" updated.`,'listing');toast('Listing updated ✓');
   }else{
     const l={id:'L'+Date.now().toString(36).toUpperCase(),...data,createdAt:Date.now(),expiryAt:Date.now()+90*86400000,status:'available',views:0};
-    DB.listings.unshift(l);notify(currentUser.uid,'Listing Live 🏠',`"${l.houseName}" published for 90 days till ${fdate(l.expiryAt)}.`,'listing');toast('Published for 90 days 🎉');
+    DB.listings.unshift(l);notify(currentUid,'Listing Live 🏠',`"${l.houseName}" published for 90 days till ${fdate(l.expiryAt)}.`,'listing');toast('Published for 90 days 🎉');
   }
   saveDB();e.target.reset();state.tempPhotos=[];state.pickLat=null;state.pickLng=null;renderPhotoPrev();$('pickCoord').textContent='Not set — tap on map';renderAll();ownerTab('mine');
 }
@@ -1157,9 +1186,10 @@ function renderOwner(){
   const gate=$('ownerGate'),body=$('ownerBody');
   if(!currentUser){gate.innerHTML=`<div class="mt-3 rounded-[20px] bg-white border border-slate-200 p-6 text-center"><div class="text-4xl">🏠</div><div class="font-sora font-extrabold mt-2">Login as Owner / User</div><p class="text-[12px] text-slate-500">Same account lists rooms & books rooms.</p><button onclick="go('auth')" class="mt-3 px-6 py-3 rounded-xl bg-ink-900 text-white text-[13px] font-extrabold">Login / Register</button></div>`;body.classList.add('hidden');return}
   gate.innerHTML='';body.classList.remove('hidden');
-  const mine=DB.listings.filter(l=>l.ownerUid===currentUser.uid);
+  const currentUid = currentUser.uid || currentUser.id;
+  const mine=DB.listings.filter(l=>l.ownerUid===currentUid);
   $('mineCount').textContent=mine.length;
-  const reqs=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&l.ownerUid===currentUser.uid&&['requested','cancel_requested'].includes(b.status)});
+  const reqs=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&(l.ownerUid===currentUid)&&['requested','cancel_requested'].includes(b.status)});
   const badge=$('reqCount');badge.textContent=reqs.length;badge.classList.toggle('hidden',!reqs.length);badge.classList.toggle('flex',!!reqs.length);
   $('otab-mine').innerHTML=mine.length?mine.map(l=>{
     const days=Math.max(0,Math.ceil((l.expiryAt-Date.now())/86400000));const pct=Math.max(0,Math.min(100,days/90*100));
@@ -1175,7 +1205,7 @@ function renderOwner(){
         ${l.status==='expired'?`<button onclick="publishAgain('${l.id}')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold">🔁 Publish Again</button>`:''}
         <button onclick="deleteListing('${l.id}')" class="px-3 py-2 rounded-xl bg-red-50 text-red-600 text-[12px] font-extrabold">Delete</button>
       </div></div>`}).join(''):`<div class="text-center py-10 bg-white rounded-[20px] border border-dashed border-slate-300"><div class="text-4xl">🏠</div><div class="font-bold mt-2">No listings yet</div><p class="text-[12px] text-slate-500">Publish your first room — 90 days free.</p></div>`;
-  const allReq=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&l.ownerUid===currentUser.uid}).sort((a,b)=>b.createdAt-a.createdAt);
+  const allReq=DB.bookings.filter(b=>{const l=DB.listings.find(x=>x.id===b.listingId);return l&&(l.ownerUid===currentUid)}).sort((a,b)=>b.createdAt-a.createdAt);
   $('otab-req').innerHTML=allReq.length?allReq.map(b=>{const l=DB.listings.find(x=>x.id===b.listingId);const[lb,cl]=bkStatusMeta(b.status);
     return `<div class="rounded-[20px] bg-white border border-slate-200 p-3.5">
       <div class="flex items-center gap-2"><div class="font-bold text-[14px] flex-1">${esc(b.userName)} <span class="text-slate-400 font-semibold">→ ${esc(b.houseName)}</span></div><span class="badge ${cl}">${lb}</span></div>
@@ -1188,7 +1218,6 @@ function renderOwner(){
 
 /* ================= MAPS ================= */
 function initPickMap(){
-  if($('view-owner').classList.contains('on')===false&&true){}
   try{
     if(_pickMap){_pickMap.invalidateSize();return}
     _pickMap=L.map('pickMap').setView([28.6139,77.2090],11);
@@ -1237,7 +1266,8 @@ function renderNearList(){
 /* ================= TRL + PDF ================= */
 function renderTRL(){
   if(!currentUser)return;
-  const arr=DB.bookings.filter(b=>b.trl&&(b.userUid===currentUser.uid||DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUser.uid));
+  const currentUid = currentUser.uid || currentUser.id;
+  const arr=DB.bookings.filter(b=>b.trl&&(b.userUid===currentUid||DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUid));
   $('trlList').innerHTML=arr.length?arr.map(b=>{const l=DB.listings.find(x=>x.id===b.listingId);
     return `<div class="rounded-[20px] bg-gradient-to-br from-ink-900 to-indigo-900 text-white p-4 relative overflow-hidden">
       <div class="absolute -right-6 -top-6 w-28 h-28 bg-rehzo-500/40 blur-2xl rounded-full"></div>
@@ -1303,11 +1333,12 @@ function downloadPDF(){
 }
 
 /* ================= NOTIFS / REPORTS / REVIEWS ================= */
-function updateBell(){const n=currentUser?DB.notifications.filter(x=>x.uid===currentUser.uid&&!x.read).length:0;const b=$('bellBadge');b.textContent=n;b.classList.toggle('hidden',!n)}
-function markAllRead(){DB.notifications.forEach(n=>{if(n.uid===currentUser?.uid)n.read=true});saveDB();renderNotifs();updateBell()}
+function updateBell(){const n=currentUser?DB.notifications.filter(x=>x.uid===(currentUser.uid||currentUser.id)&&!x.read).length:0;const b=$('bellBadge');b.textContent=n;b.classList.toggle('hidden',!n)}
+function markAllRead(){const currentUid = currentUser?.uid||currentUser?.id;DB.notifications.forEach(n=>{if(n.uid===currentUid)n.read=true});saveDB();renderNotifs();updateBell()}
 function renderNotifs(){
   if(!currentUser)return;
-  const arr=DB.notifications.filter(n=>n.uid===currentUser.uid).sort((a,b)=>b.time-a.time);
+  const currentUid = currentUser.uid || currentUser.id;
+  const arr=DB.notifications.filter(n=>n.uid===currentUid).sort((a,b)=>b.time-a.time);
   const ic={booking:'📩',cancel:'⚠',listing:'🏠',expiry:'⏳',account:'🔐',report:'🚨',admin:'📢',review:'★'};
   $('notifList').innerHTML=arr.length?arr.map(n=>`<div class="rounded-2xl ${n.read?'bg-white border border-slate-200':'bg-ink-900 text-white border border-ink-900'} p-3.5 flex gap-3">
     <div class="w-10 h-10 rounded-2xl ${n.read?'bg-slate-100':'bg-white/10'} flex items-center justify-center text-xl shrink-0">${ic[n.type]||'🔔'}</div>
@@ -1323,12 +1354,14 @@ function openReport(targetId,kind){
 }
 function submitReport(targetId){
   const r=$('rpReason').value.trim();if(!r)return toast('Describe issue','err');
-  DB.reports.unshift({id:'R'+Date.now(),reporterUid:currentUser.uid,type:$('rpType').value,targetId,reason:r,status:'open',time:Date.now()});
+  const currentUid = currentUser.uid || currentUser.id;
+  DB.reports.unshift({id:'R'+Date.now(),reporterUid:currentUid,type:$('rpType').value,targetId,reason:r,status:'open',time:Date.now()});
   saveDB();closeGen();toast('Report sent to Admin 🚨');
-  notify(currentUser.uid,'Report Received 🚨','Admin will review within 24–48h.','report');
+  notify(currentUid,'Report Received 🚨','Admin will review within 24–48h.','report');
 }
 function renderReportsView(){
-  const arr=currentUser?DB.reports.filter(r=>r.reporterUid===currentUser.uid):[];
+  const currentUid = currentUser?.uid || currentUser?.id;
+  const arr=currentUser?DB.reports.filter(r=>r.reporterUid===currentUid):[];
   $('reportList').innerHTML=(arr.length?arr.map(r=>`<div class="rounded-2xl bg-white border border-slate-200 p-3.5"><div class="flex items-center gap-2"><span class="badge ${r.status==='open'?'bg-amber-100 text-amber-800':'bg-emerald-100 text-emerald-800'}">${r.status.toUpperCase()}</span><b class="text-[13px]">${esc(r.type)}</b><div class="flex-1"></div><span class="text-[11px] text-slate-400">${timeAgo(r.time)}</span></div><div class="text-[13px] mt-1.5">Target: <span class="font-mono font-bold">${esc(r.targetId)}</span> — ${esc(r.reason)}</div></div>`).join(''):'<div class="text-center py-8 text-slate-400 text-[13px]">No reports filed by you.</div>')
   +`<button onclick="openReport('general','listing')" class="w-full py-3.5 rounded-2xl bg-red-600 text-white font-extrabold text-[13px]">+ New Report</button>`;
 }
@@ -1342,20 +1375,21 @@ function openReview(bid){
 function setStars(n){window._stars=n;document.querySelectorAll('#starRow .star').forEach(s=>s.classList.toggle('on',+s.dataset.s<=n))}
 function submitReview(bid){
   const b=DB.bookings.find(x=>x.id===bid);const l=DB.listings.find(x=>x.id===b.listingId);
-  const toUid=b.userUid===currentUser.uid?l.ownerUid:b.userUid;
-  DB.reviews.unshift({id:'V'+Date.now(),bookingId:bid,fromUid:currentUser.uid,toUid,rating:window._stars||5,text:$('rvText').value.trim()||'Good experience.',time:Date.now()});
+  const currentUid = currentUser.uid || currentUser.id;
+  const toUid=b.userUid===currentUid?l.ownerUid:b.userUid;
+  DB.reviews.unshift({id:'V'+Date.now(),bookingId:bid,fromUid:currentUid,toUid,rating:window._stars||5,text:$('rvText').value.trim()||'Good experience.',time:Date.now()});
   saveDB();closeGen();toast('Review published ★');notify(toUid,'New Review ★',`${currentUser.name} rated you ${window._stars}/5.`,'review');renderAll();
 }
 
 /* ================= MORE / LEGAL / ROADMAP ================= */
 function renderMore(){
   const u=currentUser;
-  $('profileCard').innerHTML=u?`<div class="mt-3 rounded-[22px] bg-gradient-to-br from-ink-900 to-indigo-900 text-white p-4 flex items-center gap-3">
+  $('profileCard').innerHTML=(u && u.name)?`<div class="mt-3 rounded-[22px] bg-gradient-to-br from-ink-900 to-indigo-900 text-white p-4 flex items-center gap-3">
     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rehzo-500 to-amber-400 flex items-center justify-center font-sora font-extrabold text-2xl">${esc(u.name[0].toUpperCase())}</div>
     <div class="flex-1"><div class="font-sora font-bold">${esc(u.name)}</div><div class="text-[11px] text-white/60 font-mono">ID: ${esc(u.uid)} • ${esc(u.email)}</div><div class="text-[11px] text-white/60">${countryOf(u.country).f} ${countryOf(u.country).n} • ${countryOf(u.country).d} ${esc(u.phone)}</div></div>
     <button onclick="logout()" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-[11px] font-extrabold">Logout</button></div>`
    :`<div class="mt-3 rounded-[22px] bg-white border border-slate-200 p-4 text-center"><div class="font-sora font-bold">You're browsing as guest</div><button onclick="go('auth')" class="mt-2 px-5 py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold">Login / Register</button></div>`;
-  const favN=u?(DB.users.find(x=>x.uid===u.uid)?.favs?.length||0):0;
+  const favN=u?(DB.users.find(x=>x.uid===u.uid||x.id===u.id)?.favs?.length||0):0;
   const items=[
     ['🧳','My Bookings','Requests • Confirmations • Cancellations',`go('bookings')`],
     ['🔖','TRL Records','Permanent 12-char verified bookings',`go('trl')`],
@@ -1374,7 +1408,7 @@ function renderMore(){
   $('moreMenu').innerHTML=items.map(([e,t,s,fn])=>`<button onclick="${fn}" class="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-2xl p-3.5 text-left btn-press"><span class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${e}</span><span class="flex-1"><span class="block font-extrabold text-[13.5px]">${t}</span><span class="block text-[11.5px] text-slate-500">${s}</span></span><span class="text-slate-300 font-bold">›</span></button>`).join('');
 }
 function renderFav(){
-  const u=DB.users.find(x=>x.uid===currentUser?.uid);const ids=u?.favs||[];
+  const u=DB.users.find(x=>x.uid===currentUser?.uid||x.id===currentUser?.id);const ids=u?.favs||[];
   const arr=DB.listings.filter(l=>ids.includes(l.id));
   $('favList').innerHTML=arr.length?arr.map(cardHTML).join(''):'<div class="col-span-full text-center py-10 text-slate-400 text-[13px]">No favourites yet — tap ♥ on any room.</div>';
 }
@@ -1411,7 +1445,7 @@ function renderAdmin(){
   const tabs=[['users','Users'],['listings','Listings'],['bookings','Bookings'],['reports','Reports'],['reviews','Reviews']];
   $('adminTabs').innerHTML=tabs.map(([k,l])=>`<button onclick="state.adminTab='${k}';renderAdmin()" class="px-4 py-2 rounded-full text-[12px] font-extrabold whitespace-nowrap ${state.adminTab===k?'bg-ink-900 text-white':'bg-white border border-slate-200'}">${l}${k==='reports'&&DB.reports.filter(r=>r.status==='open').length?` (${DB.reports.filter(r=>r.status==='open').length})`:''}</button>`).join('');
   const c=$('adminContent');
-  if(state.adminTab==='users')c.innerHTML=DB.users.map(u=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold">${esc(u.name[0])}</div><div class="flex-1"><b class="text-[13px]">${esc(u.name)}</b> <span class="font-mono text-[11px] text-slate-400">${esc(u.uid)}</span><div class="text-[11px] text-slate-500">${esc(u.email)} • ${u.blocked?'<b class="text-red-600">SUSPENDED</b>':'<b class="text-emerald-600">ACTIVE</b>'} ${u.role==='admin'?'• ADMIN':''}</div></div><button onclick="toggleBlock('${u.uid}')" class="px-3 py-2 rounded-xl ${u.blocked?'bg-emerald-600 text-white':'bg-red-50 text-red-600 border border-red-100'} text-[11px] font-extrabold">${u.blocked?'Unblock':'Block'}</button></div>`).join('');
+  if(state.adminTab==='users')c.innerHTML=DB.users.map(u=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold">${esc((u.name||'U')[0])}</div><div class="flex-1"><b class="text-[13px]">${esc(u.name)}</b> <span class="font-mono text-[11px] text-slate-400">${esc(u.uid)}</span><div class="text-[11px] text-slate-500">${esc(u.email)} • ${u.blocked?'<b class="text-red-600">SUSPENDED</b>':'<b class="text-emerald-600">ACTIVE</b>'} ${u.role==='admin'?'• ADMIN':''}</div></div><button onclick="toggleBlock('${u.uid}')" class="px-3 py-2 rounded-xl ${u.blocked?'bg-emerald-600 text-white':'bg-red-50 text-red-600 border border-red-100'} text-[11px] font-extrabold">${u.blocked?'Unblock':'Block'}</button></div>`).join('');
   if(state.adminTab==='listings')c.innerHTML=DB.listings.map(l=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 flex gap-3 items-center"><img src="${l.photos[0]}" class="w-14 h-14 rounded-xl object-cover"><div class="flex-1"><b class="text-[13px]">${esc(l.houseName)}</b><div class="text-[11px] text-slate-500">${esc(l.city)} • ${l.status} • exp ${fdate(l.expiryAt)}</div></div><button onclick="deleteListing('${l.id}')" class="px-3 py-2 rounded-xl bg-red-50 text-red-600 text-[11px] font-extrabold">Remove</button></div>`).join('');
   if(state.adminTab==='bookings')c.innerHTML=DB.bookings.map(b=>`<div class="rounded-2xl bg-white border border-slate-200 p-3 text-[13px]"><b class="font-mono">${b.trl||b.id}</b> — ${esc(b.houseName)}<div class="text-[11px] text-slate-500">${esc(b.userName)} • ${b.status} • ${fmtMoney(b.totalRent,'₹')}</div></div>`).join('')||'<div class="text-slate-400 text-[13px]">No bookings</div>';
   if(state.adminTab==='reports')c.innerHTML=DB.reports.map(r=>`<div class="rounded-2xl bg-white border border-slate-200 p-3"><div class="flex gap-2 items-center"><b class="text-[13px]">${esc(r.type)}</b><span class="badge ${r.status==='open'?'bg-amber-100 text-amber-800':'bg-emerald-100 text-emerald-800'}">${r.status}</span><div class="flex-1"></div>${r.status==='open'?`<button onclick="resolveReport('${r.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold">Resolve</button>`:''}</div><div class="text-[12px] text-slate-500 mt-1">By ${esc(r.reporterUid)} → ${esc(r.targetId)}: ${esc(r.reason)}</div></div>`).join('')||'<div class="text-slate-400 text-[13px]">No reports 🎉</div>';
@@ -1444,7 +1478,7 @@ function renderCountryList(){}
 function resetDemo(){openGen(`<h3 class="font-sora font-extrabold">Reset demo data?</h3><p class="text-[13px] text-slate-500">Sample rooms, users & TRL will be restored.</p><div class="flex gap-2 mt-4"><button onclick="closeGen()" class="flex-1 py-3 rounded-xl bg-slate-100 font-extrabold text-[13px]">Cancel</button><button onclick="localStorage.removeItem('REHZO_DB');localStorage.removeItem('REHZO_SESSION');location.reload()" class="flex-1 py-3 rounded-xl bg-ink-900 text-white font-extrabold text-[13px]">Reset ♻</button></div>`)}
 function renderActivity(){
   const el=$('activityFeed');if(!el)return;
-  const acts=[...DB.bookings].slice(0,6).map(b=>({t:`${b.userName.split(' ')[0]} booked ${b.houseName}`,s:b.trl?'TRL '+b.trl:b.status, time:b.createdAt}));
+  const acts=[...DB.bookings].slice(0,6).map(b=>({t:`${(b.userName||'User').split(' ')[0]} booked ${b.houseName}`,s:b.trl?'TRL '+b.trl:b.status, time:b.createdAt}));
   el.innerHTML=acts.map(a=>`<div class="flex gap-2.5 items-center"><div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center text-sm">✓</div><div class="flex-1"><div class="text-[12px] font-bold text-ink-900">${esc(a.t)}</div><div class="text-[10.5px] text-slate-400 font-mono">${esc(a.s)} • ${timeAgo(a.time)}</div></div></div>`).join('')||'<div class="text-[12px] text-slate-400">No activity</div>';
 }
 function renderAll(){renderHome();renderOwner();renderBookingsTabs();renderBkList();renderTRL();renderNotifs();renderMore();renderReportsView();renderFav();renderActivity();updateAuthUI();updateBell()}
