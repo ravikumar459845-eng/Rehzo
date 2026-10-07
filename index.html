@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-* { -webkit-tap-highlight-color: rgba(0,0,0,0); box-sizing: border-box; }
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
@@ -25,12 +25,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 }
 </style>
 </head>
-<body class="text-slate-800 pb-[84px]">
+<body class="text-slate-800 pb-[84px] select-none">
 
-<!-- ================= FIXED TOPBAR ================= -->
-<header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
+<!-- ================= FIXED HEADER ================= -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
   <div class="max-w-[500px] mx-auto px-4 py-2.5 flex items-center justify-between">
-    <div class="flex items-center gap-2 cursor-pointer" onclick="window.go('home')">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="goView('home')">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#044E3B] to-[#006A4E] flex items-center justify-center text-white shadow-sm shrink-0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -43,42 +43,40 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <button type="button" onclick="window.go('notifications')" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm cursor-pointer">
+      <button type="button" onclick="goView('notifications')" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm cursor-pointer">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
       </button>
-      <button type="button" id="avatarBtn" onclick="window.handleAvatar()" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 shadow-sm cursor-pointer">
+      <button type="button" onclick="handleAvatar()" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 shadow-sm cursor-pointer">
         👤
       </button>
     </div>
   </div>
 </header>
 
-<!-- ================= MAIN CONTAINER ================= -->
+<!-- ================= MAIN VIEWS ================= -->
 <main class="max-w-[500px] mx-auto min-h-screen">
 
-  <!-- VIEW 1: HOME -->
+  <!-- VIEW: HOME -->
   <section id="view-home" class="app-view on px-3.5 pt-2.5">
-    <div class="rounded-[20px] bg-gradient-to-br from-[#044E3B] via-[#055B45] to-[#013527] text-white p-3.5 shadow-sm relative overflow-hidden">
-      <div>
-        <h1 class="font-bold text-[17px] leading-tight" style="font-family:'Sora',sans-serif;">Better Rooms, Brighter Days</h1>
-        <p class="text-[10.5px] text-emerald-100/80 mt-0.5 font-medium">Find, book & settle in your verified space.</p>
-      </div>
+    <div class="rounded-[20px] bg-gradient-to-br from-[#044E3B] via-[#055B45] to-[#013527] text-white p-3.5 shadow-sm">
+      <h1 class="font-bold text-[17px] leading-tight" style="font-family:'Sora',sans-serif;">Better Rooms, Brighter Days</h1>
+      <p class="text-[10.5px] text-emerald-100/80 mt-0.5 font-medium">Find, book & settle in your verified space.</p>
       
-      <!-- Live Search / TRL -->
+      <!-- Live Search Bar -->
       <div class="mt-2.5 flex items-center bg-white rounded-full px-3 py-1 shadow-md">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="homeSearchInput" oninput="window.onHomeSearch(this.value)" placeholder="Search city, house or 12-digit TRL No…" class="flex-1 text-[12px] text-slate-800 font-semibold px-2 py-1 bg-transparent outline-none">
-        <button type="button" onclick="window.applyHomeSearch()" class="px-3 py-1 bg-[#044E3B] text-white text-[10px] font-extrabold rounded-full cursor-pointer">Go</button>
+        <input id="homeSearchInput" oninput="onHomeSearch(this.value)" placeholder="Search city, house or 12-digit TRL No…" class="flex-1 text-[12px] text-slate-800 font-semibold px-2 py-1 bg-transparent outline-none">
+        <button type="button" onclick="applyHomeSearch()" class="px-3 py-1 bg-[#044E3B] text-white text-[10px] font-extrabold rounded-full cursor-pointer">Go</button>
       </div>
     </div>
 
-    <!-- TRL Result Wrap -->
+    <!-- TRL Result Notification -->
     <div id="trlCheckResultWrap" class="hidden mt-2"></div>
 
     <!-- Dropdowns -->
     <div class="grid grid-cols-2 gap-2 mt-2">
       <div class="relative">
-        <select id="homeCountrySelect" onchange="window.onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none cursor-pointer">
+        <select id="homeCountrySelect" onchange="onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none cursor-pointer">
           <option value="">All Countries</option>
           <option value="IN">🇮🇳 India</option>
           <option value="US">🇺🇸 USA</option>
@@ -88,7 +86,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
         <span class="absolute right-3.5 top-2 text-[8px] text-slate-400 pointer-events-none">▼</span>
       </div>
       <div class="relative">
-        <select id="homeTypeSelect" onchange="window.onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none cursor-pointer">
+        <select id="homeTypeSelect" onchange="onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none cursor-pointer">
           <option value="" selected>All Room Types</option>
           <option value="Single Room">Single Room</option>
           <option value="1 RK">1 RK</option>
@@ -104,68 +102,68 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 
     <!-- Category Chips -->
     <div class="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-1 text-[11px] font-bold">
-      <button type="button" onclick="window.filterCategory('all', this)" class="cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm cursor-pointer">All Rooms</button>
-      <button type="button" onclick="window.filterCategory('Students', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Students</button>
-      <button type="button" onclick="window.filterCategory('Family', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Families</button>
-      <button type="button" onclick="window.filterCategory('Worker', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Workers</button>
+      <button type="button" onclick="filterCategory('all', this)" class="cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm cursor-pointer">All Rooms</button>
+      <button type="button" onclick="filterCategory('Students', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Students</button>
+      <button type="button" onclick="filterCategory('Family', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Families</button>
+      <button type="button" onclick="filterCategory('Worker', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Workers</button>
     </div>
 
     <!-- Header -->
     <div class="flex items-center justify-between mt-2.5 mb-1.5 px-1">
       <h3 class="font-bold text-[15px] text-slate-900" style="font-family:'Sora',sans-serif;">Available Rooms</h3>
-      <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="window.resetFiltersAndShowAll()">Reset & View All</span>
+      <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="resetFiltersAndShowAll()">Reset & View All</span>
     </div>
 
     <!-- 2x2 Rooms Grid -->
     <div id="roomsGrid" class="grid grid-cols-2 gap-2.5 pb-6"></div>
   </section>
 
-  <!-- VIEW 2: SEARCH -->
+  <!-- VIEW: SEARCH -->
   <section id="view-search" class="app-view px-3.5 pt-3">
     <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Search Stays</h2>
     <p class="text-[11px] text-slate-500 mb-2.5">Find verified rooms across all cities</p>
     <div class="bg-white rounded-full border border-slate-200 px-3.5 py-1.5 flex items-center shadow-sm mb-3">
-      <input id="searchInputField" oninput="window.onSearchScreenInput(this.value)" placeholder="Search city, area, house name…" class="flex-1 text-[12.5px] outline-none">
+      <input id="searchInputField" oninput="onSearchScreenInput(this.value)" placeholder="Search city, area, house name…" class="flex-1 text-[12.5px] outline-none">
     </div>
     <div id="searchGridList" class="grid grid-cols-2 gap-2.5 pb-6"></div>
   </section>
 
-  <!-- VIEW 3: NEAR ME (10 KM) -->
+  <!-- VIEW: NEAR ME -->
   <section id="view-near" class="app-view px-3.5 pt-3">
     <div class="flex items-center justify-between">
       <div>
         <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Near Me 📍</h2>
         <p class="text-[11px] text-slate-500 font-semibold">Strictly within <b class="text-emerald-700">10 km</b> radius</p>
       </div>
-      <button type="button" onclick="window.getUserGeoLocation()" class="px-3 py-1 bg-[#044E3B] text-white text-[10.5px] font-extrabold rounded-full shadow-sm cursor-pointer">Refresh GPS</button>
+      <button type="button" onclick="getUserGeoLocation()" class="px-3 py-1 bg-[#044E3B] text-white text-[10.5px] font-extrabold rounded-full shadow-sm cursor-pointer">Refresh GPS</button>
     </div>
     <div id="nearStatusText" class="text-[11px] font-bold text-slate-500 mt-2 p-2 bg-slate-100 rounded-xl">Locating rooms near you…</div>
     <div id="nearRoomsList" class="grid grid-cols-2 gap-2.5 mt-2.5 pb-6"></div>
   </section>
 
-  <!-- VIEW 4: MY BOOKINGS -->
+  <!-- VIEW: MY BOOKINGS -->
   <section id="view-bookings" class="app-view px-3.5 pt-3 pb-8">
     <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">My Bookings</h2>
     <div class="mt-3 space-y-2.5" id="userBookingsList"></div>
   </section>
 
-  <!-- VIEW 5: OWNER -->
+  <!-- VIEW: OWNER -->
   <section id="view-owner" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
       <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">List Your Property</h2>
-      <button type="button" onclick="window.toggleOwnerView('mine')" id="toggleOwnerListBtn" class="text-[11.5px] font-bold text-emerald-800 cursor-pointer">My Listings (0)</button>
+      <button type="button" onclick="toggleOwnerView('mine')" id="toggleOwnerListBtn" class="text-[11.5px] font-bold text-emerald-800 cursor-pointer">My Listings (0)</button>
     </div>
 
     <div id="ownerMyListingsWrap" class="hidden space-y-2 mb-3">
       <div id="ownerListingsContainer"></div>
-      <button type="button" onclick="window.toggleOwnerView('form')" class="w-full py-2 bg-slate-100 rounded-full font-bold text-xs text-slate-600 cursor-pointer">+ Add New Listing</button>
+      <button type="button" onclick="toggleOwnerView('form')" class="w-full py-2 bg-slate-100 rounded-full font-bold text-xs text-slate-600 cursor-pointer">+ Add New Listing</button>
     </div>
 
-    <form id="ownerListingForm" onsubmit="window.handleOwnerSubmit(event)" class="space-y-3">
+    <form id="ownerListingForm" onsubmit="handleOwnerSubmit(event)" class="space-y-3">
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Country *</label>
-          <select id="oCountry" onchange="window.handleCountryChange(this.value)" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm cursor-pointer" required>
+          <select id="oCountry" onchange="handleCountryChange(this.value)" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm cursor-pointer" required>
             <option value="IN">🇮🇳 India (+91 / ₹)</option>
             <option value="US">🇺🇸 USA (+1 / $)</option>
             <option value="GB">🇬🇧 UK (+44 / £)</option>
@@ -267,7 +265,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       </div>
 
       <div class="pt-1 text-center">
-        <button type="button" onclick="window.lockExactMapLocation()" id="mapLockBtn" class="w-full py-2.5 px-3 rounded-full border border-slate-300 bg-white text-slate-700 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+        <button type="button" onclick="lockExactMapLocation()" id="mapLockBtn" class="w-full py-2.5 px-3 rounded-full border border-slate-300 bg-white text-slate-700 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
           <span>📍</span> <span id="mapLockText">Use Exact Map Location *</span>
         </button>
       </div>
@@ -283,11 +281,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
     </form>
   </section>
 
-  <!-- VIEW 6: ADMIN PANEL -->
+  <!-- VIEW: ADMIN PANEL -->
   <section id="view-admin" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
       <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Admin Control Panel 🔐</h2>
-      <button type="button" onclick="window.go('home')" class="text-xs font-bold text-slate-500 cursor-pointer">Close</button>
+      <button type="button" onclick="goView('home')" class="text-xs font-bold text-slate-500 cursor-pointer">Close</button>
     </div>
     <div id="adminStatsGrid" class="grid grid-cols-3 gap-2 mb-3"></div>
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm mb-3">
@@ -300,40 +298,40 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
     </div>
   </section>
 
-  <!-- VIEW 7: NOTIFICATIONS -->
+  <!-- VIEW: NOTIFICATIONS -->
   <section id="view-notifications" class="app-view px-3.5 pt-3 pb-8">
     <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Notifications</h2>
     <div class="mt-2.5 p-4 bg-white rounded-2xl border text-center text-xs text-slate-400 font-bold">No new notifications</div>
   </section>
 </main>
 
-<!-- ================= FIXED BOTTOM NAVIGATION ================= -->
+<!-- ================= FIXED BOTTOM NAV ================= -->
 <nav class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 shadow-md">
   <div class="max-w-[500px] mx-auto grid grid-cols-5 py-2">
-    <button type="button" data-nav="home" onclick="window.go('home')" class="bnav flex flex-col items-center justify-center text-[#044E3B] cursor-pointer">
+    <button type="button" data-nav="home" onclick="goView('home')" class="bnav flex flex-col items-center justify-center text-[#044E3B] cursor-pointer">
       <span class="text-[18px]">⌂</span>
       <span class="text-[9.5px] font-extrabold">Home</span>
     </button>
-    <button type="button" data-nav="search" onclick="window.go('search')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="search" onclick="goView('search')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">🔍</span>
       <span class="text-[9.5px] font-extrabold">Search</span>
     </button>
-    <button type="button" data-nav="near" onclick="window.go('near')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="near" onclick="goView('near')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">📍</span>
       <span class="text-[9.5px] font-extrabold">Near</span>
     </button>
-    <button type="button" data-nav="bookings" onclick="window.go('bookings')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="bookings" onclick="goView('bookings')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">📅</span>
       <span class="text-[9.5px] font-extrabold">My Bookings</span>
     </button>
-    <button type="button" data-nav="owner" onclick="window.go('owner')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="owner" onclick="goView('owner')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">👤</span>
       <span class="text-[9.5px] font-extrabold">Owner</span>
     </button>
   </div>
 </nav>
 
-<!-- MODAL SLOT -->
+<!-- MODAL CONTAINER (Populates only when button is tapped) -->
 <div id="modalSlot"></div>
 
 <script>
@@ -478,7 +476,7 @@ window.getDistanceKm = function(lat1, lon1, lat2, lon2) {
   return R * c;
 };
 
-window.go = function(view) {
+window.goView = function(view) {
   var views = document.querySelectorAll('.app-view');
   for (var i = 0; i < views.length; i++) { views[i].classList.remove('on'); }
   var target = $('view-' + view) || $('view-home');
@@ -500,7 +498,7 @@ window.go = function(view) {
 };
 
 window.handleAvatar = function() {
-  if (window.currentUser.role === 'admin') window.go('admin');
+  if (window.currentUser.role === 'admin') window.goView('admin');
   else alert("Signed in as: " + window.currentUser.name);
 };
 
@@ -509,7 +507,7 @@ window.renderHomeGrid = function(items) {
   var container = $('roomsGrid');
   if (!container) return;
   if (list.length === 0) {
-    container.innerHTML = '<div class="col-span-2 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-xs text-slate-500 font-bold mb-2">No matching rooms found.</p><button onclick="window.resetFiltersAndShowAll()" class="px-4 py-1.5 bg-[#044E3B] text-white text-[11px] font-extrabold rounded-full">Reset Filters</button></div>';
+    container.innerHTML = '<div class="col-span-2 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-xs text-slate-500 font-bold mb-2">No matching rooms found.</p><button onclick="window.resetFiltersAndShowAll()" class="px-4 py-1.5 bg-[#044E3B] text-white text-[11px] font-extrabold rounded-full cursor-pointer">Reset Filters</button></div>';
     return;
   }
   container.innerHTML = list.map(function(l){ return window.createRoomCardHTML(l); }).join('');
@@ -734,7 +732,7 @@ window.submitBookingRequest = function() {
   window.DB.bookings.unshift(newBk);
   window.closeModal();
   alert("Booking Request Sent to Owner!");
-  window.go('bookings');
+  window.goView('bookings');
 };
 
 window.renderUserBookings = function() {
@@ -868,8 +866,8 @@ window.handleOwnerSubmit = function(e) {
     rent: rent,
     deposit: parseFloat($('oDep').value) || 0,
     rules: $('oRules').value.trim(),
-    lat: window.lockedExactCoord.lat,
-    lng: window.lockedExactCoord.lng,
+    lat: 28.6139,
+    lng: 77.2090,
     photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'],
     status: 'available'
   };
@@ -877,7 +875,7 @@ window.handleOwnerSubmit = function(e) {
   window.DB.listings.unshift(newListing);
   e.target.reset();
   alert("Room published for 90 Days!");
-  window.go('home');
+  window.goView('home');
 };
 
 window.toggleOwnerView = function(mode) {
@@ -965,7 +963,7 @@ window.renderSearchGrid = function() {
   $('searchGridList').innerHTML = window.DB.listings.filter(function(l){ return l.status === 'available'; }).map(function(l){ return window.createRoomCardHTML(l); }).join('');
 };
 
-// Immediate Launch without waiting for heavy external loaders
+// Immediate start
 window.initSeed();
 window.renderHomeGrid();
 </script>
