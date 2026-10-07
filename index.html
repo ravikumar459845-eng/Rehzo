@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+* { -webkit-tap-highlight-color: rgba(0,0,0,0); box-sizing: border-box; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
@@ -30,7 +30,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 <!-- ================= FIXED TOPBAR ================= -->
 <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
   <div class="max-w-[500px] mx-auto px-4 py-2.5 flex items-center justify-between">
-    <div class="flex items-center gap-2 cursor-pointer" onclick="go('home')">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="window.go('home')">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#044E3B] to-[#006A4E] flex items-center justify-center text-white shadow-sm shrink-0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -43,10 +43,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <button type="button" onclick="go('notifications')" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+      <button type="button" onclick="window.go('notifications')" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm cursor-pointer">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
       </button>
-      <button type="button" id="avatarBtn" onclick="handleAvatar()" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 shadow-sm">
+      <button type="button" id="avatarBtn" onclick="window.handleAvatar()" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 shadow-sm cursor-pointer">
         👤
       </button>
     </div>
@@ -58,7 +58,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 
   <!-- VIEW 1: HOME -->
   <section id="view-home" class="app-view on px-3.5 pt-2.5">
-    <!-- Compact Banner -->
     <div class="rounded-[20px] bg-gradient-to-br from-[#044E3B] via-[#055B45] to-[#013527] text-white p-3.5 shadow-sm relative overflow-hidden">
       <div>
         <h1 class="font-bold text-[17px] leading-tight" style="font-family:'Sora',sans-serif;">Better Rooms, Brighter Days</h1>
@@ -68,18 +67,18 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       <!-- Live Search / TRL -->
       <div class="mt-2.5 flex items-center bg-white rounded-full px-3 py-1 shadow-md">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="homeSearchInput" oninput="onHomeSearch(this.value)" placeholder="Search city, house or 12-digit TRL No…" class="flex-1 text-[12px] text-slate-800 font-semibold px-2 py-1 bg-transparent outline-none">
-        <button type="button" onclick="applyHomeSearch()" class="px-3 py-1 bg-[#044E3B] text-white text-[10px] font-extrabold rounded-full cursor-pointer">Go</button>
+        <input id="homeSearchInput" oninput="window.onHomeSearch(this.value)" placeholder="Search city, house or 12-digit TRL No…" class="flex-1 text-[12px] text-slate-800 font-semibold px-2 py-1 bg-transparent outline-none">
+        <button type="button" onclick="window.applyHomeSearch()" class="px-3 py-1 bg-[#044E3B] text-white text-[10px] font-extrabold rounded-full cursor-pointer">Go</button>
       </div>
     </div>
 
-    <!-- TRL Live Match Container -->
+    <!-- TRL Result Wrap -->
     <div id="trlCheckResultWrap" class="hidden mt-2"></div>
 
-    <!-- Filters -->
+    <!-- Dropdowns -->
     <div class="grid grid-cols-2 gap-2 mt-2">
       <div class="relative">
-        <select id="homeCountrySelect" onchange="onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none">
+        <select id="homeCountrySelect" onchange="window.onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none cursor-pointer">
           <option value="">All Countries</option>
           <option value="IN">🇮🇳 India</option>
           <option value="US">🇺🇸 USA</option>
@@ -89,7 +88,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
         <span class="absolute right-3.5 top-2 text-[8px] text-slate-400 pointer-events-none">▼</span>
       </div>
       <div class="relative">
-        <select id="homeTypeSelect" onchange="onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none">
+        <select id="homeTypeSelect" onchange="window.onHomeFilterChange()" class="w-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-full appearance-none shadow-sm outline-none cursor-pointer">
           <option value="" selected>All Room Types</option>
           <option value="Single Room">Single Room</option>
           <option value="1 RK">1 RK</option>
@@ -105,16 +104,16 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 
     <!-- Category Chips -->
     <div class="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-1 text-[11px] font-bold">
-      <button type="button" onclick="filterCategory('all', this)" class="cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm cursor-pointer">All Rooms</button>
-      <button type="button" onclick="filterCategory('Students', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Students</button>
-      <button type="button" onclick="filterCategory('Family', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Families</button>
-      <button type="button" onclick="filterCategory('Worker', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Workers</button>
+      <button type="button" onclick="window.filterCategory('all', this)" class="cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm cursor-pointer">All Rooms</button>
+      <button type="button" onclick="window.filterCategory('Students', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Students</button>
+      <button type="button" onclick="window.filterCategory('Family', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Families</button>
+      <button type="button" onclick="window.filterCategory('Worker', this)" class="cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer">For Workers</button>
     </div>
 
     <!-- Header -->
     <div class="flex items-center justify-between mt-2.5 mb-1.5 px-1">
       <h3 class="font-bold text-[15px] text-slate-900" style="font-family:'Sora',sans-serif;">Available Rooms</h3>
-      <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="resetFiltersAndShowAll()">Reset & View All</span>
+      <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="window.resetFiltersAndShowAll()">Reset & View All</span>
     </div>
 
     <!-- 2x2 Rooms Grid -->
@@ -126,7 +125,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
     <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Search Stays</h2>
     <p class="text-[11px] text-slate-500 mb-2.5">Find verified rooms across all cities</p>
     <div class="bg-white rounded-full border border-slate-200 px-3.5 py-1.5 flex items-center shadow-sm mb-3">
-      <input id="searchInputField" oninput="onSearchScreenInput(this.value)" placeholder="Search city, area, house name…" class="flex-1 text-[12.5px] outline-none">
+      <input id="searchInputField" oninput="window.onSearchScreenInput(this.value)" placeholder="Search city, area, house name…" class="flex-1 text-[12.5px] outline-none">
     </div>
     <div id="searchGridList" class="grid grid-cols-2 gap-2.5 pb-6"></div>
   </section>
@@ -138,7 +137,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
         <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Near Me 📍</h2>
         <p class="text-[11px] text-slate-500 font-semibold">Strictly within <b class="text-emerald-700">10 km</b> radius</p>
       </div>
-      <button type="button" onclick="getUserGeoLocation()" class="px-3 py-1 bg-[#044E3B] text-white text-[10.5px] font-extrabold rounded-full shadow-sm cursor-pointer">Refresh GPS</button>
+      <button type="button" onclick="window.getUserGeoLocation()" class="px-3 py-1 bg-[#044E3B] text-white text-[10.5px] font-extrabold rounded-full shadow-sm cursor-pointer">Refresh GPS</button>
     </div>
     <div id="nearStatusText" class="text-[11px] font-bold text-slate-500 mt-2 p-2 bg-slate-100 rounded-xl">Locating rooms near you…</div>
     <div id="nearRoomsList" class="grid grid-cols-2 gap-2.5 mt-2.5 pb-6"></div>
@@ -154,19 +153,19 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
   <section id="view-owner" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
       <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">List Your Property</h2>
-      <button type="button" onclick="toggleOwnerView('mine')" id="toggleOwnerListBtn" class="text-[11.5px] font-bold text-emerald-800 cursor-pointer">My Listings (0)</button>
+      <button type="button" onclick="window.toggleOwnerView('mine')" id="toggleOwnerListBtn" class="text-[11.5px] font-bold text-emerald-800 cursor-pointer">My Listings (0)</button>
     </div>
 
     <div id="ownerMyListingsWrap" class="hidden space-y-2 mb-3">
       <div id="ownerListingsContainer"></div>
-      <button type="button" onclick="toggleOwnerView('form')" class="w-full py-2 bg-slate-100 rounded-full font-bold text-xs text-slate-600 cursor-pointer">+ Add New Listing</button>
+      <button type="button" onclick="window.toggleOwnerView('form')" class="w-full py-2 bg-slate-100 rounded-full font-bold text-xs text-slate-600 cursor-pointer">+ Add New Listing</button>
     </div>
 
-    <form id="ownerListingForm" onsubmit="handleOwnerSubmit(event)" class="space-y-3">
+    <form id="ownerListingForm" onsubmit="window.handleOwnerSubmit(event)" class="space-y-3">
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Country *</label>
-          <select id="oCountry" onchange="handleCountryChange(this.value)" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm" required>
+          <select id="oCountry" onchange="window.handleCountryChange(this.value)" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm cursor-pointer" required>
             <option value="IN">🇮🇳 India (+91 / ₹)</option>
             <option value="US">🇺🇸 USA (+1 / $)</option>
             <option value="GB">🇬🇧 UK (+44 / £)</option>
@@ -222,7 +221,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
         </div>
         <div>
           <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Room Type *</label>
-          <select id="oType" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm" required>
+          <select id="oType" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm cursor-pointer" required>
             <option>1 RK</option>
             <option>Single Room</option>
             <option>2 BHK</option>
@@ -241,7 +240,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
         </div>
         <div>
           <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Suitable For</label>
-          <select id="oSuitable" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm">
+          <select id="oSuitable" class="w-full bg-white border border-slate-200 text-[12px] font-bold px-3 py-2 rounded-full outline-none shadow-sm cursor-pointer">
             <option>Anyone</option>
             <option>Students</option>
             <option>Family</option>
@@ -268,7 +267,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
       </div>
 
       <div class="pt-1 text-center">
-        <button type="button" onclick="lockExactMapLocation()" id="mapLockBtn" class="w-full py-2.5 px-3 rounded-full border border-slate-300 bg-white text-slate-700 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+        <button type="button" onclick="window.lockExactMapLocation()" id="mapLockBtn" class="w-full py-2.5 px-3 rounded-full border border-slate-300 bg-white text-slate-700 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
           <span>📍</span> <span id="mapLockText">Use Exact Map Location *</span>
         </button>
       </div>
@@ -288,7 +287,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
   <section id="view-admin" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
       <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Admin Control Panel 🔐</h2>
-      <button type="button" onclick="go('home')" class="text-xs font-bold text-slate-500 cursor-pointer">Close</button>
+      <button type="button" onclick="window.go('home')" class="text-xs font-bold text-slate-500 cursor-pointer">Close</button>
     </div>
     <div id="adminStatsGrid" class="grid grid-cols-3 gap-2 mb-3"></div>
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm mb-3">
@@ -311,51 +310,51 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 <!-- ================= FIXED BOTTOM NAVIGATION ================= -->
 <nav class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 shadow-md">
   <div class="max-w-[500px] mx-auto grid grid-cols-5 py-2">
-    <button type="button" data-nav="home" onclick="go('home')" class="bnav flex flex-col items-center justify-center text-[#044E3B] cursor-pointer">
+    <button type="button" data-nav="home" onclick="window.go('home')" class="bnav flex flex-col items-center justify-center text-[#044E3B] cursor-pointer">
       <span class="text-[18px]">⌂</span>
       <span class="text-[9.5px] font-extrabold">Home</span>
     </button>
-    <button type="button" data-nav="search" onclick="go('search')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="search" onclick="window.go('search')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">🔍</span>
       <span class="text-[9.5px] font-extrabold">Search</span>
     </button>
-    <button type="button" data-nav="near" onclick="go('near')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="near" onclick="window.go('near')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">📍</span>
       <span class="text-[9.5px] font-extrabold">Near</span>
     </button>
-    <button type="button" data-nav="bookings" onclick="go('bookings')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="bookings" onclick="window.go('bookings')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">📅</span>
       <span class="text-[9.5px] font-extrabold">My Bookings</span>
     </button>
-    <button type="button" data-nav="owner" onclick="go('owner')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
+    <button type="button" data-nav="owner" onclick="window.go('owner')" class="bnav flex flex-col items-center justify-center text-slate-400 cursor-pointer">
       <span class="text-[18px]">👤</span>
       <span class="text-[9.5px] font-extrabold">Owner</span>
     </button>
   </div>
 </nav>
 
-<!-- ================= DYNAMIC MODALS (ONLY INSERTED WHEN OPENED) ================= -->
+<!-- MODAL SLOT -->
 <div id="modalSlot"></div>
 
 <script>
-var DB = { listings: [], bookings: [] };
-var currentUser = { uid: 'usr_admin', name: 'Master User', phone: '9876543210', role: 'admin' };
-var activeBookingRoom = null;
-var currentGeo = { lat: 28.6139, lng: 77.2090 };
-var lockedExactCoord = null;
+window.DB = { listings: [], bookings: [] };
+window.currentUser = { uid: 'usr_admin', name: 'Master User', phone: '9876543210', role: 'admin' };
+window.activeBookingRoom = null;
+window.currentGeo = { lat: 28.6139, lng: 77.2090 };
+window.lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
 
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
 
-var COUNTRY_CONFIG = {
+window.COUNTRY_CONFIG = {
   IN: { dial: '+91', sym: '₹' },
   US: { dial: '+1', sym: '$' },
   GB: { dial: '+44', sym: '£' },
   AE: { dial: '+971', sym: 'AED' }
 };
 
-function initSeed() {
-  DB.listings = [
+window.initSeed = function() {
+  window.DB.listings = [
     {
       id: 'L-101',
       houseName: 'Sunny 1 RK near Andheri',
@@ -442,7 +441,7 @@ function initSeed() {
     }
   ];
 
-  DB.bookings = [
+  window.DB.bookings = [
     {
       id: 'BK-DEMO-TRL',
       trl: '839472615028',
@@ -466,9 +465,9 @@ function initSeed() {
       status: 'confirmed'
     }
   ];
-}
+};
 
-function getDistanceKm(lat1, lon1, lat2, lon2) {
+window.getDistanceKm = function(lat1, lon1, lat2, lon2) {
   var R = 6371;
   var dLat = (lat2 - lat1) * Math.PI / 180;
   var dLon = (lon2 - lon1) * Math.PI / 180;
@@ -477,9 +476,9 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
           Math.sin(dLon/2) * Math.sin(dLon/2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
-}
+};
 
-function go(view) {
+window.go = function(view) {
   var views = document.querySelectorAll('.app-view');
   for (var i = 0; i < views.length; i++) { views[i].classList.remove('on'); }
   var target = $('view-' + view) || $('view-home');
@@ -491,36 +490,36 @@ function go(view) {
     bnavs[j].className = "bnav flex flex-col items-center justify-center cursor-pointer " + (isThis ? 'text-[#044E3B]' : 'text-slate-400');
   }
 
-  if (view === 'home') renderHomeGrid();
-  if (view === 'search') renderSearchGrid();
-  if (view === 'near') renderNearMeView();
-  if (view === 'bookings') renderUserBookings();
-  if (view === 'owner') renderOwnerListings();
-  if (view === 'admin') renderAdminView();
+  if (view === 'home') window.renderHomeGrid();
+  if (view === 'search') window.renderSearchGrid();
+  if (view === 'near') window.renderNearMeView();
+  if (view === 'bookings') window.renderUserBookings();
+  if (view === 'owner') window.renderOwnerListings();
+  if (view === 'admin') window.renderAdminView();
   window.scrollTo(0, 0);
-}
+};
 
-function handleAvatar() {
-  if (currentUser.role === 'admin') go('admin');
-  else alert("Signed in as: " + currentUser.name);
-}
+window.handleAvatar = function() {
+  if (window.currentUser.role === 'admin') window.go('admin');
+  else alert("Signed in as: " + window.currentUser.name);
+};
 
-function renderHomeGrid(items) {
-  var list = items || DB.listings.filter(function(l){ return l.status === 'available'; });
+window.renderHomeGrid = function(items) {
+  var list = items || window.DB.listings.filter(function(l){ return l.status === 'available'; });
   var container = $('roomsGrid');
   if (!container) return;
   if (list.length === 0) {
-    container.innerHTML = '<div class="col-span-2 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-xs text-slate-500 font-bold mb-2">No matching rooms found.</p><button onclick="resetFiltersAndShowAll()" class="px-4 py-1.5 bg-[#044E3B] text-white text-[11px] font-extrabold rounded-full">Reset Filters</button></div>';
+    container.innerHTML = '<div class="col-span-2 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-xs text-slate-500 font-bold mb-2">No matching rooms found.</p><button onclick="window.resetFiltersAndShowAll()" class="px-4 py-1.5 bg-[#044E3B] text-white text-[11px] font-extrabold rounded-full">Reset Filters</button></div>';
     return;
   }
-  container.innerHTML = list.map(function(l){ return createRoomCardHTML(l); }).join('');
-}
+  container.innerHTML = list.map(function(l){ return window.createRoomCardHTML(l); }).join('');
+};
 
-function createRoomCardHTML(l) {
-  var currSym = (COUNTRY_CONFIG[l.country] && COUNTRY_CONFIG[l.country].sym) || '₹';
+window.createRoomCardHTML = function(l) {
+  var currSym = (window.COUNTRY_CONFIG[l.country] && window.COUNTRY_CONFIG[l.country].sym) || '₹';
   return '<div class="bg-white border border-slate-200 rounded-[16px] overflow-hidden shadow-sm flex flex-col justify-between">' +
       '<div class="relative">' +
-        '<img src="' + l.photos[0] + '" class="room-card-img" alt="' + esc(l.houseName) + '">' +
+        '<img src="' + l.photos[0] + '" class="room-card-img" alt="' + esc(l.houseName) + '" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80\'">' +
         '<span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-white/90 text-emerald-800 font-extrabold text-[8.5px]">● Available</span>' +
       '</div>' +
       '<div class="p-2.5 flex flex-col justify-between flex-1">' +
@@ -533,14 +532,14 @@ function createRoomCardHTML(l) {
             '<span class="px-1.5 py-0.5 rounded bg-slate-100 text-[8.5px] font-bold text-slate-600 truncate">' + esc(l.suitableFor) + '</span>' +
           '</div>' +
         '</div>' +
-        '<button type="button" onclick="openBookingModal(\'' + l.id + '\')" class="mt-2 w-full py-1.5 bg-[#044E3B] text-white rounded-full text-[10.5px] font-extrabold shadow-sm cursor-pointer">' +
+        '<button type="button" onclick="window.openBookingModal(\'' + l.id + '\')" class="mt-2 w-full py-1.5 bg-[#044E3B] text-white rounded-full text-[10.5px] font-extrabold shadow-sm cursor-pointer active:scale-95 transition-transform">' +
           'Book Now' +
         '</button>' +
       '</div>' +
     '</div>';
-}
+};
 
-function resetFiltersAndShowAll() {
+window.resetFiltersAndShowAll = function() {
   if ($('homeCountrySelect')) $('homeCountrySelect').value = '';
   if ($('homeTypeSelect')) $('homeTypeSelect').value = '';
   if ($('homeSearchInput')) $('homeSearchInput').value = '';
@@ -550,15 +549,15 @@ function resetFiltersAndShowAll() {
       ? 'cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm cursor-pointer'
       : 'cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer';
   }
-  renderHomeGrid();
-}
+  window.renderHomeGrid();
+};
 
-function onHomeSearch(val) {
+window.onHomeSearch = function(val) {
   var q = val.trim().toUpperCase();
   var resBox = $('trlCheckResultWrap');
 
   if (q.length === 12 && /^\d+$/.test(q)) {
-    var foundBk = DB.bookings.find(function(b){ return b.trl === q; });
+    var foundBk = window.DB.bookings.find(function(b){ return b.trl === q; });
     if (foundBk) {
       resBox.classList.remove('hidden');
       resBox.innerHTML = '<div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 flex items-center justify-between">' +
@@ -566,7 +565,7 @@ function onHomeSearch(val) {
             '<div class="font-extrabold">✓ Authentic REHZO TRL Record: ' + foundBk.trl + '</div>' +
             '<div class="text-[10px] text-emerald-700">' + esc(foundBk.houseName) + ' • ' + esc(foundBk.userName) + '</div>' +
           '</div>' +
-          '<button type="button" onclick="openPdfSlip(\'' + foundBk.id + '\')" class="px-2.5 py-1 bg-emerald-700 text-white font-bold text-[10px] rounded-lg cursor-pointer">View Slip</button>' +
+          '<button type="button" onclick="window.openPdfSlip(\'' + foundBk.id + '\')" class="px-2.5 py-1 bg-emerald-700 text-white font-bold text-[10px] rounded-lg cursor-pointer">View Slip</button>' +
         '</div>';
       return;
     }
@@ -574,7 +573,7 @@ function onHomeSearch(val) {
 
   resBox.classList.add('hidden');
   var sLow = val.trim().toLowerCase();
-  var filtered = DB.listings.filter(function(l){
+  var filtered = window.DB.listings.filter(function(l){
     return l.status === 'available' && (
       l.houseName.toLowerCase().indexOf(sLow) !== -1 ||
       l.city.toLowerCase().indexOf(sLow) !== -1 ||
@@ -582,40 +581,40 @@ function onHomeSearch(val) {
       l.roomType.toLowerCase().indexOf(sLow) !== -1
     );
   });
-  renderHomeGrid(filtered);
-}
+  window.renderHomeGrid(filtered);
+};
 
-function applyHomeSearch() {
-  onHomeSearch($('homeSearchInput').value);
-}
+window.applyHomeSearch = function() {
+  window.onHomeSearch($('homeSearchInput').value);
+};
 
-function onHomeFilterChange() {
+window.onHomeFilterChange = function() {
   var c = $('homeCountrySelect').value;
   var t = $('homeTypeSelect').value;
-  var filtered = DB.listings.filter(function(l){
+  var filtered = window.DB.listings.filter(function(l){
     return l.status === 'available' && (!c || l.country === c) && (!t || l.roomType === t);
   });
-  renderHomeGrid(filtered);
-}
+  window.renderHomeGrid(filtered);
+};
 
-function filterCategory(cat, btn) {
+window.filterCategory = function(cat, btn) {
   var chips = document.querySelectorAll('.cat-chip');
   for (var i = 0; i < chips.length; i++) {
     chips[i].className = 'cat-chip px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap cursor-pointer';
   }
   btn.className = 'cat-chip px-3 py-1 rounded-full bg-[#044E3B] text-white whitespace-nowrap shadow-sm cursor-pointer';
-  if (cat === 'all') renderHomeGrid();
+  if (cat === 'all') window.renderHomeGrid();
   else {
-    var filtered = DB.listings.filter(function(l){ return l.status === 'available' && l.suitableFor === cat; });
-    renderHomeGrid(filtered);
+    var filtered = window.DB.listings.filter(function(l){ return l.status === 'available' && l.suitableFor === cat; });
+    window.renderHomeGrid(filtered);
   }
-}
+};
 
-function renderNearMeView() {
+window.renderNearMeView = function() {
   var nearRooms = [];
-  DB.listings.forEach(function(l) {
+  window.DB.listings.forEach(function(l) {
     if (l.status === 'available' && l.lat && l.lng) {
-      var dist = getDistanceKm(currentGeo.lat, currentGeo.lng, l.lat, l.lng);
+      var dist = window.getDistanceKm(window.currentGeo.lat, window.currentGeo.lng, l.lat, l.lng);
       if (dist <= 10) {
         nearRooms.push(Object.assign({}, l, { distKm: dist }));
       }
@@ -624,81 +623,80 @@ function renderNearMeView() {
 
   if (nearRooms.length > 0) {
     $('nearStatusText').innerHTML = '<span class="text-emerald-700 font-bold">✓ ' + nearRooms.length + ' room(s) within 10 km</span>';
-    $('nearRoomsList').innerHTML = nearRooms.map(function(l){ return createRoomCardHTML(l); }).join('');
+    $('nearRoomsList').innerHTML = nearRooms.map(function(l){ return window.createRoomCardHTML(l); }).join('');
   } else {
     $('nearStatusText').innerHTML = '<span class="text-amber-700 font-bold">No rooms available within 10 km radius.</span>';
     $('nearRoomsList').innerHTML = '<div class="col-span-2 text-center py-6 text-xs text-slate-400">Try exploring other cities via Search.</div>';
   }
-}
+};
 
-function getUserGeoLocation() {
+window.getUserGeoLocation = function() {
   if (navigator.geolocation) {
     $('nearStatusText').textContent = "Detecting GPS location…";
     navigator.geolocation.getCurrentPosition(function(pos) {
-      currentGeo.lat = pos.coords.latitude;
-      currentGeo.lng = pos.coords.longitude;
-      renderNearMeView();
+      window.currentGeo.lat = pos.coords.latitude;
+      window.currentGeo.lng = pos.coords.longitude;
+      window.renderNearMeView();
     }, function() {
-      renderNearMeView();
+      window.renderNearMeView();
     });
   } else {
-    renderNearMeView();
+    window.renderNearMeView();
   }
-}
+};
 
-// ================= DYNAMIC MODALS =================
-function openBookingModal(listingId) {
-  var l = DB.listings.find(function(x){ return x.id === listingId; });
+window.openBookingModal = function(listingId) {
+  var l = window.DB.listings.find(function(x){ return x.id === listingId; });
   if (!l) return;
-  activeBookingRoom = l;
-  var sym = (COUNTRY_CONFIG[l.country] && COUNTRY_CONFIG[l.country].sym) || '₹';
+  window.activeBookingRoom = l;
+  var sym = (window.COUNTRY_CONFIG[l.country] && window.COUNTRY_CONFIG[l.country].sym) || '₹';
   
   $('modalSlot').innerHTML = '<div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto flex items-center justify-center">' +
     '<div class="w-full max-w-[440px] bg-white rounded-[24px] p-4 shadow-2xl">' +
       '<div class="flex items-center justify-between border-b pb-2">' +
         '<h3 class="font-bold text-[15px] text-slate-900">Request Room Booking</h3>' +
-        '<button type="button" onclick="closeModal()" class="w-6 h-6 rounded-full bg-slate-100 font-bold text-xs cursor-pointer">✕</button>' +
+        '<button type="button" onclick="window.closeModal()" class="w-6 h-6 rounded-full bg-slate-100 font-bold text-xs cursor-pointer">✕</button>' +
       '</div>' +
       '<div class="mt-2.5 space-y-2">' +
         '<div class="grid grid-cols-2 gap-2">' +
-          '<div><label class="text-[10px] font-bold text-slate-500">Name *</label><input id="bkName" value="' + (currentUser.name !== 'Master User' ? currentUser.name : '') + '" placeholder="Full Name" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
-          '<div><label class="text-[10px] font-bold text-slate-500">Phone No *</label><input id="bkPhone" value="' + (currentUser.phone || '') + '" placeholder="Mobile" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Name *</label><input id="bkName" value="' + (window.currentUser.name !== 'Master User' ? window.currentUser.name : '') + '" placeholder="Full Name" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Phone No *</label><input id="bkPhone" value="' + (window.currentUser.phone || '') + '" placeholder="Mobile" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
         '</div>' +
         '<div><label class="text-[10px] font-bold text-slate-500">Gmail (optional)</label><input id="bkGmail" placeholder="you@gmail.com" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
         '<div><label class="text-[10px] font-bold text-slate-500">Your Old Address *</label><input id="bkOldAddr" placeholder="Permanent address" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
         '<div class="grid grid-cols-2 gap-2">' +
           '<div><label class="text-[10px] font-bold text-slate-500">Check-in Date *</label><input id="bkDate" type="date" value="' + new Date().toISOString().slice(0, 10) + '" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
-          '<div><label class="text-[10px] font-bold text-slate-500">Kitne month k liy *</label><select id="bkMonths" onchange="calcBookingRent()" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Kitne month k liy *</label><select id="bkMonths" onchange="window.calcBookingRent()" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none cursor-pointer"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
         '</div>' +
         '<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2 text-[11px] space-y-0.5">' +
           '<div class="flex justify-between"><span>Monthly Rent:</span><span id="calcMonthlyRentText">' + sym + l.rent.toLocaleString() + '</span></div>' +
           '<div class="flex justify-between"><span>Deposit:</span><span id="calcDepositText">' + sym + (l.deposit || 0).toLocaleString() + '</span></div>' +
           '<div class="border-t pt-0.5 flex justify-between font-bold text-emerald-900"><span>Total Payable:</span><span id="calcTotalRentText">' + sym + (l.rent + (l.deposit || 0)).toLocaleString() + '</span></div>' +
         '</div>' +
-        '<button type="button" onclick="submitBookingRequest()" class="w-full py-2 bg-[#044E3B] text-white font-bold text-xs rounded-full cursor-pointer shadow">Send Booking Request →</button>' +
+        '<button type="button" onclick="window.submitBookingRequest()" class="w-full py-2 bg-[#044E3B] text-white font-bold text-xs rounded-full cursor-pointer shadow">Send Booking Request →</button>' +
       '</div>' +
     '</div>' +
   '</div>';
-}
+};
 
-function closeModal() {
+window.closeModal = function() {
   $('modalSlot').innerHTML = '';
-}
+};
 
-function calcBookingRent() {
-  if (!activeBookingRoom) return;
+window.calcBookingRent = function() {
+  if (!window.activeBookingRoom) return;
   var m = parseInt($('bkMonths').value) || 1;
-  var sym = (COUNTRY_CONFIG[activeBookingRoom.country] && COUNTRY_CONFIG[activeBookingRoom.country].sym) || '₹';
-  var monthly = activeBookingRoom.rent;
-  var deposit = activeBookingRoom.deposit || 0;
+  var sym = (window.COUNTRY_CONFIG[window.activeBookingRoom.country] && window.COUNTRY_CONFIG[window.activeBookingRoom.country].sym) || '₹';
+  var monthly = window.activeBookingRoom.rent;
+  var deposit = window.activeBookingRoom.deposit || 0;
   var total = (monthly * m) + deposit;
 
   if ($('calcMonthlyRentText')) $('calcMonthlyRentText').textContent = sym + monthly.toLocaleString();
   if ($('calcDepositText')) $('calcDepositText').textContent = deposit ? (sym + deposit.toLocaleString()) : 'None';
   if ($('calcTotalRentText')) $('calcTotalRentText').textContent = sym + total.toLocaleString();
-}
+};
 
-function submitBookingRequest() {
+window.submitBookingRequest = function() {
   var name = $('bkName').value.trim();
   var phone = $('bkPhone').value.trim();
   var oldAddr = $('bkOldAddr').value.trim();
@@ -712,44 +710,44 @@ function submitBookingRequest() {
 
   var newBk = {
     id: 'BK-' + Date.now().toString(36).toUpperCase(),
-    listingId: activeBookingRoom.id,
-    houseName: activeBookingRoom.houseName,
-    roomType: activeBookingRoom.roomType,
+    listingId: window.activeBookingRoom.id,
+    houseName: window.activeBookingRoom.houseName,
+    roomType: window.activeBookingRoom.roomType,
     userName: name,
     userPhone: phone,
     userGmail: $('bkGmail').value.trim() || 'N/A',
     userOldAddress: oldAddr,
     checkInDate: date,
     durationMonths: months,
-    monthlyRent: activeBookingRoom.rent,
-    deposit: activeBookingRoom.deposit || 0,
-    totalRent: (activeBookingRoom.rent * months) + (activeBookingRoom.deposit || 0),
-    ownerName: activeBookingRoom.ownerName,
-    ownerPhone: activeBookingRoom.contact,
-    ownerGmail: activeBookingRoom.gmail || 'N/A',
-    ownerAddress: activeBookingRoom.address,
-    country: activeBookingRoom.country,
+    monthlyRent: window.activeBookingRoom.rent,
+    deposit: window.activeBookingRoom.deposit || 0,
+    totalRent: (window.activeBookingRoom.rent * months) + (window.activeBookingRoom.deposit || 0),
+    ownerName: window.activeBookingRoom.ownerName,
+    ownerPhone: window.activeBookingRoom.contact,
+    ownerGmail: window.activeBookingRoom.gmail || 'N/A',
+    ownerAddress: window.activeBookingRoom.address,
+    country: window.activeBookingRoom.country,
     status: 'requested',
     trl: null
   };
 
-  DB.bookings.unshift(newBk);
-  closeModal();
+  window.DB.bookings.unshift(newBk);
+  window.closeModal();
   alert("Booking Request Sent to Owner!");
-  go('bookings');
-}
+  window.go('bookings');
+};
 
-function renderUserBookings() {
+window.renderUserBookings = function() {
   var container = $('userBookingsList');
   if (!container) return;
-  if (DB.bookings.length === 0) {
+  if (window.DB.bookings.length === 0) {
     container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400 font-bold">No bookings requested yet.</div>';
     return;
   }
 
-  container.innerHTML = DB.bookings.map(function(b) {
+  container.innerHTML = window.DB.bookings.map(function(b) {
     var isAccepted = b.status === 'owner_accepted' || b.status === 'confirmed';
-    var currSym = (COUNTRY_CONFIG[b.country] && COUNTRY_CONFIG[b.country].sym) || '₹';
+    var currSym = (window.COUNTRY_CONFIG[b.country] && window.COUNTRY_CONFIG[b.country].sym) || '₹';
     return '<div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm space-y-2">' +
         '<div class="flex items-center justify-between">' +
           '<div class="font-extrabold text-[13px] text-slate-900">' + esc(b.houseName) + '</div>' +
@@ -767,48 +765,48 @@ function renderUserBookings() {
           )) +
         '</div>' +
         '<div class="flex gap-2 pt-1">' +
-          (b.status === 'requested' ? '<button type="button" onclick="ownerAcceptsBooking(\'' + b.id + '\')" class="flex-1 py-1 bg-emerald-700 text-white font-bold text-[10.5px] rounded-full cursor-pointer">Accept Request (Host Sim)</button>' : '') +
-          (b.status === 'owner_accepted' ? '<button type="button" onclick="userConfirmsBooking(\'' + b.id + '\')" class="flex-1 py-1 bg-[#044E3B] text-white font-bold text-[10.5px] rounded-full cursor-pointer">Final Confirm & Issue TRL</button>' : '') +
-          (b.status === 'confirmed' ? '<button type="button" onclick="openPdfSlip(\'' + b.id + '\')" class="flex-1 py-1 bg-slate-900 text-white font-bold text-[10.5px] rounded-full cursor-pointer">📄 Official 12-Digit TRL Slip</button>' : '') +
+          (b.status === 'requested' ? '<button type="button" onclick="window.ownerAcceptsBooking(\'' + b.id + '\')" class="flex-1 py-1 bg-emerald-700 text-white font-bold text-[10.5px] rounded-full cursor-pointer">Accept Request (Host Sim)</button>' : '') +
+          (b.status === 'owner_accepted' ? '<button type="button" onclick="window.userConfirmsBooking(\'' + b.id + '\')" class="flex-1 py-1 bg-[#044E3B] text-white font-bold text-[10.5px] rounded-full cursor-pointer">Final Confirm & Issue TRL</button>' : '') +
+          (b.status === 'confirmed' ? '<button type="button" onclick="window.openPdfSlip(\'' + b.id + '\')" class="flex-1 py-1 bg-slate-900 text-white font-bold text-[10.5px] rounded-full cursor-pointer">📄 Official 12-Digit TRL Slip</button>' : '') +
         '</div>' +
       '</div>';
   }).join('');
-}
+};
 
-function ownerAcceptsBooking(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
+window.ownerAcceptsBooking = function(id) {
+  var b = window.DB.bookings.find(function(x){ return x.id === id; });
   if (b) {
     b.status = 'owner_accepted';
-    renderUserBookings();
+    window.renderUserBookings();
     alert("Owner accepted! Contact details unlocked.");
   }
-}
+};
 
-function userConfirmsBooking(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
+window.userConfirmsBooking = function(id) {
+  var b = window.DB.bookings.find(function(x){ return x.id === id; });
   if (b) {
     b.status = 'confirmed';
     var trl = '';
     for (var i = 0; i < 12; i++) trl += Math.floor(Math.random() * 10);
     b.trl = trl;
 
-    var l = DB.listings.find(function(x){ return x.id === b.listingId; });
+    var l = window.DB.listings.find(function(x){ return x.id === b.listingId; });
     if (l) l.status = 'booked';
 
-    renderUserBookings();
-    openPdfSlip(b.id);
+    window.renderUserBookings();
+    window.openPdfSlip(b.id);
   }
-}
+};
 
-function openPdfSlip(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
+window.openPdfSlip = function(id) {
+  var b = window.DB.bookings.find(function(x){ return x.id === id; });
   if (!b) return;
-  var sym = (COUNTRY_CONFIG[b.country] && COUNTRY_CONFIG[b.country].sym) || '₹';
+  var sym = (window.COUNTRY_CONFIG[b.country] && window.COUNTRY_CONFIG[b.country].sym) || '₹';
 
   $('modalSlot').innerHTML = '<div class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm p-3 overflow-y-auto flex items-center justify-center">' +
     '<div class="w-full max-w-[420px] bg-white rounded-[24px] p-4 shadow-2xl">' +
       '<div class="flex justify-between items-center mb-2">' +
-        '<button type="button" onclick="closeModal()" class="text-xs font-bold text-slate-500 cursor-pointer">✕ Close</button>' +
+        '<button type="button" onclick="window.closeModal()" class="text-xs font-bold text-slate-500 cursor-pointer">✕ Close</button>' +
         '<button type="button" onclick="window.print()" class="px-3 py-1 bg-[#044E3B] text-white text-[11px] font-bold rounded-full cursor-pointer">🖨 Print / PDF</button>' +
       '</div>' +
       '<div id="pdfPrintWrapper" class="bg-white p-3 border border-slate-200 rounded-xl text-slate-800 text-[11px]">' +
@@ -832,22 +830,22 @@ function openPdfSlip(id) {
       '</div>' +
     '</div>' +
   '</div>';
-}
+};
 
-function handleCountryChange(code) {
-  var conf = COUNTRY_CONFIG[code] || COUNTRY_CONFIG.IN;
+window.handleCountryChange = function(code) {
+  var conf = window.COUNTRY_CONFIG[code] || window.COUNTRY_CONFIG.IN;
   $('oDialCode').textContent = conf.dial;
   $('oCurrSymbol1').textContent = conf.sym;
   $('oCurrSymbol2').textContent = conf.sym;
-}
+};
 
-function lockExactMapLocation() {
-  lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
+window.lockExactMapLocation = function() {
+  window.lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
   $('mapLockText').textContent = "✓ Map Location Locked";
   $('mapLockBtn').className = "w-full py-2.5 px-3 rounded-full border border-emerald-600 bg-emerald-50 text-emerald-800 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer";
-}
+};
 
-function handleOwnerSubmit(e) {
+window.handleOwnerSubmit = function(e) {
   e.preventDefault();
   var c = $('oCountry').value;
   var house = $('oHouse').value.trim();
@@ -870,107 +868,106 @@ function handleOwnerSubmit(e) {
     rent: rent,
     deposit: parseFloat($('oDep').value) || 0,
     rules: $('oRules').value.trim(),
-    lat: 28.6139,
-    lng: 77.2090,
+    lat: window.lockedExactCoord.lat,
+    lng: window.lockedExactCoord.lng,
     photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'],
     status: 'available'
   };
 
-  DB.listings.unshift(newListing);
+  window.DB.listings.unshift(newListing);
   e.target.reset();
   alert("Room published for 90 Days!");
-  go('home');
-}
+  window.go('home');
+};
 
-function toggleOwnerView(mode) {
+window.toggleOwnerView = function(mode) {
   if (mode === 'mine') {
     $('ownerMyListingsWrap').classList.remove('hidden');
     $('ownerListingForm').classList.add('hidden');
-    renderOwnerListings();
+    window.renderOwnerListings();
   } else {
     $('ownerMyListingsWrap').classList.add('hidden');
     $('ownerListingForm').classList.remove('hidden');
   }
-}
+};
 
-function renderOwnerListings() {
-  var mine = DB.listings;
+window.renderOwnerListings = function() {
+  var mine = window.DB.listings;
   $('toggleOwnerListBtn').textContent = "My Listings (" + mine.length + ")";
   $('ownerListingsContainer').innerHTML = mine.map(function(l) {
     return '<div class="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center gap-2.5">' +
-      '<img src="' + l.photos[0]" class="w-12 h-12 rounded-lg object-cover">' +
+      '<img src="' + l.photos[0] + '" class="w-12 h-12 rounded-lg object-cover">' +
       '<div class="flex-1 min-w-0">' +
         '<div class="font-bold text-xs truncate">' + esc(l.houseName) + '</div>' +
         '<div class="text-[10px] text-emerald-800 font-extrabold">₹' + Number(l.rent).toLocaleString() + ' • ' + l.status + '</div>' +
       '</div>' +
-      '<button type="button" onclick="adminDeleteListing(\'' + l.id + '\')" class="px-2 py-0.5 bg-red-50 text-red-600 rounded-full font-bold text-[9.5px] cursor-pointer">Delete</button>' +
+      '<button type="button" onclick="window.adminDeleteListing(\'' + l.id + '\')" class="px-2 py-0.5 bg-red-50 text-red-600 rounded-full font-bold text-[9.5px] cursor-pointer">Delete</button>' +
     '</div>';
   }).join('') || '<div class="text-xs text-slate-400">No rooms listed by you yet.</div>';
-}
+};
 
-function renderAdminView() {
-  $('adminStatsGrid').innerHTML = '<div class="bg-white border rounded-xl p-2 text-center"><div class="font-extrabold text-sm text-slate-900">' + DB.listings.length + '</div><div class="text-[8px] font-bold text-slate-400 uppercase">Listings</div></div>' +
-    '<div class="bg-white border rounded-xl p-2 text-center"><div class="font-extrabold text-sm text-slate-900">' + DB.bookings.length + '</div><div class="text-[8px] font-bold text-slate-400 uppercase">Bookings</div></div>' +
+window.renderAdminView = function() {
+  $('adminStatsGrid').innerHTML = '<div class="bg-white border rounded-xl p-2 text-center"><div class="font-extrabold text-sm text-slate-900">' + window.DB.listings.length + '</div><div class="text-[8px] font-bold text-slate-400 uppercase">Listings</div></div>' +
+    '<div class="bg-white border rounded-xl p-2 text-center"><div class="font-extrabold text-sm text-slate-900">' + window.DB.bookings.length + '</div><div class="text-[8px] font-bold text-slate-400 uppercase">Bookings</div></div>' +
     '<div class="bg-white border rounded-xl p-2 text-center"><div class="font-extrabold text-sm text-emerald-700">Online</div><div class="text-[8px] font-bold text-slate-400 uppercase">System</div></div>';
 
-  $('adminListingsControl').innerHTML = DB.listings.map(function(l) {
+  $('adminListingsControl').innerHTML = window.DB.listings.map(function(l) {
     return '<div class="p-2 border rounded-xl flex items-center justify-between text-xs">' +
       '<div><b>' + esc(l.houseName) + '</b> (' + esc(l.city) + ')</div>' +
-      '<button type="button" onclick="adminDeleteListing(\'' + l.id + '\')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[9.5px] cursor-pointer">Delete</button>' +
+      '<button type="button" onclick="window.adminDeleteListing(\'' + l.id + '\')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[9.5px] cursor-pointer">Delete</button>' +
     '</div>';
   }).join('');
 
-  $('adminBookingsControl').innerHTML = DB.bookings.map(function(b) {
+  $('adminBookingsControl').innerHTML = window.DB.bookings.map(function(b) {
     return '<div class="p-2 border rounded-xl flex items-center justify-between text-xs">' +
       '<div><b>' + esc(b.houseName) + '</b>: Guest ' + esc(b.userName) + '</div>' +
-      '<button type="button" onclick="adminCancelBooking(\'' + b.id + '\')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[9.5px] cursor-pointer">Cancel</button>' +
+      '<button type="button" onclick="window.adminCancelBooking(\'' + b.id + '\')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[9.5px] cursor-pointer">Cancel</button>' +
     '</div>';
   }).join('') || '<div class="text-xs text-slate-400">No bookings</div>';
-}
+};
 
-function adminDeleteListing(id) {
+window.adminDeleteListing = function(id) {
   if (confirm("Admin: Delete this room?")) {
-    DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
-    renderAdminView();
-    renderHomeGrid();
-    renderOwnerListings();
+    window.DB.listings = window.DB.listings.filter(function(x){ return x.id !== id; });
+    window.renderAdminView();
+    window.renderHomeGrid();
+    window.renderOwnerListings();
   }
-}
+};
 
-function adminCancelBooking(id) {
+window.adminCancelBooking = function(id) {
   if (confirm("Admin: Cancel this booking?")) {
-    var b = DB.bookings.find(function(x){ return x.id === id; });
+    var b = window.DB.bookings.find(function(x){ return x.id === id; });
     if (b) {
       b.status = 'cancelled';
-      var l = DB.listings.find(function(x){ return x.id === b.listingId; });
+      var l = window.DB.listings.find(function(x){ return x.id === b.listingId; });
       if (l) l.status = 'available';
-      renderAdminView();
-      renderUserBookings();
-      renderHomeGrid();
+      window.renderAdminView();
+      window.renderUserBookings();
+      window.renderHomeGrid();
     }
   }
-}
+};
 
-function onSearchScreenInput(v) {
+window.onSearchScreenInput = function(v) {
   var q = v.trim().toLowerCase();
-  var filtered = DB.listings.filter(function(l) {
+  var filtered = window.DB.listings.filter(function(l) {
     return l.status === 'available' && (
       l.houseName.toLowerCase().indexOf(q) !== -1 ||
       l.city.toLowerCase().indexOf(q) !== -1 ||
       l.address.toLowerCase().indexOf(q) !== -1
     );
   });
-  $('searchGridList').innerHTML = filtered.map(function(l){ return createRoomCardHTML(l); }).join('');
-}
-
-function renderSearchGrid() {
-  $('searchGridList').innerHTML = DB.listings.filter(function(l){ return l.status === 'available'; }).map(function(l){ return createRoomCardHTML(l); }).join('');
-}
-
-window.onload = function() {
-  initSeed();
-  renderHomeGrid();
+  $('searchGridList').innerHTML = filtered.map(function(l){ return window.createRoomCardHTML(l); }).join('');
 };
+
+window.renderSearchGrid = function() {
+  $('searchGridList').innerHTML = window.DB.listings.filter(function(l){ return l.status === 'available'; }).map(function(l){ return window.createRoomCardHTML(l); }).join('');
+};
+
+// Immediate Launch without waiting for heavy external loaders
+window.initSeed();
+window.renderHomeGrid();
 </script>
 </body>
 </html>
