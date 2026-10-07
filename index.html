@@ -5,31 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>REHZO — Find Your Perfect Room</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        forest: { 800: '#064E3B', 900: '#043A2C', 950: '#02231A' },
-        emeraldBrand: '#006A4E'
-      },
-      fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-        sora: ['Sora', 'sans-serif']
-      }
-    }
-  }
-}
-</script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-action: manipulation; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
-.glass-header { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(14px); }
 .app-view { display: none; }
 .app-view.on { display: block; }
 .room-card-img { height: 110px; width: 100%; object-fit: cover; }
@@ -37,8 +18,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
   background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px);
   height: 32px;
 }
-.modal-backdrop { display: none; }
-.modal-backdrop.open { display: block; }
 @media print {
   body * { visibility: hidden; }
   #pdfPrintWrapper, #pdfPrintWrapper * { visibility: visible; }
@@ -46,10 +25,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
 }
 </style>
 </head>
-<body class="text-slate-800 pb-[84px] select-none">
+<body class="text-slate-800 pb-[84px]">
 
 <!-- ================= FIXED TOPBAR ================= -->
-<header class="sticky top-0 z-30 glass-header border-b border-slate-100 shadow-sm">
+<header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
   <div class="max-w-[500px] mx-auto px-4 py-2.5 flex items-center justify-between">
     <div class="flex items-center gap-2 cursor-pointer" onclick="go('home')">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#044E3B] to-[#006A4E] flex items-center justify-center text-white shadow-sm shrink-0">
@@ -59,7 +38,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
         </svg>
       </div>
       <div>
-        <div class="font-extrabold text-[17px] text-slate-900 leading-none tracking-tight">REHZO</div>
+        <div class="font-extrabold text-[17px] text-slate-900 leading-none">REHZO</div>
         <div class="text-[9px] font-bold text-emerald-800 tracking-wider mt-0.5">Find Your Perfect Room</div>
       </div>
     </div>
@@ -75,15 +54,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
 </header>
 
 <!-- ================= MAIN CONTAINER ================= -->
-<main class="max-w-[500px] mx-auto min-h-screen relative z-10">
+<main class="max-w-[500px] mx-auto min-h-screen">
 
   <!-- VIEW 1: HOME -->
   <section id="view-home" class="app-view on px-3.5 pt-2.5">
-    
     <!-- Compact Banner -->
     <div class="rounded-[20px] bg-gradient-to-br from-[#044E3B] via-[#055B45] to-[#013527] text-white p-3.5 shadow-sm relative overflow-hidden">
       <div>
-        <h1 class="font-sora font-extrabold text-[17px] leading-tight">Better Rooms, Brighter Days</h1>
+        <h1 class="font-bold text-[17px] leading-tight" style="font-family:'Sora',sans-serif;">Better Rooms, Brighter Days</h1>
         <p class="text-[10.5px] text-emerald-100/80 mt-0.5 font-medium">Find, book & settle in your verified space.</p>
       </div>
       
@@ -135,7 +113,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
 
     <!-- Header -->
     <div class="flex items-center justify-between mt-2.5 mb-1.5 px-1">
-      <h3 class="font-sora font-extrabold text-[15px] text-slate-900">Available Rooms</h3>
+      <h3 class="font-bold text-[15px] text-slate-900" style="font-family:'Sora',sans-serif;">Available Rooms</h3>
       <span class="text-[11px] font-bold text-emerald-800 cursor-pointer" onclick="resetFiltersAndShowAll()">Reset & View All</span>
     </div>
 
@@ -145,7 +123,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
 
   <!-- VIEW 2: SEARCH -->
   <section id="view-search" class="app-view px-3.5 pt-3">
-    <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Search Stays</h2>
+    <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Search Stays</h2>
     <p class="text-[11px] text-slate-500 mb-2.5">Find verified rooms across all cities</p>
     <div class="bg-white rounded-full border border-slate-200 px-3.5 py-1.5 flex items-center shadow-sm mb-3">
       <input id="searchInputField" oninput="onSearchScreenInput(this.value)" placeholder="Search city, area, house name…" class="flex-1 text-[12.5px] outline-none">
@@ -157,26 +135,25 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
   <section id="view-near" class="app-view px-3.5 pt-3">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Near Me 📍</h2>
+        <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Near Me 📍</h2>
         <p class="text-[11px] text-slate-500 font-semibold">Strictly within <b class="text-emerald-700">10 km</b> radius</p>
       </div>
       <button type="button" onclick="getUserGeoLocation()" class="px-3 py-1 bg-[#044E3B] text-white text-[10.5px] font-extrabold rounded-full shadow-sm cursor-pointer">Refresh GPS</button>
     </div>
-    <div id="nearMap" class="mt-2.5 rounded-[18px] overflow-hidden border border-slate-200 shadow-sm" style="height: 180px;"></div>
-    <div id="nearStatusText" class="text-[10.5px] font-bold text-slate-500 mt-2">Checking GPS location…</div>
+    <div id="nearStatusText" class="text-[11px] font-bold text-slate-500 mt-2 p-2 bg-slate-100 rounded-xl">Locating rooms near you…</div>
     <div id="nearRoomsList" class="grid grid-cols-2 gap-2.5 mt-2.5 pb-6"></div>
   </section>
 
   <!-- VIEW 4: MY BOOKINGS -->
   <section id="view-bookings" class="app-view px-3.5 pt-3 pb-8">
-    <h2 class="font-sora font-extrabold text-[19px] text-slate-900">My Bookings</h2>
+    <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">My Bookings</h2>
     <div class="mt-3 space-y-2.5" id="userBookingsList"></div>
   </section>
 
   <!-- VIEW 5: OWNER -->
   <section id="view-owner" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
-      <h2 class="font-sora font-extrabold text-[19px] text-slate-900">List Your Property</h2>
+      <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">List Your Property</h2>
       <button type="button" onclick="toggleOwnerView('mine')" id="toggleOwnerListBtn" class="text-[11.5px] font-bold text-emerald-800 cursor-pointer">My Listings (0)</button>
     </div>
 
@@ -185,7 +162,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
       <button type="button" onclick="toggleOwnerView('form')" class="w-full py-2 bg-slate-100 rounded-full font-bold text-xs text-slate-600 cursor-pointer">+ Add New Listing</button>
     </div>
 
-    <!-- 8-Point Listing Form -->
     <form id="ownerListingForm" onsubmit="handleOwnerSubmit(event)" class="space-y-3">
       <div class="grid grid-cols-2 gap-2">
         <div>
@@ -261,7 +237,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Amenities</label>
-          <input id="oAmenities" placeholder="WiFi, AC, Parking, Kitchen" class="w-full bg-white border border-slate-200 text-[12px] font-semibold px-3 py-2 rounded-full outline-none shadow-sm">
+          <input id="oAmenities" placeholder="WiFi, AC, Parking" class="w-full bg-white border border-slate-200 text-[12px] font-semibold px-3 py-2 rounded-full outline-none shadow-sm">
         </div>
         <div>
           <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Suitable For</label>
@@ -295,7 +271,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
         <button type="button" onclick="lockExactMapLocation()" id="mapLockBtn" class="w-full py-2.5 px-3 rounded-full border border-slate-300 bg-white text-slate-700 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
           <span>📍</span> <span id="mapLockText">Use Exact Map Location *</span>
         </button>
-        <p class="text-[9.5px] text-slate-400 mt-1 font-semibold">Tapping locks GPS coords. Hidden until booking accepted.</p>
       </div>
 
       <div>
@@ -303,13 +278,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
         <textarea id="oRules" rows="2" placeholder="e.g. Gate closes at 10 PM, No smoking…" class="w-full bg-white border border-slate-200 rounded-[16px] p-2.5 text-[12px] font-semibold outline-none shadow-sm" required></textarea>
       </div>
 
-      <div>
-        <label class="text-[10.5px] font-extrabold text-slate-600 block mb-0.5">Upload Room Photos (Max 3)</label>
-        <div class="grid grid-cols-3 gap-2" id="photoPreviewBox"></div>
-        <input type="file" id="photoFileInput" accept="image/*" multiple onchange="onFilePicked(event)" class="mt-1.5 text-[10.5px] text-slate-500 w-full file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[10.5px] file:font-bold file:bg-[#044E3B] file:text-white cursor-pointer">
-      </div>
-
-      <button type="submit" class="w-full py-3 bg-gradient-to-r from-[#044E3B] to-[#006A4E] text-white font-sora font-extrabold text-[13px] rounded-full shadow-md cursor-pointer">
+      <button type="submit" class="w-full py-3 bg-gradient-to-r from-[#044E3B] to-[#006A4E] text-white font-extrabold text-[13px] rounded-full shadow-md cursor-pointer">
         Publish Listing • 90 Days Free
       </button>
     </form>
@@ -318,17 +287,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
   <!-- VIEW 6: ADMIN PANEL -->
   <section id="view-admin" class="app-view px-3.5 pt-3 pb-10">
     <div class="flex items-center justify-between mb-2.5">
-      <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Admin Control Panel 🔐</h2>
+      <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Admin Control Panel 🔐</h2>
       <button type="button" onclick="go('home')" class="text-xs font-bold text-slate-500 cursor-pointer">Close</button>
     </div>
-    
     <div id="adminStatsGrid" class="grid grid-cols-3 gap-2 mb-3"></div>
-
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm mb-3">
       <h4 class="font-extrabold text-xs text-slate-800 uppercase mb-2">Live Listings (Admin Control)</h4>
       <div id="adminListingsControl" class="space-y-1.5"></div>
     </div>
-
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm">
       <h4 class="font-extrabold text-xs text-slate-800 uppercase mb-2">Bookings Control</h4>
       <div id="adminBookingsControl" class="space-y-1.5"></div>
@@ -337,13 +303,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
 
   <!-- VIEW 7: NOTIFICATIONS -->
   <section id="view-notifications" class="app-view px-3.5 pt-3 pb-8">
-    <h2 class="font-sora font-extrabold text-[19px] text-slate-900">Notifications</h2>
+    <h2 class="font-bold text-[19px] text-slate-900" style="font-family:'Sora',sans-serif;">Notifications</h2>
     <div class="mt-2.5 p-4 bg-white rounded-2xl border text-center text-xs text-slate-400 font-bold">No new notifications</div>
   </section>
 </main>
 
 <!-- ================= FIXED BOTTOM NAVIGATION ================= -->
-<nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-md">
+<nav class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 shadow-md">
   <div class="max-w-[500px] mx-auto grid grid-cols-5 py-2">
     <button type="button" data-nav="home" onclick="go('home')" class="bnav flex flex-col items-center justify-center text-[#044E3B] cursor-pointer">
       <span class="text-[18px]">⌂</span>
@@ -368,135 +334,15 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAF9; touch-
   </div>
 </nav>
 
-<!-- ================= BOOKING MODAL (DEFAULT CLOSED & DISPLAY NONE) ================= -->
-<div id="bookingModal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-  <div class="max-w-[460px] mx-auto bg-white rounded-[24px] p-4 shadow-2xl my-6">
-    <div class="flex items-center justify-between border-b pb-2.5">
-      <h3 class="font-sora font-extrabold text-[16px] text-slate-900">Request Room Booking</h3>
-      <button type="button" onclick="closeBookingModal()" class="w-6 h-6 rounded-full bg-slate-100 font-bold text-xs cursor-pointer">✕</button>
-    </div>
+<!-- ================= DYNAMIC MODALS (ONLY INSERTED WHEN OPENED) ================= -->
+<div id="modalSlot"></div>
 
-    <div class="mt-3 space-y-2.5">
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-[10px] font-extrabold text-slate-600 block mb-0.5">Name *</label>
-          <input id="bkName" placeholder="Full Name" class="w-full bg-slate-50 border border-slate-200 text-[12px] font-semibold px-3 py-1.5 rounded-full outline-none" required>
-        </div>
-        <div>
-          <label class="text-[10px] font-extrabold text-slate-600 block mb-0.5">Phone No *</label>
-          <input id="bkPhone" placeholder="Mobile Number" class="w-full bg-slate-50 border border-slate-200 text-[12px] font-semibold px-3 py-1.5 rounded-full outline-none" required>
-        </div>
-      </div>
-
-      <div>
-        <label class="text-[10px] font-extrabold text-slate-600 block mb-0.5">Gmail (optional)</label>
-        <input id="bkGmail" type="email" placeholder="you@gmail.com" class="w-full bg-slate-50 border border-slate-200 text-[12px] font-semibold px-3 py-1.5 rounded-full outline-none">
-      </div>
-
-      <div>
-        <label class="text-[10px] font-extrabold text-slate-600 block mb-0.5">Your Old Address *</label>
-        <input id="bkOldAddr" placeholder="Permanent/previous address" class="w-full bg-slate-50 border border-slate-200 text-[12px] font-semibold px-3 py-1.5 rounded-full outline-none" required>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-[10px] font-extrabold text-slate-600 block mb-0.5">Kab book karna hai *</label>
-          <input id="bkDate" type="date" class="w-full bg-slate-50 border border-slate-200 text-[11.5px] font-semibold px-3 py-1.5 rounded-full outline-none" required>
-        </div>
-        <div>
-          <label class="text-[10px] font-extrabold text-slate-600 block mb-0.5">Kitne month k liy *</label>
-          <select id="bkMonths" onchange="calcBookingRent()" class="w-full bg-slate-50 border border-slate-200 text-[11.5px] font-bold px-3 py-1.5 rounded-full outline-none">
-            <option value="1">1 Month</option>
-            <option value="2">2 Months</option>
-            <option value="3">3 Months</option>
-            <option value="6">6 Months</option>
-            <option value="12">12 Months</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-2.5 text-[11px] space-y-0.5">
-        <div class="flex justify-between font-semibold text-slate-600"><span>Monthly Rent:</span> <span id="calcMonthlyRentText">₹0</span></div>
-        <div class="flex justify-between font-semibold text-slate-600"><span>Security Deposit:</span> <span id="calcDepositText">₹0</span></div>
-        <div class="border-t border-emerald-200 pt-1 flex justify-between font-extrabold text-emerald-900 text-xs"><span>Total Payable:</span> <span id="calcTotalRentText">₹0</span></div>
-      </div>
-
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-2 text-[10px] text-amber-900 font-semibold">
-        🔒 Privacy Note: Owner ka Phone No aur Gmail request accept hone ke baad My Bookings me dikhega.
-      </div>
-
-      <button type="button" onclick="submitBookingRequest()" class="w-full py-2.5 bg-[#044E3B] text-white font-sora font-extrabold text-[12.5px] rounded-full shadow-md cursor-pointer">
-        Send Booking Request →
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= 12-DIGIT TRL & PDF MODAL (DEFAULT CLOSED) ================= -->
-<div id="pdfModal" class="modal-backdrop fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm p-3 overflow-y-auto">
-  <div class="max-w-[420px] mx-auto bg-white rounded-[24px] p-4 shadow-2xl my-6">
-    <div class="flex justify-between items-center mb-2.5">
-      <button type="button" onclick="closePdfModal()" class="text-xs font-bold text-slate-500 cursor-pointer">✕ Close</button>
-      <button type="button" onclick="window.print()" class="px-3 py-1 bg-[#044E3B] text-white text-[11px] font-bold rounded-full cursor-pointer">🖨 Print / PDF</button>
-    </div>
-
-    <!-- Official PDF Slip -->
-    <div id="pdfPrintWrapper" class="bg-white p-3.5 border border-slate-200 rounded-xl text-slate-800 text-[11px]">
-      <div class="flex items-center justify-between border-b pb-2">
-        <div class="flex items-center gap-1.5">
-          <div class="w-5 h-5 rounded bg-emerald-700 text-white flex items-center justify-center font-bold text-[10px]">⌂</div>
-          <div>
-            <div class="font-extrabold text-[13px] text-slate-900">Rehzo</div>
-            <div class="text-[7.5px] text-slate-400 font-semibold">Find Your Perfect Room</div>
-          </div>
-        </div>
-        <div class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-extrabold">● CONFIRMED</div>
-      </div>
-
-      <div class="mt-2.5 p-2 rounded-lg border border-emerald-300 bg-emerald-50/50 text-center">
-        <div class="text-[8px] font-extrabold tracking-widest text-emerald-800 uppercase">OFFICIAL 12-DIGIT TRL NUMBER</div>
-        <div id="pdfTrlNumber" class="font-mono font-extrabold text-lg tracking-wider text-slate-900">839472615028</div>
-        <div class="text-[7.5px] text-slate-400 font-medium">🔒 Permanent Non-Reusable Record</div>
-      </div>
-
-      <div class="barcode-strip my-2.5 rounded"></div>
-
-      <div class="space-y-1">
-        <div class="font-bold text-[10px] text-emerald-900">🏠 1. ROOM & PROPERTY DETAILS</div>
-        <div class="flex justify-between text-slate-500"><span>Property Title:</span> <b id="pdfPropTitle" class="text-slate-800">1 RK Room</b></div>
-        <div class="flex justify-between text-slate-500"><span>Monthly Rent:</span> <b id="pdfMonthlyRent" class="text-slate-800">₹5000 / month</b></div>
-        <div class="flex justify-between text-slate-500"><span>Check-in Date:</span> <b id="pdfCheckIn" class="text-slate-800">28 Sep 2026</b></div>
-        <div class="flex justify-between text-slate-500"><span>Stay Duration:</span> <b id="pdfDuration" class="text-slate-800">6 Months</b></div>
-      </div>
-
-      <div class="mt-2 pt-2 border-t space-y-1">
-        <div class="font-bold text-[10px] text-emerald-900">👤 2. PROPERTY OWNER DETAILS (मकान मालिक)</div>
-        <div class="flex justify-between text-slate-500"><span>Owner Name:</span> <b id="pdfOwnerName" class="text-slate-800">Amit Kumar</b></div>
-        <div class="flex justify-between text-slate-500"><span>Owner Contact:</span> <b id="pdfOwnerPhone" class="text-slate-800">+91 9876543210</b></div>
-        <div class="flex justify-between text-slate-500"><span>Owner Address:</span> <b id="pdfOwnerAddr" class="text-slate-800 text-right max-w-[180px]">Patna, Bihar</b></div>
-      </div>
-
-      <div class="mt-2 pt-1.5 border-t text-[7.5px] text-slate-400 text-center">
-        Verified booking proof under REHZO platform conditions.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ================= ROBUST INLINE JAVASCRIPT ENGINE ================= -->
 <script>
-window.onerror = function(msg, url, line) {
-  console.log("Error caught safely: " + msg + " at " + line);
-  return true;
-};
-
-var DB = { listings: [], bookings: [], notifications: [] };
+var DB = { listings: [], bookings: [] };
 var currentUser = { uid: 'usr_admin', name: 'Master User', phone: '9876543210', role: 'admin' };
 var activeBookingRoom = null;
 var currentGeo = { lat: 28.6139, lng: 77.2090 };
-var tempPhotos = [];
 var lockedExactCoord = null;
-var nearMapInstance = null;
 
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
@@ -617,8 +463,7 @@ function initSeed() {
       ownerGmail: 'sunita@gmail.com',
       ownerAddress: 'Andheri West, Mumbai',
       country: 'IN',
-      status: 'confirmed',
-      createdAt: Date.now() - 86400000
+      status: 'confirmed'
     }
   ];
 }
@@ -675,7 +520,7 @@ function createRoomCardHTML(l) {
   var currSym = (COUNTRY_CONFIG[l.country] && COUNTRY_CONFIG[l.country].sym) || '₹';
   return '<div class="bg-white border border-slate-200 rounded-[16px] overflow-hidden shadow-sm flex flex-col justify-between">' +
       '<div class="relative">' +
-        '<img src="' + l.photos[0] + '" class="room-card-img" alt="' + esc(l.houseName) + '" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80\'">' +
+        '<img src="' + l.photos[0] + '" class="room-card-img" alt="' + esc(l.houseName) + '">' +
         '<span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-white/90 text-emerald-800 font-extrabold text-[8.5px]">● Available</span>' +
       '</div>' +
       '<div class="p-2.5 flex flex-col justify-between flex-1">' +
@@ -767,50 +612,28 @@ function filterCategory(cat, btn) {
 }
 
 function renderNearMeView() {
-  $('nearStatusText').innerHTML = "Scanning 10 km radius around: " + currentGeo.lat.toFixed(4) + ", " + currentGeo.lng.toFixed(4);
-  setTimeout(function() {
-    try {
-      if (!nearMapInstance) {
-        nearMapInstance = L.map('nearMap').setView([currentGeo.lat, currentGeo.lng], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearMapInstance);
-      } else {
-        nearMapInstance.setView([currentGeo.lat, currentGeo.lng], 12);
-        nearMapInstance.invalidateSize();
+  var nearRooms = [];
+  DB.listings.forEach(function(l) {
+    if (l.status === 'available' && l.lat && l.lng) {
+      var dist = getDistanceKm(currentGeo.lat, currentGeo.lng, l.lat, l.lng);
+      if (dist <= 10) {
+        nearRooms.push(Object.assign({}, l, { distKm: dist }));
       }
-
-      nearMapInstance.eachLayer(function(layer) {
-        if (layer instanceof L.Marker) nearMapInstance.removeLayer(layer);
-      });
-
-      L.marker([currentGeo.lat, currentGeo.lng]).addTo(nearMapInstance).bindPopup("You are here").openPopup();
-
-      var nearRooms = [];
-      DB.listings.forEach(function(l) {
-        if (l.status === 'available' && l.lat && l.lng) {
-          var dist = getDistanceKm(currentGeo.lat, currentGeo.lng, l.lat, l.lng);
-          if (dist <= 10) {
-            nearRooms.push(Object.assign({}, l, { distKm: dist }));
-            L.marker([l.lat, l.lng]).addTo(nearMapInstance).bindPopup("<b>" + l.houseName + "</b><br>" + dist.toFixed(1) + " km");
-          }
-        }
-      });
-
-      if (nearRooms.length > 0) {
-        $('nearStatusText').innerHTML = '<span class="text-emerald-700 font-bold">✓ ' + nearRooms.length + ' room(s) within 10 km</span>';
-        $('nearRoomsList').innerHTML = nearRooms.map(function(l){ return createRoomCardHTML(l); }).join('');
-      } else {
-        $('nearStatusText').innerHTML = '<span class="text-amber-700 font-bold">No rooms available within 10 km radius.</span>';
-        $('nearRoomsList').innerHTML = '<div class="col-span-2 text-center py-6 text-xs text-slate-400">Try exploring other cities via Search.</div>';
-      }
-    } catch(err) {
-      console.log(err);
     }
-  }, 100);
+  });
+
+  if (nearRooms.length > 0) {
+    $('nearStatusText').innerHTML = '<span class="text-emerald-700 font-bold">✓ ' + nearRooms.length + ' room(s) within 10 km</span>';
+    $('nearRoomsList').innerHTML = nearRooms.map(function(l){ return createRoomCardHTML(l); }).join('');
+  } else {
+    $('nearStatusText').innerHTML = '<span class="text-amber-700 font-bold">No rooms available within 10 km radius.</span>';
+    $('nearRoomsList').innerHTML = '<div class="col-span-2 text-center py-6 text-xs text-slate-400">Try exploring other cities via Search.</div>';
+  }
 }
 
 function getUserGeoLocation() {
   if (navigator.geolocation) {
-    $('nearStatusText').textContent = "Getting current GPS coordinates…";
+    $('nearStatusText').textContent = "Detecting GPS location…";
     navigator.geolocation.getCurrentPosition(function(pos) {
       currentGeo.lat = pos.coords.latitude;
       currentGeo.lng = pos.coords.longitude;
@@ -823,19 +646,43 @@ function getUserGeoLocation() {
   }
 }
 
+// ================= DYNAMIC MODALS =================
 function openBookingModal(listingId) {
   var l = DB.listings.find(function(x){ return x.id === listingId; });
   if (!l) return;
   activeBookingRoom = l;
-  $('bkName').value = currentUser.name !== 'Master User' ? currentUser.name : '';
-  $('bkPhone').value = currentUser.phone || '';
-  $('bkDate').value = new Date().toISOString().slice(0, 10);
-  calcBookingRent();
-  $('bookingModal').classList.add('open');
+  var sym = (COUNTRY_CONFIG[l.country] && COUNTRY_CONFIG[l.country].sym) || '₹';
+  
+  $('modalSlot').innerHTML = '<div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto flex items-center justify-center">' +
+    '<div class="w-full max-w-[440px] bg-white rounded-[24px] p-4 shadow-2xl">' +
+      '<div class="flex items-center justify-between border-b pb-2">' +
+        '<h3 class="font-bold text-[15px] text-slate-900">Request Room Booking</h3>' +
+        '<button type="button" onclick="closeModal()" class="w-6 h-6 rounded-full bg-slate-100 font-bold text-xs cursor-pointer">✕</button>' +
+      '</div>' +
+      '<div class="mt-2.5 space-y-2">' +
+        '<div class="grid grid-cols-2 gap-2">' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Name *</label><input id="bkName" value="' + (currentUser.name !== 'Master User' ? currentUser.name : '') + '" placeholder="Full Name" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Phone No *</label><input id="bkPhone" value="' + (currentUser.phone || '') + '" placeholder="Mobile" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+        '</div>' +
+        '<div><label class="text-[10px] font-bold text-slate-500">Gmail (optional)</label><input id="bkGmail" placeholder="you@gmail.com" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+        '<div><label class="text-[10px] font-bold text-slate-500">Your Old Address *</label><input id="bkOldAddr" placeholder="Permanent address" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+        '<div class="grid grid-cols-2 gap-2">' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Check-in Date *</label><input id="bkDate" type="date" value="' + new Date().toISOString().slice(0, 10) + '" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"></div>' +
+          '<div><label class="text-[10px] font-bold text-slate-500">Kitne month k liy *</label><select id="bkMonths" onchange="calcBookingRent()" class="w-full bg-slate-50 border p-1.5 rounded-full text-xs outline-none"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
+        '</div>' +
+        '<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2 text-[11px] space-y-0.5">' +
+          '<div class="flex justify-between"><span>Monthly Rent:</span><span id="calcMonthlyRentText">' + sym + l.rent.toLocaleString() + '</span></div>' +
+          '<div class="flex justify-between"><span>Deposit:</span><span id="calcDepositText">' + sym + (l.deposit || 0).toLocaleString() + '</span></div>' +
+          '<div class="border-t pt-0.5 flex justify-between font-bold text-emerald-900"><span>Total Payable:</span><span id="calcTotalRentText">' + sym + (l.rent + (l.deposit || 0)).toLocaleString() + '</span></div>' +
+        '</div>' +
+        '<button type="button" onclick="submitBookingRequest()" class="w-full py-2 bg-[#044E3B] text-white font-bold text-xs rounded-full cursor-pointer shadow">Send Booking Request →</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
 
-function closeBookingModal() {
-  $('bookingModal').classList.remove('open');
+function closeModal() {
+  $('modalSlot').innerHTML = '';
 }
 
 function calcBookingRent() {
@@ -846,9 +693,9 @@ function calcBookingRent() {
   var deposit = activeBookingRoom.deposit || 0;
   var total = (monthly * m) + deposit;
 
-  $('calcMonthlyRentText').textContent = sym + monthly.toLocaleString();
-  $('calcDepositText').textContent = deposit ? (sym + deposit.toLocaleString()) : 'None';
-  $('calcTotalRentText').textContent = sym + total.toLocaleString();
+  if ($('calcMonthlyRentText')) $('calcMonthlyRentText').textContent = sym + monthly.toLocaleString();
+  if ($('calcDepositText')) $('calcDepositText').textContent = deposit ? (sym + deposit.toLocaleString()) : 'None';
+  if ($('calcTotalRentText')) $('calcTotalRentText').textContent = sym + total.toLocaleString();
 }
 
 function submitBookingRequest() {
@@ -883,12 +730,11 @@ function submitBookingRequest() {
     ownerAddress: activeBookingRoom.address,
     country: activeBookingRoom.country,
     status: 'requested',
-    trl: null,
-    createdAt: Date.now()
+    trl: null
   };
 
   DB.bookings.unshift(newBk);
-  closeBookingModal();
+  closeModal();
   alert("Booking Request Sent to Owner!");
   go('bookings');
 }
@@ -911,7 +757,7 @@ function renderUserBookings() {
         '</div>' +
         '<div class="text-xs text-slate-500 font-medium">Check-in: <b>' + b.checkInDate + '</b> • ' + b.durationMonths + ' Month(s)</div>' +
         '<div class="text-xs font-bold text-emerald-800">Total: ' + currSym + Number(b.totalRent).toLocaleString() + '</div>' +
-        '<div class="p-2.5 rounded-xl ' + (isAccepted ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-slate-50 text-slate-500') + ' text-[11px]">' +
+        '<div class="p-2 rounded-xl ' + (isAccepted ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-slate-50 text-slate-500') + ' text-[11px]">' +
           (isAccepted ? (
             '<div><b>✓ Owner Contact Unlocked:</b> ' + esc(b.ownerName) + '</div>' +
             '<div>📞 <b>Phone:</b> ' + esc(b.ownerPhone) + ' | ✉️ ' + esc(b.ownerGmail) + '</div>' +
@@ -921,9 +767,9 @@ function renderUserBookings() {
           )) +
         '</div>' +
         '<div class="flex gap-2 pt-1">' +
-          (b.status === 'requested' ? '<button type="button" onclick="ownerAcceptsBooking(\'' + b.id + '\')" class="flex-1 py-1.5 bg-emerald-700 text-white font-bold text-[10.5px] rounded-full cursor-pointer">Accept Request (Host Sim)</button>' : '') +
-          (b.status === 'owner_accepted' ? '<button type="button" onclick="userConfirmsBooking(\'' + b.id + '\')" class="flex-1 py-1.5 bg-[#044E3B] text-white font-bold text-[10.5px] rounded-full cursor-pointer">Final Confirm & Issue TRL</button>' : '') +
-          (b.status === 'confirmed' ? '<button type="button" onclick="openPdfSlip(\'' + b.id + '\')" class="flex-1 py-1.5 bg-slate-900 text-white font-bold text-[10.5px] rounded-full cursor-pointer">📄 Official 12-Digit TRL Slip</button>' : '') +
+          (b.status === 'requested' ? '<button type="button" onclick="ownerAcceptsBooking(\'' + b.id + '\')" class="flex-1 py-1 bg-emerald-700 text-white font-bold text-[10.5px] rounded-full cursor-pointer">Accept Request (Host Sim)</button>' : '') +
+          (b.status === 'owner_accepted' ? '<button type="button" onclick="userConfirmsBooking(\'' + b.id + '\')" class="flex-1 py-1 bg-[#044E3B] text-white font-bold text-[10.5px] rounded-full cursor-pointer">Final Confirm & Issue TRL</button>' : '') +
+          (b.status === 'confirmed' ? '<button type="button" onclick="openPdfSlip(\'' + b.id + '\')" class="flex-1 py-1 bg-slate-900 text-white font-bold text-[10.5px] rounded-full cursor-pointer">📄 Official 12-Digit TRL Slip</button>' : '') +
         '</div>' +
       '</div>';
   }).join('');
@@ -958,19 +804,34 @@ function openPdfSlip(id) {
   var b = DB.bookings.find(function(x){ return x.id === id; });
   if (!b) return;
   var sym = (COUNTRY_CONFIG[b.country] && COUNTRY_CONFIG[b.country].sym) || '₹';
-  $('pdfTrlNumber').textContent = b.trl || '839472615028';
-  $('pdfPropTitle').textContent = b.houseName + ' (' + b.roomType + ')';
-  $('pdfMonthlyRent').textContent = sym + b.monthlyRent + ' / month';
-  $('pdfCheckIn').textContent = b.checkInDate;
-  $('pdfDuration').textContent = b.durationMonths + ' Months';
-  $('pdfOwnerName').textContent = b.ownerName;
-  $('pdfOwnerPhone').textContent = b.ownerPhone;
-  $('pdfOwnerAddr').textContent = b.ownerAddress;
-  $('pdfModal').classList.add('open');
-}
 
-function closePdfModal() {
-  $('pdfModal').classList.remove('open');
+  $('modalSlot').innerHTML = '<div class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm p-3 overflow-y-auto flex items-center justify-center">' +
+    '<div class="w-full max-w-[420px] bg-white rounded-[24px] p-4 shadow-2xl">' +
+      '<div class="flex justify-between items-center mb-2">' +
+        '<button type="button" onclick="closeModal()" class="text-xs font-bold text-slate-500 cursor-pointer">✕ Close</button>' +
+        '<button type="button" onclick="window.print()" class="px-3 py-1 bg-[#044E3B] text-white text-[11px] font-bold rounded-full cursor-pointer">🖨 Print / PDF</button>' +
+      '</div>' +
+      '<div id="pdfPrintWrapper" class="bg-white p-3 border border-slate-200 rounded-xl text-slate-800 text-[11px]">' +
+        '<div class="flex items-center justify-between border-b pb-2">' +
+          '<div class="font-bold text-[14px] text-slate-900">Rehzo</div>' +
+          '<div class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">● CONFIRMED</div>' +
+        '</div>' +
+        '<div class="mt-2 p-2 rounded-lg border border-emerald-300 bg-emerald-50 text-center">' +
+          '<div class="text-[8px] font-bold text-emerald-800 uppercase">OFFICIAL 12-DIGIT TRL NUMBER</div>' +
+          '<div class="font-mono font-extrabold text-lg text-slate-900">' + (b.trl || '839472615028') + '</div>' +
+        '</div>' +
+        '<div class="barcode-strip my-2 rounded"></div>' +
+        '<div class="space-y-1">' +
+          '<div class="flex justify-between"><span>Property:</span> <b>' + esc(b.houseName) + '</b></div>' +
+          '<div class="flex justify-between"><span>Monthly Rent:</span> <b>' + sym + b.monthlyRent + '/mo</b></div>' +
+          '<div class="flex justify-between"><span>Check-in:</span> <b>' + b.checkInDate + '</b></div>' +
+          '<div class="flex justify-between"><span>Duration:</span> <b>' + b.durationMonths + ' Months</b></div>' +
+          '<div class="flex justify-between"><span>Owner Name:</span> <b>' + esc(b.ownerName) + '</b></div>' +
+          '<div class="flex justify-between"><span>Owner Phone:</span> <b>' + esc(b.ownerPhone) + '</b></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 function handleCountryChange(code) {
@@ -981,46 +842,9 @@ function handleCountryChange(code) {
 }
 
 function lockExactMapLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      lockedExactCoord = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      $('mapLockText').textContent = "✓ Coordinates Locked (" + pos.coords.latitude.toFixed(3) + ", " + pos.coords.longitude.toFixed(3) + ")";
-      $('mapLockBtn').className = "w-full py-2.5 px-3 rounded-full border border-emerald-600 bg-emerald-50 text-emerald-800 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer";
-    }, function() {
-      lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
-      $('mapLockText').textContent = "✓ Map Location Locked (Default)";
-      $('mapLockBtn').className = "w-full py-2.5 px-3 rounded-full border border-emerald-600 bg-emerald-50 text-emerald-800 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer";
-    });
-  } else {
-    lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
-    $('mapLockText').textContent = "✓ Map Location Locked";
-  }
-}
-
-function onFilePicked(event) {
-  var files = Array.prototype.slice.call(event.target.files, 0, 3 - tempPhotos.length);
-  files.forEach(function(f) {
-    if (!f.type.startsWith('image/')) return;
-    var r = new FileReader();
-    r.onload = function(ev) {
-      if (tempPhotos.length < 3) {
-        tempPhotos.push(ev.target.result);
-        renderPhotoPreview();
-      }
-    };
-    r.readAsDataURL(f);
-  });
-}
-
-function renderPhotoPreview() {
-  $('photoPreviewBox').innerHTML = [0, 1, 2].map(function(i) {
-    return '<div class="h-16 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center relative">' +
-      (tempPhotos[i] ? (
-        '<img src="' + tempPhotos[i] + '" class="w-full h-full object-cover">' +
-        '<button type="button" onclick="tempPhotos.splice(' + i + ',1);renderPhotoPreview();" class="absolute top-1 right-1 w-4 h-4 bg-slate-900 text-white rounded-full text-[9px] cursor-pointer">✕</button>'
-      ) : '<span class="text-slate-300 font-extrabold">+</span>') +
-    '</div>';
-  }).join('');
+  lockedExactCoord = { lat: 28.6139, lng: 77.2090 };
+  $('mapLockText').textContent = "✓ Map Location Locked";
+  $('mapLockBtn').className = "w-full py-2.5 px-3 rounded-full border border-emerald-600 bg-emerald-50 text-emerald-800 font-extrabold text-[12px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer";
 }
 
 function handleOwnerSubmit(e) {
@@ -1028,11 +852,6 @@ function handleOwnerSubmit(e) {
   var c = $('oCountry').value;
   var house = $('oHouse').value.trim();
   var rent = parseFloat($('oRent').value);
-
-  if (!lockedExactCoord) {
-    alert("Please tap 'Use Exact Map Location' first.");
-    return;
-  }
 
   var newListing = {
     id: 'L-' + Date.now().toString(36).toUpperCase(),
@@ -1051,19 +870,14 @@ function handleOwnerSubmit(e) {
     rent: rent,
     deposit: parseFloat($('oDep').value) || 0,
     rules: $('oRules').value.trim(),
-    lat: lockedExactCoord.lat,
-    lng: lockedExactCoord.lng,
-    photos: tempPhotos.length ? tempPhotos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'],
-    status: 'available',
-    createdAt: Date.now()
+    lat: 28.6139,
+    lng: 77.2090,
+    photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'],
+    status: 'available'
   };
 
   DB.listings.unshift(newListing);
   e.target.reset();
-  tempPhotos = [];
-  lockedExactCoord = null;
-  $('mapLockText').textContent = "Use Exact Map Location *";
-  renderPhotoPreview();
   alert("Room published for 90 Days!");
   go('home');
 }
@@ -1084,7 +898,7 @@ function renderOwnerListings() {
   $('toggleOwnerListBtn').textContent = "My Listings (" + mine.length + ")";
   $('ownerListingsContainer').innerHTML = mine.map(function(l) {
     return '<div class="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center gap-2.5">' +
-      '<img src="' + l.photos[0] + '" class="w-12 h-12 rounded-lg object-cover">' +
+      '<img src="' + l.photos[0]" class="w-12 h-12 rounded-lg object-cover">' +
       '<div class="flex-1 min-w-0">' +
         '<div class="font-bold text-xs truncate">' + esc(l.houseName) + '</div>' +
         '<div class="text-[10px] text-emerald-800 font-extrabold">₹' + Number(l.rent).toLocaleString() + ' • ' + l.status + '</div>' +
@@ -1101,21 +915,21 @@ function renderAdminView() {
 
   $('adminListingsControl').innerHTML = DB.listings.map(function(l) {
     return '<div class="p-2 border rounded-xl flex items-center justify-between text-xs">' +
-      '<div><b>' + esc(l.houseName) + '</b> (' + esc(l.city) + ') - ' + l.status + '</div>' +
+      '<div><b>' + esc(l.houseName) + '</b> (' + esc(l.city) + ')</div>' +
       '<button type="button" onclick="adminDeleteListing(\'' + l.id + '\')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[9.5px] cursor-pointer">Delete</button>' +
     '</div>';
   }).join('');
 
   $('adminBookingsControl').innerHTML = DB.bookings.map(function(b) {
     return '<div class="p-2 border rounded-xl flex items-center justify-between text-xs">' +
-      '<div><b>' + esc(b.houseName) + '</b>: Guest ' + esc(b.userName) + ' (' + b.status + ')</div>' +
+      '<div><b>' + esc(b.houseName) + '</b>: Guest ' + esc(b.userName) + '</div>' +
       '<button type="button" onclick="adminCancelBooking(\'' + b.id + '\')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[9.5px] cursor-pointer">Cancel</button>' +
     '</div>';
   }).join('') || '<div class="text-xs text-slate-400">No bookings</div>';
 }
 
 function adminDeleteListing(id) {
-  if (confirm("Admin: Permanently delete this room?")) {
+  if (confirm("Admin: Delete this room?")) {
     DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
     renderAdminView();
     renderHomeGrid();
@@ -1153,11 +967,10 @@ function renderSearchGrid() {
   $('searchGridList').innerHTML = DB.listings.filter(function(l){ return l.status === 'available'; }).map(function(l){ return createRoomCardHTML(l); }).join('');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+window.onload = function() {
   initSeed();
-  renderPhotoPreview();
   renderHomeGrid();
-});
+};
 </script>
 </body>
 </html>
