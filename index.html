@@ -6,10 +6,10 @@
 <title>REHZO — Find Your Perfect Room</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 80px; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
 
 /* Sticky Header */
-.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
+.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
@@ -18,95 +18,95 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #EF4444; display: none; }
 
 /* Wrapper */
-.main-wrapper { max-width: 500px; margin: 0 auto; padding: 12px 14px; }
+.main-wrapper { max-width: 500px; margin: 0 auto; padding: 14px 16px; }
 .view { display: none; }
 .view.active { display: block; }
 
 /* Banner */
-.banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; }
-.banner h2 { font-size: 17px; font-weight: 800; line-height: 1.2; }
-.banner p { font-size: 10.5px; opacity: 0.85; margin-top: 3px; }
-.search-bar { display: flex; background: #fff; border-radius: 30px; padding: 4px 6px 4px 12px; margin-top: 10px; align-items: center; }
+.banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 20px; padding: 16px; color: #fff; box-shadow: 0 4px 12px rgba(4,78,59,0.15); }
+.banner h2 { font-size: 18px; font-weight: 800; line-height: 1.2; }
+.banner p { font-size: 11px; opacity: 0.88; margin-top: 3px; }
+.search-bar { display: flex; background: #fff; border-radius: 30px; padding: 5px 6px 5px 14px; margin-top: 12px; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 .search-bar input { flex: 1; border: none; outline: none; font-size: 12px; font-weight: 600; color: #1E293B; }
-.search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6px 14px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
+.search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 7px 15px; font-size: 11px; font-weight: 800; cursor: pointer; }
 
 /* Filter Bar & Chips */
-.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.pill-select { width: 100%; border: 1px solid #E2E8F0; border-radius: 30px; background: #fff; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
-.chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 4px; }
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.pill-select { width: 100%; border: 1px solid #E2E8F0; border-radius: 30px; background: #fff; padding: 9px 14px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 6px; }
 .chip-row::-webkit-scrollbar { display: none; }
-.chip { border: 1px solid #E2E8F0; border-radius: 20px; background: #fff; padding: 6px 14px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
+.chip { border: 1px solid #E2E8F0; border-radius: 20px; background: #fff; padding: 7px 15px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
 .chip.active { background: #044E3B; color: #fff; border-color: #044E3B; }
 
 /* 2x2 Rooms Grid on Home */
-.section-title { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px; }
-.section-title h3 { font-size: 14px; font-weight: 800; }
+.section-title { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 10px; }
+.section-title h3 { font-size: 14.5px; font-weight: 800; color: #0F172A; }
 .section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
-.room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
-.room-thumb-wrap { position: relative; width: 100%; height: 110px; }
+.room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+.room-thumb-wrap { position: relative; width: 100%; height: 115px; }
 .room-thumb { width: 100%; height: 100%; object-fit: cover; }
-.avail-badge { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.95); color: #044E3B; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.avail-badge { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.96); color: #044E3B; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 .avail-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
-.room-details { padding: 8px; }
+.room-details { padding: 10px; }
 .room-title { font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0F172A; }
-.room-rent { font-size: 12.5px; font-weight: 800; color: #044E3B; margin-top: 2px; }
+.room-rent { font-size: 13px; font-weight: 800; color: #044E3B; margin-top: 2px; }
 .room-city { font-size: 9.5px; color: #64748B; margin-top: 2px; }
-.book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 18px; padding: 6.5px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 6px; }
+.book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 7.5px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 8px; }
 
-/* Sub Header */
-.sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+/* Sub Navigation Header */
+.sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .back-btn-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .back-arrow { font-size: 18px; font-weight: 800; color: #0F172A; }
 .sub-title { font-size: 17px; font-weight: 800; color: #0F172A; }
 
-/* Pill 2-Column Form Fields */
-.form-section-title { font-size: 13px; font-weight: 800; color: #0F172A; margin: 14px 0 8px; }
-.pill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.field-box { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.field-label { font-size: 10.5px; font-weight: 700; color: #334155; }
-.pill-input { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11.5px; font-weight: 600; color: #1E293B; outline: none; }
+/* Spacious Pill 2-Column Form Fields */
+.form-section-title { font-size: 13.5px; font-weight: 800; color: #0F172A; margin: 18px 0 10px; border-top: 1px solid #F1F5F9; padding-top: 14px; }
+.pill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.field-box { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field-label { font-size: 11px; font-weight: 700; color: #334155; }
+.pill-input { width: 100%; padding: 11px 14px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 12px; font-weight: 600; color: #1E293B; outline: none; }
 .pill-input:focus { border-color: #044E3B; }
-.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 10px; width: 100%; }
-.dial-prefix-wrap span { font-size: 11px; font-weight: 700; color: #475569; margin-right: 4px; white-space: nowrap; }
-.dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 6px; font-size: 11.5px; font-weight: 600; background: transparent; }
+.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 6px 0 12px; width: 100%; }
+.dial-prefix-wrap span { font-size: 11.5px; font-weight: 700; color: #475569; margin-right: 4px; white-space: nowrap; }
+.dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 11px 6px; font-size: 12px; font-weight: 600; background: transparent; }
 
-/* Collapsible Dropdown Chips */
-.collapsible-trigger { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11px; font-weight: 700; color: #334155; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-.collapsible-drawer { display: none; margin-top: 6px; padding: 8px; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; flex-direction: column; gap: 6px; }
+/* Dropdown drawers */
+.collapsible-trigger { width: 100%; padding: 11px 14px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11.5px; font-weight: 700; color: #334155; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.collapsible-drawer { display: none; margin-top: 8px; padding: 10px; background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; flex-direction: column; gap: 7px; }
 .collapsible-drawer.open { display: flex; }
-.radio-chip { display: flex; align-items: center; gap: 8px; background: #F1F5F3; border: 1px solid transparent; border-radius: 24px; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
+.radio-chip { display: flex; align-items: center; gap: 8px; background: #F1F5F3; border: 1px solid transparent; border-radius: 24px; padding: 7px 14px; font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
 .radio-chip.selected { background: #E6F3ED; border-color: #044E3B; }
 .circle-indicator { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #044E3B; display: flex; align-items: center; justify-content: center; }
 .radio-chip.selected .circle-indicator::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #044E3B; }
 
 /* Photos Upload & Map */
-.photo-upload-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.photo-add-box { width: 75px; height: 75px; border-radius: 14px; border: 1px dashed #CBD5E1; background: #F1F5F3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 9px; font-weight: 700; color: #044E3B; cursor: pointer; }
-.photo-thumb-preview { width: 75px; height: 75px; border-radius: 14px; object-fit: cover; border: 1px solid #E2E8F0; }
+.photo-upload-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.photo-add-box { width: 80px; height: 80px; border-radius: 16px; border: 1px dashed #CBD5E1; background: #F1F5F3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 9.5px; font-weight: 700; color: #044E3B; cursor: pointer; }
+.photo-thumb-preview { width: 80px; height: 80px; border-radius: 16px; object-fit: cover; border: 1px solid #E2E8F0; }
 .photo-preview-item { position: relative; }
 .photo-del-btn { position: absolute; top: -5px; right: -5px; background: #EF4444; color: #fff; border-radius: 50%; width: 18px; height: 18px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
 
-.map-lock-btn { width: 100%; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; padding: 11px; font-size: 11.5px; font-weight: 800; color: #1E293B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0; }
+.map-lock-btn { width: 100%; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; padding: 13px; font-size: 12px; font-weight: 800; color: #1E293B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 14px 0; }
 .map-lock-btn.locked { border-color: #10B981; color: #044E3B; background: #ECFDF5; }
-.big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; margin-top: 12px; }
+.big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 14px; font-size: 13px; font-weight: 800; cursor: pointer; margin-top: 16px; box-shadow: 0 4px 10px rgba(4,78,59,0.2); }
 
 /* Sub Tabs & Stat Cards */
-.sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
+.sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 4px; gap: 4px; margin-bottom: 14px; }
 .sub-tab-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 7px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; text-align: center; }
 .sub-tab-btn.active { background: #044E3B; color: #fff; }
-.owner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.stat-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 8px; text-align: center; }
-.stat-num { font-size: 17px; font-weight: 900; color: #044E3B; }
-.stat-label { font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 2px; }
+.owner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.stat-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.stat-num { font-size: 18px; font-weight: 900; color: #044E3B; }
+.stat-label { font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 2px; }
 
-/* COMPACT HORIZONTAL CARD (My Rooms & My Bookings) */
-.compact-h-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; margin-bottom: 8px; display: flex; gap: 10px; padding: 8px; align-items: center; }
-.compact-h-img { width: 78px; height: 78px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+/* COMPACT HORIZONTAL CARDS (My Rooms & My Bookings) */
+.compact-h-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; margin-bottom: 10px; display: flex; gap: 10px; padding: 9px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+.compact-h-img { width: 78px; height: 78px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
 .compact-h-content { flex: 1; min-width: 0; }
 .compact-h-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
-.compact-h-title { font-size: 12px; font-weight: 800; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.compact-h-rent { font-size: 11.5px; font-weight: 800; color: #044E3B; margin-top: 1px; }
+.compact-h-title { font-size: 12.5px; font-weight: 800; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.compact-h-rent { font-size: 12px; font-weight: 800; color: #044E3B; margin-top: 1px; }
 .compact-h-sub { font-size: 9px; color: #64748B; margin-top: 2px; }
 .status-pill { font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
 .status-confirmed { background: #DCFCE7; color: #15803D; }
@@ -114,22 +114,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .status-cancelled { background: #FEE2E2; color: #B91C1C; }
 .status-cancel-pending { background: #FEF3C7; color: #B45309; }
 
-.action-row-mini { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
-.btn-mini { padding: 4px 8px; border: 1px solid #E2E8F0; background: #fff; border-radius: 14px; font-size: 9.5px; font-weight: 700; color: #334155; cursor: pointer; text-align: center; }
+.action-row-mini { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+.btn-mini { padding: 4.5px 9px; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; font-size: 9.5px; font-weight: 700; color: #334155; cursor: pointer; text-align: center; }
 .btn-mini.danger { color: #DC2626; border-color: #FCA5A5; }
 .btn-mini.success { background: #044E3B; color: #fff; border-color: #044E3B; }
 .btn-mini.disabled { opacity: 0.5; cursor: not-allowed; background: #F1F5F9; }
 
 /* Bottom Nav Bar */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 2px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 3px; }
 .nav-item.active { color: #044E3B; }
 .nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
-.modal-box { background: #fff; border-radius: 20px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 16px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px; }
+.modal-box { background: #fff; border-radius: 22px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 14px; }
 .barcode-strip { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 32px; margin: 10px 0; border-radius: 4px; }
 
 @media print {
@@ -171,14 +171,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       </div>
     </div>
 
-    <!-- TRL Alert -->
-    <div id="trlAlertBox" style="display:none; margin-top:10px; padding:10px; background:#ECFDF5; border:1px solid #10B981; border-radius:14px; font-size:11px;">
+    <!-- TRL Search Alert Box -->
+    <div id="trlAlertBox" style="display:none; margin-top:12px; padding:12px; background:#ECFDF5; border:1px solid #10B981; border-radius:16px; font-size:11px;">
       <b>✓ Authentic REHZO Record Found!</b>
       <div id="trlAlertDetails" style="margin-top:2px; color:#065F46;"></div>
-      <button onclick="openSlipModal(matchedBookingId)" style="margin-top:6px; padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">View Official TRL Slip</button>
+      <button onclick="openSlipModal(matchedBookingId)" style="margin-top:8px; padding:5px 12px; background:#044E3B; color:#fff; border:none; border-radius:14px; font-size:10px; font-weight:800; cursor:pointer;">View Official TRL Slip</button>
     </div>
 
-    <!-- Country & Room Type Filters -->
+    <!-- Global Country & Room Type Filters -->
     <div class="filter-row">
       <select id="countryFilter" class="pill-select" onchange="applyFilters()">
         <option value="">All Countries</option>
@@ -225,13 +225,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="sub-header">
       <h3 class="sub-title">Search Stays</h3>
     </div>
-    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 12px; margin-bottom:12px;">
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:8px 14px; margin-bottom:14px;">
       <input id="searchScreenInput" placeholder="Type city, landmark, area…" oninput="handleSearch(this.value)" style="width:100%; border:none; outline:none; font-size:12px; font-weight:600;">
     </div>
     <div class="room-grid" id="searchRoomsGrid"></div>
   </section>
 
-  <!-- ================= 3. NEAR ME VIEW (10 KM STRICT GPS) ================= -->
+  <!-- ================= 3. NEAR ME VIEW (Strict 10km GPS) ================= -->
   <section id="view-near" class="view">
     <div class="sub-header">
       <div class="back-btn-row" onclick="goView('home')">
@@ -239,13 +239,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         <h3 class="sub-title">Near Me</h3>
       </div>
     </div>
-    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:12px; margin-bottom:12px; display:flex; gap:10px; align-items:center;">
-      <div style="width:34px; height:34px; border-radius:50%; background:#ECFDF5; color:#044E3B; display:flex; align-items:center; justify-content:center; font-size:16px;">📍</div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:14px; margin-bottom:14px; display:flex; gap:12px; align-items:center;">
+      <div style="width:36px; height:36px; border-radius:50%; background:#ECFDF5; color:#044E3B; display:flex; align-items:center; justify-content:center; font-size:16px;">📍</div>
       <div style="flex:1;">
         <div id="nearStatusText" style="font-size:12px; font-weight:800; color:#0F172A;">Detecting real live GPS…</div>
         <div style="font-size:10px; color:#64748B; margin-top:2px;">Showing rooms strictly within 10 km of you.</div>
       </div>
-      <button id="gpsRefreshBtn" onclick="detectGPS(true)" style="padding:6px 12px; background:#044E3B; color:#fff; border:none; border-radius:16px; font-size:10.5px; font-weight:bold; cursor:pointer;">Refresh</button>
+      <button id="gpsRefreshBtn" onclick="detectGPS(true)" style="padding:6px 14px; background:#044E3B; color:#fff; border:none; border-radius:18px; font-size:11px; font-weight:bold; cursor:pointer;">Refresh</button>
     </div>
     <div class="room-grid" id="nearRoomsGrid"></div>
   </section>
@@ -268,7 +268,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div id="ownerDashboardWrap">
       <div class="sub-header">
         <h3 class="sub-title">Owner Dashboard</h3>
-        <button onclick="toggleOwnerForm(true)" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; cursor:pointer;">+ Add</button>
+        <button onclick="toggleOwnerForm(true)" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:7px 16px; font-size:11.5px; font-weight:800; cursor:pointer;">+ Add</button>
       </div>
 
       <div class="owner-stats-grid">
@@ -295,7 +295,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       <div id="ownerContentContainer"></div>
     </div>
 
-    <!-- OWNER LIST PROPERTY FORM -->
+    <!-- OWNER LIST PROPERTY FORM (Spacious Layout) -->
     <div id="ownerFormWrap" style="display:none;">
       <div class="sub-header">
         <div class="back-btn-row" onclick="toggleOwnerForm(false)">
@@ -322,7 +322,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           </div>
         </div>
 
-        <!-- 2. Contact No & Gmail (50/50 Symmetrical Split) -->
+        <!-- 2. Contact No & Gmail (Equal 50/50 Split) -->
         <div class="pill-grid">
           <div class="field-box">
             <label class="field-label">Contact No. *</label>
@@ -448,6 +448,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         </button>
 
         <!-- 7. Photos & Conditions -->
+        <div class="form-section-title">Photos & Rules</div>
         <div class="pill-grid" style="align-items:start;">
           <div class="field-box">
             <label class="field-label">Room Photos * (max 3)</label>
@@ -524,8 +525,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <div id="modalSlot"></div>
 
 <script>
-// ================= DATABASE & INITIAL SEED =================
-var DB = {
+// ================= PERMANENT STORAGE SYNC (RELOAD FIX) =================
+var SEED_DATA = {
   listings: [
     {
       id: 'L-101',
@@ -533,6 +534,7 @@ var DB = {
       roomType: 'Single Room',
       suitableFor: ['Student', 'Worker'],
       amenities: ['Wi-Fi', 'Parking'],
+      rules: ['No Smoking', 'No Pets', 'ID Proof Required'],
       rent: 2500,
       deposit: 2500,
       country: 'IN',
@@ -553,6 +555,22 @@ var DB = {
   bookings: [],
   notifications: []
 };
+
+function loadStorage() {
+  try {
+    var raw = localStorage.getItem('REHZO_STATE_V1');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(SEED_DATA));
+}
+
+function saveStorage() {
+  try {
+    localStorage.setItem('REHZO_STATE_V1', JSON.stringify(DB));
+  } catch (e) {}
+}
+
+var DB = loadStorage();
 
 var userGeo = { lat: 24.9536, lng: 84.0321 };
 var lockedMapCoord = { lat: 24.9536, lng: 84.0321 };
@@ -600,10 +618,11 @@ if (window.location.search.indexOf('admin=rehzo123') !== -1) {
 
 // ================= HOME ROOMS GRID =================
 function renderHomeGrid(items) {
+  // Only available rooms are shown on home
   var list = items || DB.listings.filter(function(x){ return x.status === 'available'; });
   var container = document.getElementById('homeRoomsGrid');
   if (!list.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:24px; font-size:11px; color:#64748B;">No available rooms matching filters.</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:28px; font-size:11.5px; color:#64748B;">No available rooms matching filters.</div>';
     return;
   }
   container.innerHTML = list.map(function(r) {
@@ -698,7 +717,7 @@ function renderNearGrid() {
   }
   var container = document.getElementById('nearRoomsGrid');
   if (!near.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:30px; font-size:11.5px; color:#64748B;">No available rooms within 10 km radius of your location.</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No available rooms within 10 km radius of your location.</div>';
     return;
   }
   container.innerHTML = near.map(function(r) {
@@ -734,10 +753,10 @@ function detectGPS(isManual) {
       statusText.innerText = '📍 Location: Sasaram Central (GPS Default)';
       if (btn) btn.innerText = 'Refresh';
       renderNearGrid();
-      if (isManual) alert("GPS permission denied or timeout. Using high accuracy location fallback.");
+      if (isManual) alert("GPS permission timed out or denied. Using accurate location fallback.");
     }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
   } else {
-    statusText.innerText = '📍 Geolocation not supported on this browser';
+    statusText.innerText = '📍 Geolocation not supported on this device';
     if (btn) btn.innerText = 'Refresh';
     renderNearGrid();
   }
@@ -761,7 +780,7 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS (COMPACT HORIZONTAL ROOM CARDS) =================
+// ================= MY BOOKINGS (MUTUAL CANCELLATION FLOW) =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
@@ -799,7 +818,7 @@ function renderBookingsView() {
         '<div class="compact-h-header">' +
           '<div class="compact-h-title">' + b.houseName + '</div>' +
           '<span class="status-pill ' + (isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isCancelPending ? 'status-cancel-pending' : 'status-cancelled') + '">' +
-            '● ' + (isPending ? 'Waiting Owner Approval' : isCancelPending ? 'Cancel Pending' : b.status.toUpperCase()) +
+            '● ' + (isPending ? 'Waiting Owner Acceptance' : isCancelPending ? 'Cancel Pending' : b.status.toUpperCase()) +
           '</span>' +
         '</div>' +
         '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo</div>' +
@@ -808,22 +827,24 @@ function renderBookingsView() {
 
         '<div class="action-row-mini">' +
           (isConfirmed ? '<button class="btn-mini" onclick="openSlipModal(\'' + b.id + '\')">📄 PDF Slip</button>' : '') +
-          (isConfirmed ? '<button class="btn-mini danger" onclick="requestCancelBooking(\'' + b.id + '\', \'user\')">Cancel Request</button>' : '') +
-          (isCancelPending && b.cancelRequestedBy === 'owner' ? '<button class="btn-mini success" onclick="acceptCancelBooking(\'' + b.id + '\')">Accept Cancel</button>' : '') +
-          (isPending ? '<span class="btn-mini disabled">Waiting Owner Acceptance</span>' : '') +
+          (isConfirmed ? '<button class="btn-mini danger" onclick="requestCancelBooking(\'' + b.id + '\', \'user\')">Request Cancel</button>' : '') +
+          (isCancelPending && b.cancelRequestedBy === 'owner' ? '<button class="btn-mini success" onclick="acceptCancelBooking(\'' + b.id + '\')">Accept Owner Cancel</button>' : '') +
+          (isCancelPending && b.cancelRequestedBy === 'user' ? '<span class="btn-mini disabled">Waiting Owner Approval</span>' : '') +
+          (isPending ? '<span class="btn-mini disabled">Awaiting Confirmation</span>' : '') +
         '</div>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-// Cancellation Request & Accept Flow
+// Mutual Cancellation Request & Accept Flow
 function requestCancelBooking(id, role) {
   if (confirm("Send cancellation request to the other party?")) {
     var b = DB.bookings.find(function(x){ return x.id === id; });
     if (b) {
       b.status = 'cancel_pending';
       b.cancelRequestedBy = role;
+      saveStorage();
       addNotification("Cancellation request sent for " + b.houseName);
       alert("Cancellation request sent successfully!");
       renderBookingsView();
@@ -833,17 +854,18 @@ function requestCancelBooking(id, role) {
 }
 
 function acceptCancelBooking(id) {
-  if (confirm("Accept cancellation? This will cancel the booking and immediately make the room Available again.")) {
+  if (confirm("Accept cancellation? This will cancel the booking and immediately make the room Live & Available again on Home Screen.")) {
     var b = DB.bookings.find(function(x){ return x.id === id; });
     if (b) {
       b.status = 'cancelled';
       b.cancelRequestedBy = null;
       var l = DB.listings.find(function(x){ return x.id === b.listingId; });
       if (l) {
-        l.status = 'available'; // Automatically Live again
+        l.status = 'available'; // Instant relisting
       }
-      addNotification("Booking for " + b.houseName + " was cancelled. Room is now Available.");
-      alert("Booking Cancelled! Room is now live again for new users.");
+      saveStorage();
+      addNotification("Booking for " + b.houseName + " was cancelled. Room is now Available on Home Screen.");
+      alert("Booking Cancelled! The room is now live again for new users to book.");
       renderBookingsView();
       renderOwnerView();
       renderHomeGrid();
@@ -851,7 +873,7 @@ function acceptCancelBooking(id) {
   }
 }
 
-// ================= OWNER VIEW (ACCEPT/REJECT REQUESTS & COMPACT ROOMS) =================
+// ================= OWNER VIEW (EDIT, VIEW & DETAILS) =================
 function toggleOwnerForm(show) {
   document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
   document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
@@ -886,20 +908,19 @@ function renderOwnerView() {
           '<div class="compact-h-rent">₹' + Number(r.rent).toLocaleString() + '/mo</div>' +
           '<div class="compact-h-sub">' + r.city + ', ' + r.country + ' • ' + r.daysLeft + ' days left</div>' +
           '<div class="action-row-mini">' +
-            '<button class="btn-mini" onclick="alert(\'Room Address: ' + r.address + '\')">View Address</button>' +
-            // Lock delete rule until expired
+            '<button class="btn-mini" onclick="openOwnerEditModal(\'' + r.id + '\')">✏️ Edit</button>' +
+            '<button class="btn-mini" onclick="openOwnerViewRoomModal(\'' + r.id + '\')">View</button>' +
             (isExpired ? 
               '<button class="btn-mini danger" onclick="deleteExpiredRoom(\'' + r.id + '\')">Delete</button>' :
-              '<button class="btn-mini disabled" onclick="alert(\'Notice: Room cannot be deleted until 90-day expiry period ends.\')">🔒 Locked (Active)</button>'
+              '<button class="btn-mini disabled" onclick="alert(\'Notice: Room cannot be deleted until 90-day expiry period ends.\')">🔒 Locked</button>'
             ) +
           '</div>' +
         '</div>' +
       '</div>';
     }).join('');
   } else if (currentOwnerTab === 'requests') {
-    // Owner Requests Tab: Shows Pending requests with ACCEPT / REJECT buttons
     if (!DB.bookings.length) {
-      container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:20px; text-align:center; font-size:11px; color:#64748B;">No booking requests received yet.</div>';
+      container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No booking requests received yet.</div>';
       return;
     }
     container.innerHTML = DB.bookings.map(function(b) {
@@ -932,11 +953,81 @@ function renderOwnerView() {
       '</div>';
     }).join('');
   } else {
-    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:20px; text-align:center; font-size:11px; color:#64748B;">No expired listings.</div>';
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No expired listings.</div>';
   }
 }
 
-// OWNER ACCEPTS BOOKING (Generates 12-Digit TRL & Confirms Room)
+// OWNER EDIT ROOM MODAL
+function openOwnerEditModal(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Edit Room Details</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">House Name</label><input id="editHouse" class="pill-input" value="' + r.houseName + '"></div>' +
+        '<div class="field-box"><label class="field-label">Room Type</label><input id="editType" class="pill-input" value="' + r.roomType + '"></div>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Monthly Rent (₹)</label><input id="editRent" type="number" class="pill-input" value="' + r.rent + '"></div>' +
+        '<div class="field-box"><label class="field-label">Deposit (₹)</label><input id="editDeposit" type="number" class="pill-input" value="' + (r.deposit||0) + '"></div>' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">Full Address</label>' +
+        '<input id="editAddr" class="pill-input" value="' + r.address + '">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="saveOwnerRoomEdit(\'' + r.id + '\')">Save & Update Room</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function saveOwnerRoomEdit(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  r.houseName = document.getElementById('editHouse').value.trim() || r.houseName;
+  r.roomType = document.getElementById('editType').value.trim() || r.roomType;
+  r.rent = parseFloat(document.getElementById('editRent').value) || r.rent;
+  r.deposit = parseFloat(document.getElementById('editDeposit').value) || 0;
+  r.address = document.getElementById('editAddr').value.trim() || r.address;
+
+  saveStorage();
+  closeModal();
+  alert("Room details updated successfully!");
+  renderOwnerView();
+  renderHomeGrid();
+}
+
+// OWNER VIEW ROOM MODAL
+function openOwnerViewRoomModal(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Room Overview</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<img src="' + r.photos[0] + '" style="width:100%; height:140px; border-radius:14px; object-fit:cover; margin-bottom:10px;">' +
+      '<div style="font-size:12px; line-height:1.7; color:#334155;">' +
+        '<div><b>Property:</b> ' + r.houseName + ' (' + r.roomType + ')</div>' +
+        '<div><b>Rent:</b> ₹' + r.rent + '/month • <b>Deposit:</b> ₹' + r.deposit + '</div>' +
+        '<div><b>Address:</b> ' + r.address + ', ' + r.city + '</div>' +
+        '<div><b>Suitable For:</b> ' + r.suitableFor.join(', ') + '</div>' +
+        '<div><b>Amenities:</b> ' + r.amenities.join(', ') + '</div>' +
+        '<div><b>Conditions:</b> ' + (r.rules ? r.rules.join(', ') : 'Standard rules apply') + '</div>' +
+        '<div><b>Status:</b> ' + r.status.toUpperCase() + ' (' + r.daysLeft + ' days left)</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// OWNER ACCEPTS BOOKING (Generates 12-Digit TRL & Locks Room)
 function ownerAcceptRequest(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -948,11 +1039,12 @@ function ownerAcceptRequest(bookingId) {
 
   var room = DB.listings.find(function(x){ return x.id === b.listingId; });
   if (room) {
-    room.status = 'booked';
+    room.status = 'booked'; // Permanently booked (won't appear on home)
   }
 
-  addNotification("Your booking for " + b.houseName + " is CONFIRMED by the owner! TRL: " + b.trl);
-  alert("Booking Request ACCEPTED!\nTRL Number Generated: " + b.trl + "\nOfficial PDF Slip is ready.");
+  saveStorage();
+  addNotification("Your booking for " + b.houseName + " is CONFIRMED! TRL: " + b.trl);
+  alert("Booking Request ACCEPTED!\nTRL Generated: " + b.trl + "\nOfficial PDF Slip is ready.");
 
   renderOwnerView();
   renderBookingsView();
@@ -960,13 +1052,13 @@ function ownerAcceptRequest(bookingId) {
   openSlipModal(b.id);
 }
 
-// OWNER REJECTS BOOKING
 function ownerRejectRequest(bookingId) {
   if (confirm("Reject this booking request?")) {
     var b = DB.bookings.find(function(x){ return x.id === bookingId; });
     if (b) {
       b.status = 'rejected';
-      addNotification("Booking request for " + b.houseName + " was declined by the owner.");
+      saveStorage();
+      addNotification("Booking request for " + b.houseName + " was declined by owner.");
       alert("Booking request rejected.");
       renderOwnerView();
       renderBookingsView();
@@ -977,12 +1069,13 @@ function ownerRejectRequest(bookingId) {
 function deleteExpiredRoom(id) {
   if (confirm("Delete this expired room?")) {
     DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
+    saveStorage();
     renderOwnerView();
     renderHomeGrid();
   }
 }
 
-// ================= OWNER LISTING FORM & MAP SAVE =================
+// ================= OWNER LISTING FORM HANDLERS =================
 function toggleDrawer(id) {
   var d = document.getElementById(id);
   d.classList.toggle('open');
@@ -1013,7 +1106,6 @@ function updateDialPrefix(code) {
   document.getElementById('opDepSym').innerText = item.s;
 }
 
-// Save Exact Map Location Button
 function saveExactMapLocation() {
   var btn = document.getElementById('opMapLockBtn');
   var txt = document.getElementById('opMapLockText');
@@ -1023,7 +1115,7 @@ function saveExactMapLocation() {
     navigator.geolocation.getCurrentPosition(function(pos) {
       lockedMapCoord = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       btn.classList.add('locked');
-      txt.innerText = '✓ Exact Map Location Saved (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')';
+      txt.innerText = '✓ Live GPS Location Saved (' + pos.coords.latitude.toFixed(4) + ')';
       alert("Exact Map Coordinates Saved to Listing!");
     }, function() {
       lockedMapCoord = { lat: userGeo.lat, lng: userGeo.lng };
@@ -1075,6 +1167,7 @@ function handlePublishProperty(e) {
     roomType: document.getElementById('opRoomType').value,
     suitableFor: selectedSuitable.length ? selectedSuitable : ['Family'],
     amenities: selectedAmenities.length ? selectedAmenities : ['Wi-Fi'],
+    rules: selectedRules.length ? selectedRules : ['No Smoking'],
     rent: rent,
     deposit: parseFloat(document.getElementById('opDeposit').value) || 0,
     country: document.getElementById('opCountry').value,
@@ -1093,6 +1186,7 @@ function handlePublishProperty(e) {
   };
 
   DB.listings.unshift(newRoom);
+  saveStorage();
   e.target.reset();
   uploadedPhotos = [];
   alert("Room published successfully for 90 Days!");
@@ -1100,12 +1194,17 @@ function handlePublishProperty(e) {
   goView('owner');
 }
 
-// ================= USER BOOKING MODAL (Sends Request to Owner) =================
+// ================= USER BOOKING MODAL (WITH OWNER RULES SELECTION) =================
 function openBookingPillModal(id) {
   var l = DB.listings.find(function(x){ return x.id === id; });
   if (!l) return;
   activeBookingRoom = l;
   var today = new Date().toISOString().slice(0, 10);
+
+  // Render Owner Rules inside Booking Modal
+  var rulesHTML = (l.rules && l.rules.length) 
+    ? l.rules.map(function(r){ return '<span style="display:inline-block; padding:3px 8px; background:#E2E8F0; border-radius:12px; font-size:10px; font-weight:700; margin:2px;">• ' + r + '</span>'; }).join('')
+    : '<span style="font-size:10px; color:#64748B;">Standard house rules apply</span>';
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
@@ -1125,6 +1224,17 @@ function openBookingPillModal(id) {
         '<div class="field-box"><label class="field-label">Check-in Date *</label><input id="bpDate" type="date" value="' + today + '" class="pill-input"></div>' +
         '<div class="field-box"><label class="field-label">Kitne month k liy *</label><select id="bpMonths" class="pill-input" onchange="calculateBookingRent()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
       '</div>' +
+
+      '<!-- Owner Conditions Displayed to User -->' +
+      '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; margin:8px 0;">' +
+        '<div style="font-size:11px; font-weight:800; color:#044E3B; margin-bottom:4px;">Owner Conditions & Rules:</div>' +
+        '<div>' + rulesHTML + '</div>' +
+        '<label style="display:flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; color:#1E293B; margin-top:8px; cursor:pointer;">' +
+          '<input type="checkbox" id="agreeRulesCheck" checked style="accent-color:#044E3B;">' +
+          'I agree to abide by all Owner Conditions & Rules *' +
+        '</label>' +
+      '</div>' +
+
       '<div style="background:#F1F8F5; border:1px solid #A7F3D0; border-radius:16px; padding:10px; font-size:11px; margin:10px 0;">' +
         '<div style="display:flex; justify-content:space-between;"><span>Monthly Rent:</span> <b id="calcRentPill">₹' + l.rent.toLocaleString() + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; margin-top:2px;"><span>Deposit:</span> <b id="calcDepositPill">₹' + (l.deposit||0).toLocaleString() + '</b></div>' +
@@ -1151,15 +1261,20 @@ function submitBookingRequest() {
   var addr = document.getElementById('bpOldAddr').value.trim();
   var date = document.getElementById('bpDate').value;
   var months = parseInt(document.getElementById('bpMonths').value) || 1;
+  var agreed = document.getElementById('agreeRulesCheck') ? document.getElementById('agreeRulesCheck').checked : true;
 
   if (!name || !phone || !addr || !date) {
     alert("Please fill all required booking fields.");
     return;
   }
+  if (!agreed) {
+    alert("You must agree to Owner Conditions & Rules to proceed.");
+    return;
+  }
 
   var newBk = {
     id: 'BK-' + Date.now(),
-    trl: null, // Allocated upon owner acceptance
+    trl: null,
     listingId: activeBookingRoom.id,
     houseName: activeBookingRoom.houseName,
     roomType: activeBookingRoom.roomType,
@@ -1174,18 +1289,19 @@ function submitBookingRequest() {
     ownerName: activeBookingRoom.ownerName,
     ownerPhone: activeBookingRoom.phone,
     roomExactAddress: activeBookingRoom.address + ', ' + activeBookingRoom.city + ', ' + (activeBookingRoom.state||'') + ' - ' + (activeBookingRoom.pin||''),
-    status: 'pending', // PENDING OWNER APPROVAL
+    status: 'pending',
     cancelRequestedBy: null
   };
 
   DB.bookings.unshift(newBk);
+  saveStorage();
   closeModal();
-  addNotification("Booking request sent to owner for " + activeBookingRoom.houseName + ". Waiting for owner acceptance.");
-  alert("Booking Request Sent!\nOwner has received the request. Once accepted, your official 12-Digit TRL Slip will be generated automatically.");
+  addNotification("Booking request sent for " + activeBookingRoom.houseName + ". Waiting for owner acceptance.");
+  alert("Booking Request Sent!\nOwner has received your request. Once accepted, your 12-Digit TRL Slip will be issued automatically.");
   goView('bookings');
 }
 
-// ================= OFFICIAL TRL SLIP MODAL (EXACT ADDRESS ONLY IN ROOM DETAILS) =================
+// ================= OFFICIAL TRL SLIP MODAL (Exact Address in Room Details Only) =================
 function openSlipModal(bkId) {
   var b = DB.bookings.find(function(x){ return x.id === bkId; });
   if (!b) return;
@@ -1240,6 +1356,7 @@ function closeModal() {
 // ================= NOTIFICATIONS ENGINE =================
 function addNotification(msg) {
   DB.notifications.unshift({ text: msg, time: 'Just now' });
+  saveStorage();
   var dot = document.getElementById('headerNotifDot');
   if (dot) dot.style.display = 'block';
 }
@@ -1250,13 +1367,13 @@ function renderNotifications() {
   if (dot) dot.style.display = 'none';
 
   if (!DB.notifications.length) {
-    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:20px; text-align:center; font-size:11px; color:#64748B;">No notifications yet.</div>';
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No notifications yet.</div>';
     return;
   }
   container.innerHTML = DB.notifications.map(function(n) {
-    return '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:14px; padding:10px 12px; font-size:11.5px; color:#1E293B;">' +
+    return '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:14px; padding:11px 14px; font-size:11.5px; color:#1E293B;">' +
       '<div>' + n.text + '</div>' +
-      '<div style="font-size:9px; color:#64748B; margin-top:2px;">' + n.time + '</div>' +
+      '<div style="font-size:9px; color:#64748B; margin-top:3px;">' + n.time + '</div>' +
     '</div>';
   }).join('');
 }
@@ -1265,9 +1382,9 @@ function renderNotifications() {
 function renderAdminModeration() {
   var container = document.getElementById('adminListingsControl');
   container.innerHTML = DB.listings.map(function(r) {
-    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
       '<div><b>' + r.houseName + '</b> (' + r.city + ') - ₹' + r.rent + '</div>' +
-      '<button onclick="DB.listings=DB.listings.filter(function(x){return x.id!==\''+r.id+'\'});renderAdminModeration();renderHomeGrid();" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
+      '<button onclick="DB.listings=DB.listings.filter(function(x){return x.id!==\''+r.id+'\'});saveStorage();renderAdminModeration();renderHomeGrid();" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
 }
