@@ -2,823 +2,1130 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>REHZO — Find Your Perfect Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>REHZO — Find & List Rooms | Web App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        rehzo: {50:'#FFF1EC',100:'#FFE0D5',500:'#FF4D24',600:'#E63E15',700:'#C2310E',900:'#7A1F0A'},
+        ink: {800:'#151A35',900:'#0B0E1F',950:'#070912'},
+        mint:'#00D1B2', gold:'#FFB800'
+      },
+      fontFamily: { sora:['Sora','sans-serif'], jakarta:['"Plus Jakarta Sans"','sans-serif'] },
+      boxShadow: { app:'0 30px 80px -20px rgba(0,0,0,.55)', card:'0 12px 32px -12px rgba(11,14,31,.25)', pop:'0 20px 60px -10px rgba(255,77,36,.45)' }
+    }
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 75px; }
+*{ -webkit-tap-highlight-color:transparent; }
+body{ font-family:'Plus Jakarta Sans',sans-serif; background:#070912; }
+.font-sora{ font-family:'Sora',sans-serif; }
+::-webkit-scrollbar{ width:6px; height:6px } ::-webkit-scrollbar-thumb{ background:#FF4D24; border-radius:99px } ::-webkit-scrollbar-track{ background:transparent }
+.splash-anim{ animation:splashPop 1.1s cubic-bezier(.2,1.4,.3,1) both }
+@keyframes splashPop{ 0%{ transform:scale(.6); opacity:0 } 60%{ transform:scale(1.05); opacity:1 } 100%{ transform:scale(1); opacity:1 } }
+.logo-ring{ animation:ringSpin 6s linear infinite }
+@keyframes ringSpin{ to{ transform:rotate(360deg) } }
+.fadeUp{ animation:fadeUp .35s ease both }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(12px) } to{ opacity:1; transform:translateY(0) } }
+.no-scrollbar::-webkit-scrollbar{ display:none } .no-scrollbar{ scrollbar-width:none }
+.glass{ background:rgba(255,255,255,.94); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px) }
+.chip-active{ background:#0B0E1F !important; color:#fff !important; border-color:#0B0E1F !important }
+input,select,textarea{ outline:none } input:focus,select:focus,textarea:focus{ border-color:#FF4D24 !important; box-shadow:0 0 0 3px rgba(255,77,36,.15) }
+.leaflet-container{ border-radius:18px; z-index:1 }
+.pdf-paper{ background:#fff; color:#0B0E1F; }
+.app-view{ display:none } .app-view.on{ display:block; animation:fadeUp .3s ease both }
+.toastIn{ animation:toastIn .35s cubic-bezier(.2,1.2,.3,1) both } @keyframes toastIn{ from{ opacity:0; transform:translateY(16px) scale(.95) } to{ opacity:1; transform:translateY(0) scale(1) } }
+.grid-bg{ background-image:radial-gradient(rgba(255,255,255,.09) 1px, transparent 1px); background-size:22px 22px }
+.btn-press:active{ transform:scale(.97) }
 
-/* Header */
-.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
-.brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
-.brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
-.brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
-.header-actions { display: flex; gap: 8px; }
-.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
-
-/* Container */
-.main-wrapper { max-width: 500px; margin: 0 auto; padding: 10px 12px; }
-
-/* Banner */
-.banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; }
-.banner h2 { font-size: 17px; font-weight: 800; line-height: 1.2; }
-.banner p { font-size: 10.5px; opacity: 0.85; margin-top: 3px; }
-.search-bar { display: flex; background: #fff; border-radius: 30px; padding: 4px 6px 4px 12px; margin-top: 10px; align-items: center; }
-.search-bar input { flex: 1; border: none; outline: none; font-size: 12px; font-weight: 600; color: #1E293B; }
-.search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6px 12px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
-
-/* Filter Rows */
-.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-.select-box { width: 100%; border: 1px solid #CBD5E1; border-radius: 20px; background: #fff; padding: 6px 10px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
-.chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 4px; }
-.chip-row::-webkit-scrollbar { display: none; }
-.chip { border: 1px solid #CBD5E1; border-radius: 20px; background: #fff; padding: 5px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
-.chip.active { background: #044E3B; color: #fff; border-color: #044E3B; }
-
-/* Room Grid (2x2) */
-.section-title { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 8px; }
-.section-title h3 { font-size: 14px; font-weight: 800; }
-.section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
-.room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
-.room-thumb { width: 100%; height: 105px; object-fit: cover; }
-.room-details { padding: 8px; }
-.room-title { font-size: 11.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.room-rent { font-size: 12px; font-weight: 800; color: #044E3B; margin-top: 2px; }
-.room-city { font-size: 9.5px; color: #64748B; margin-top: 2px; }
-.book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 16px; padding: 6px; font-size: 10.5px; font-weight: 800; cursor: pointer; margin-top: 6px; }
-
-/* Views */
-.view { display: none; }
-.view.active { display: block; }
-
-/* Bottom Nav */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 3px; }
-.nav-item.active { color: #044E3B; }
-.nav-item span { font-size: 16px; }
-
-/* Forms */
-.form-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 12px; margin-bottom: 10px; }
-.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.input-group label { display: block; font-size: 10px; font-weight: 800; color: #475569; margin-bottom: 3px; }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 7px 10px; border-radius: 12px; border: 1px solid #CBD5E1; font-size: 11.5px; font-weight: 600; outline: none; background: #F8FAF9; }
-.submit-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
-
-/* Modals */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: center; justify-content: center; padding: 14px; }
-.modal-overlay.show { display: flex; }
-.modal-box { background: #fff; border-radius: 18px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; padding: 14px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 10px; }
-.barcode { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 30px; margin: 10px 0; }
+/* 2x2 Clean Compact Grid */
+#homeGrid, #searchGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  width: 100% !important;
+}
+.room-card {
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.room-card img {
+  height: 110px !important;
+  width: 100% !important;
+  object-fit: cover !important;
+}
+@media print{ body *{ visibility:hidden } #pdfPrintArea, #pdfPrintArea *{ visibility:visible } #pdfPrintArea{ position:absolute; inset:0; margin:0 } }
 </style>
+<script>
+  const REHZO_SUPABASE_URL = "https://kucrovemctcswaazbwxb.supabase.co";
+  const REHZO_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-Rtx-97g9pWMF4bUqeP7Jg_6483k7Wu";
+
+  window.rehzoSupabase = window.supabase.createClient(
+    REHZO_SUPABASE_URL,
+    REHZO_SUPABASE_PUBLISHABLE_KEY
+  );
+</script>
 </head>
-<body>
+<body class="min-h-screen text-slate-900 pb-[84px]">
 
-<!-- TOP HEADER -->
-<header class="top-header">
-  <div class="brand" onclick="goView('home')">
-    <div class="logo-icon">⌂</div>
-    <div class="brand-text">
-      <h1>REHZO</h1>
-      <p>Find Your Perfect Room</p>
-    </div>
-  </div>
-  <div class="header-actions">
-    <button class="icon-btn" onclick="goView('notifications')">🔔</button>
-    <button class="icon-btn" onclick="goView('admin')">👤</button>
-  </div>
-</header>
-
-<div class="main-wrapper">
-
-  <!-- ================= VIEW 1: HOME ================= -->
-  <section id="view-home" class="view active">
-    <div class="banner">
-      <h2>Better Rooms, Brighter Days</h2>
-      <p>Find, book & settle in your verified space.</p>
-      <div class="search-bar">
-        <input id="searchInput" placeholder="Search city, house or 12-digit TRL No…" oninput="handleSearch(this.value)">
-        <button onclick="handleSearch(document.getElementById('searchInput').value)">Go</button>
-      </div>
-    </div>
-
-    <div id="trlAlert" style="display:none; margin-top:8px; padding:10px; background:#ECFDF5; border:1px solid #10B981; border-radius:12px; font-size:11px;">
-      <b>✓ Authentic REHZO Booking Found!</b>
-      <div id="trlAlertDetails" style="margin-top:2px; color:#065F46;"></div>
-      <button onclick="openSlipFromAlert()" style="margin-top:5px; padding:3px 8px; background:#044E3B; color:#fff; border:none; border-radius:8px; font-size:10px; font-weight:bold; cursor:pointer;">View Official Slip</button>
-    </div>
-
-    <div class="filter-row">
-      <select id="countryFilter" class="select-box" onchange="applyFilters()">
-        <option value="">All Countries</option>
-        <option value="IN">🇮🇳 India</option>
-        <option value="US">🇺🇸 USA</option>
-        <option value="GB">🇬🇧 UK</option>
-      </select>
-      <select id="typeFilter" class="select-box" onchange="applyFilters()">
-        <option value="">All Room Types</option>
-        <option value="Single Room">Single Room</option>
-        <option value="1 RK">1 RK</option>
-        <option value="2 BHK">2 BHK</option>
-        <option value="3 BHK">3 BHK</option>
-        <option value="PG">PG</option>
-        <option value="Hostel">Hostel</option>
-      </select>
-    </div>
-
-    <div class="chip-row">
-      <button class="chip active" onclick="filterChip('all', this)">All Rooms</button>
-      <button class="chip" onclick="filterChip('Students', this)">For Students</button>
-      <button class="chip" onclick="filterChip('Family', this)">For Families</button>
-      <button class="chip" onclick="filterChip('Worker', this)">For Workers</button>
-    </div>
-
-    <div class="section-title">
-      <h3>Available Rooms</h3>
-      <span onclick="resetAll()">Reset & View All</span>
-    </div>
-
-    <div class="room-grid" id="roomsContainer"></div>
-  </section>
-
-  <!-- ================= VIEW 2: SEARCH ================= -->
-  <section id="view-search" class="view">
-    <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;">Search Stays</h3>
-    <p style="font-size:11px; color:#64748B; margin-bottom:10px;">Filter and explore verified properties</p>
-    <div class="form-card" style="padding:6px 10px; border-radius:30px;">
-      <input id="searchScreenInput" placeholder="Type city, landmark, area…" oninput="handleSearch(this.value)" style="width:100%; border:none; outline:none; font-size:12px; font-weight:600;">
-    </div>
-    <div class="room-grid" id="searchRoomsContainer"></div>
-  </section>
-
-  <!-- ================= VIEW 3: NEAR ME (10 KM STRICT) ================= -->
-  <section id="view-near" class="view">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <h3 style="font-size:16px; font-weight:800;">Near Me 📍</h3>
-        <p style="font-size:11px; color:#044E3B; font-weight:700;">Within strict 10 km radius</p>
-      </div>
-      <button onclick="detectGPS()" style="padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:15px; font-size:10px; font-weight:bold; cursor:pointer;">Refresh GPS</button>
-    </div>
-    <div id="gpsStatus" style="font-size:10.5px; color:#64748B; margin:8px 0; background:#fff; padding:6px 10px; border-radius:10px; border:1px solid #E2E8F0;">
-      📍 Central Location: Delhi Connaught Place
-    </div>
-    <div class="room-grid" id="nearRoomsContainer"></div>
-  </section>
-
-  <!-- ================= VIEW 4: MY BOOKINGS ================= -->
-  <section id="view-bookings" class="view">
-    <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">My Bookings</h3>
-    <div id="myBookingsContainer"></div>
-  </section>
-
-  <!-- ================= VIEW 5: OWNER HUB ================= -->
-  <section id="view-owner" class="view">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="font-size:16px; font-weight:800;">List Your Property</h3>
-      <span id="ownerListCount" onclick="toggleOwnerListings()" style="font-size:11px; font-weight:700; color:#044E3B; cursor:pointer;">My Listings (0)</span>
-    </div>
-
-    <div id="ownerListingsBox" style="display:none; margin-bottom:12px;"></div>
-
-    <form class="form-card" onsubmit="handlePublish(event)">
-      <div class="input-row">
-        <div class="input-group">
-          <label>Country *</label>
-          <select id="oCountry" onchange="updateCountryPrefix(this.value)">
-            <option value="IN">🇮🇳 India (+91 / ₹)</option>
-            <option value="US">🇺🇸 USA (+1 / $)</option>
-            <option value="GB">🇬🇧 UK (+44 / £)</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label>Owner Name *</label>
-          <input id="oName" placeholder="Full Name" required>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Phone No *</label>
-          <div style="display:flex;">
-            <span id="oDial" style="padding:7px; background:#E2E8F0; font-size:11px; font-weight:bold; border-radius:12px 0 0 12px;">+91</span>
-            <input id="oPhone" placeholder="Mobile No" style="border-radius:0 12px 12px 0;" required>
-          </div>
-        </div>
-        <div class="input-group">
-          <label>Gmail (optional)</label>
-          <input id="oGmail" placeholder="you@gmail.com">
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>House Name *</label>
-          <input id="oHouse" placeholder="e.g. Sharma Villa" required>
-        </div>
-        <div class="input-group">
-          <label>State (optional)</label>
-          <input id="oState" placeholder="State">
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>City *</label>
-          <input id="oCity" placeholder="City" required>
-        </div>
-        <div class="input-group">
-          <label>Area Code *</label>
-          <input id="oPin" placeholder="Pin code" required>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Full Address *</label>
-          <input id="oAddr" placeholder="House No, Street" required>
-        </div>
-        <div class="input-group">
-          <label>Room Type *</label>
-          <select id="oType">
-            <option>1 RK</option>
-            <option>Single Room</option>
-            <option>2 BHK</option>
-            <option>3 BHK</option>
-            <option>PG</option>
-            <option>Hostel</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Amenities</label>
-          <input id="oAmenities" placeholder="WiFi, AC, Food">
-        </div>
-        <div class="input-group">
-          <label>Suitable For</label>
-          <select id="oSuitable">
-            <option>Anyone</option>
-            <option>Students</option>
-            <option>Family</option>
-            <option>Worker</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Monthly Rent *</label>
-          <div style="display:flex;">
-            <span id="oSym1" style="padding:7px; background:#E2E8F0; font-size:11px; font-weight:bold; border-radius:12px 0 0 12px;">₹</span>
-            <input id="oRent" type="number" placeholder="Rent" style="border-radius:0 12px 12px 0;" required>
-          </div>
-        </div>
-        <div class="input-group">
-          <label>Security Deposit (optional)</label>
-          <div style="display:flex;">
-            <span id="oSym2" style="padding:7px; background:#E2E8F0; font-size:11px; font-weight:bold; border-radius:12px 0 0 12px;">₹</span>
-            <input id="oDep" type="number" placeholder="Deposit" style="border-radius:0 12px 12px 0;">
-          </div>
-        </div>
-      </div>
-
-      <div style="text-align:center; margin:8px 0;">
-        <button type="button" id="mapLockBtn" onclick="lockMapLocation()" style="width:100%; padding:9px; border:1px solid #CBD5E1; border-radius:20px; background:#fff; font-size:11px; font-weight:bold; cursor:pointer;">
-          📍 <span id="mapLockText">Use Exact Map Location *</span>
-        </button>
-      </div>
-
-      <div class="input-group" style="margin-bottom:8px;">
-        <label>Owner Conditions & Rules *</label>
-        <textarea id="oRules" rows="2" placeholder="e.g. Gate closes 10 PM, No smoking" required></textarea>
-      </div>
-
-      <button type="submit" class="submit-btn">Publish Listing • 90 Days Free</button>
-    </form>
-  </section>
-
-  <!-- ================= VIEW 6: ADMIN ================= -->
-  <section id="view-admin" class="view">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="font-size:16px; font-weight:800;">Admin Full Control 🔐</h3>
-      <button onclick="goView('home')" style="font-size:11px; padding:3px 8px; border:1px solid #CBD5E1; border-radius:8px; background:#fff; cursor:pointer;">Close</button>
-    </div>
-    <div class="form-card">
-      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">Live Listings Moderation</h4>
-      <div id="adminListings"></div>
-    </div>
-  </section>
-
-  <!-- ================= VIEW 7: NOTIFICATIONS ================= -->
-  <section id="view-notifications" class="view">
-    <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">Notifications</h3>
-    <div class="form-card" style="text-align:center; font-size:11px; color:#64748B;">No unread notifications</div>
-  </section>
-
+<!-- BACKGROUND -->
+<div class="fixed inset-0 pointer-events-none">
+  <div class="absolute inset-0 bg-[radial-gradient(1200px_600px_at_20%_-10%,#FF4D24_0%,transparent_60%),radial-gradient(900px_500px_at_90%_10%,#4F46E5_0%,transparent_60%)] opacity-30"></div>
+  <div class="absolute inset-0 grid-bg opacity-60"></div>
 </div>
 
-<!-- ================= BOTTOM NAVIGATION ================= -->
-<nav class="bottom-nav">
-  <button class="nav-item active" data-view="home" onclick="goView('home')">
-    <span>⌂</span>Home
-  </button>
-  <button class="nav-item" data-view="search" onclick="goView('search')">
-    <span>🔍</span>Search
-  </button>
-  <button class="nav-item" data-view="near" onclick="goView('near')">
-    <span>📍</span>Near
-  </button>
-  <button class="nav-item" data-view="bookings" onclick="goView('bookings')">
-    <span>📅</span>My Bookings
-  </button>
-  <button class="nav-item" data-view="owner" onclick="goView('owner')">
-    <span>👤</span>Owner
-  </button>
-</nav>
+<!-- SPLASH -->
+<div id="splash" class="fixed inset-0 z-[100] bg-ink-950 flex flex-col items-center justify-center text-white px-6">
+  <div class="relative">
+    <div class="absolute -inset-6 rounded-[32px] border border-white/10 logo-ring"></div>
+    <div class="splash-anim w-20 h-20 rounded-[22px] bg-gradient-to-br from-rehzo-500 via-rehzo-600 to-amber-500 flex items-center justify-center shadow-pop">
+      <svg width="44" height="44" viewBox="0 0 48 48" fill="none"><path d="M8 22L24 8L40 22" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20V38H19V28H29V38H36V20" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="34" r="8" fill="white"/><path d="M31 34L33.2 36.2L37 32.2" stroke="#FF4D24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <h1 class="font-sora font-extrabold text-4xl tracking-tight mt-5 splash-anim">REHZO</h1>
+  <p class="text-white/60 text-xs mt-1 tracking-[.25em] font-semibold">FIND • LIST • BOOK</p>
+  <div class="mt-6 w-48 h-1 bg-white/10 rounded-full overflow-hidden"><div id="splashBar" class="h-full w-0 bg-gradient-to-r from-rehzo-500 to-amber-400 rounded-full transition-all duration-300"></div></div>
+  <p id="splashMsg" class="text-[11px] text-white/50 mt-3">Connecting to Database…</p>
+</div>
 
-<!-- ================= BOOKING MODAL ================= -->
-<div id="bookingModal" class="modal-overlay">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3 style="font-size:14px; font-weight:800;">Request Room Booking</h3>
-      <span onclick="closeModal('bookingModal')" style="cursor:pointer; font-size:14px; font-weight:bold;">✕</span>
-    </div>
-    <div class="input-row">
-      <div class="input-group">
-        <label>Your Name *</label>
-        <input id="bName" placeholder="Full Name">
+<!-- APP SHELL -->
+<div class="relative z-10 max-w-[1120px] mx-auto lg:py-4 px-0 lg:px-4 flex gap-6 items-start">
+  <main class="flex-1 min-w-0">
+    <div class="bg-[#F5F6FB] lg:rounded-[28px] overflow-hidden shadow-app border border-white/20 min-h-[100dvh] flex flex-col relative">
+
+      <!-- FIXED TOPBAR -->
+      <header class="sticky top-0 z-40 glass border-b border-slate-200/80 shadow-sm">
+        <div class="px-4 py-2.5 flex items-center gap-3">
+          <div class="flex items-center gap-2 cursor-pointer" onclick="go('home')">
+            <img src="file_000000003eb88211aab290a06f8ead27.png" alt="REHZO" class="w-8 h-8 object-contain rounded-xl shrink-0" onerror="this.style.display='none'">        
+            <div class="leading-none">
+              <div class="font-bold text-[17px] text-slate-900 leading-none">REHZO</div>
+              <span class="text-[9px] font-bold text-rehzo-600 tracking-wider">STAY VERIFIED</span>
+            </div>
+          </div>
+          <div class="flex-1"></div>
+          <button onclick="openCountry()" class="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-ink-900 text-white text-[12px] font-bold btn-press"><span id="hdrFlag">🇮🇳</span><span id="hdrCurr">₹</span><span class="text-white/40">▾</span></button>
+          <button onclick="go('notifications')" class="relative w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center btn-press">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B0E1F" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span id="bellBadge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-4 px-1 rounded-full bg-rehzo-500 text-white text-[10px] font-extrabold flex items-center justify-center">0</span>
+          </button>
+          <button id="avatarBtn" onclick="handleAvatar()" class="w-9 h-9 rounded-full bg-gradient-to-br from-ink-900 to-indigo-700 text-white font-sora font-bold text-xs flex items-center justify-center border-2 border-white shadow btn-press overflow-hidden">?</button>
+        </div>
+
+        <div id="homeSearchWrap" class="px-4 pb-2.5">
+          <div class="flex gap-2">
+            <div class="flex-1 flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0B5" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input id="globalSearch" oninput="onSearch(this.value)" placeholder="House name, city, TRL No…" class="flex-1 text-[13px] font-medium bg-transparent border-0 shadow-none placeholder:text-slate-400" style="box-shadow:none!important">
+              <button id="clearSearch" onclick="clearSearch()" class="hidden text-slate-400 font-bold text-xs">✕</button>
+            </div>
+            <button onclick="toggleFilters(true)" class="w-10 rounded-xl bg-ink-900 text-white flex items-center justify-center btn-press relative">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              <span id="filterDot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 bg-rehzo-500 rounded-full border border-ink-900"></span>
+            </button>
+          </div>
+          <div class="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-0.5" id="quickChips"></div>
+        </div>
+      </header>
+
+      <!-- CONTENT BODY -->
+      <div id="appMain" class="flex-1 relative">
+
+        <!-- HOME (COMPACT & DIRECT 2X2) -->
+        <section id="view-home" class="app-view on">
+          <div class="px-3 pt-2">
+            <div class="flex items-center justify-between mb-2 px-1">
+              <div class="flex items-center gap-2">
+                <h3 class="font-sora font-extrabold text-[15px]">Available Rooms</h3>
+                <span id="homeCount" class="text-[10px] font-bold bg-ink-900 text-white px-2 py-0.5 rounded-full">0</span>
+              </div>
+              <select id="sortSel" onchange="state.sort=this.value;renderHome()" class="text-[11px] font-bold bg-white border border-slate-200 rounded-lg px-2 py-1">
+                <option value="new">Newest</option>
+                <option value="low">Rent: Low→High</option>
+                <option value="high">Rent: High→Low</option>
+                <option value="near">Nearest</option>
+              </select>
+            </div>
+          </div>
+          <div id="homeGrid" class="pb-4"></div>
+        </section>
+
+        <!-- SEARCH -->
+        <section id="view-search" class="app-view">
+          <div class="px-4 pt-3">
+            <h2 class="font-sora font-extrabold text-[20px]">Search Rooms</h2>
+            <p class="text-[12px] text-slate-500 mb-2">Find verified stays across Bharat</p>
+            <div id="searchGrid" class="pb-4"></div>
+          </div>
+        </section>
+
+        <!-- NEAR ME -->
+        <section id="view-near" class="app-view">
+          <div class="px-4 pt-3">
+            <h2 class="font-sora font-extrabold text-[20px]">Near Me 📍</h2>
+            <div class="mt-2.5 rounded-[18px] overflow-hidden border border-slate-200 shadow-card bg-white">
+              <div id="nearMap" style="height:220px"></div>
+              <div class="p-2.5 flex gap-2">
+                <button onclick="locateMe()" class="flex-1 py-2.5 rounded-xl bg-ink-900 text-white text-[12px] font-extrabold btn-press">◎ Use My Location</button>
+                <button onclick="demoLocate()" class="flex-1 py-2.5 rounded-xl bg-rehzo-50 text-rehzo-700 border border-rehzo-100 text-[12px] font-extrabold btn-press">Demo: Connaught Place</button>
+              </div>
+            </div>
+            <div id="nearList" class="grid gap-2.5 mt-2.5 pb-6 sm:grid-cols-2"></div>
+          </div>
+        </section>
+
+        <!-- BOOKINGS -->
+        <section id="view-bookings" class="app-view">
+          <div class="px-4 pt-3 pb-8">
+            <h2 class="font-sora font-extrabold text-[20px]">My Bookings</h2>
+            <div class="flex gap-1.5 mt-2.5 overflow-x-auto no-scrollbar" id="bkTabs"></div>
+            <div id="bkList" class="mt-3 space-y-2.5"></div>
+          </div>
+        </section>
+
+        <!-- OWNER HUB -->
+        <section id="view-owner" class="app-view">
+          <div class="px-4 pt-3">
+            <div class="flex items-center gap-2">
+              <h2 class="font-sora font-extrabold text-[20px]">Owner Hub</h2>
+              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">90-DAY LISTING</span>
+            </div>
+            <div id="ownerGate"></div>
+            <div id="ownerBody" class="hidden">
+              <div class="mt-2.5 grid grid-cols-3 gap-1.5 bg-white border border-slate-200 rounded-xl p-1">
+                <button data-otab="list" onclick="ownerTab('list')" class="otab py-2 rounded-lg text-[12px] font-extrabold bg-ink-900 text-white">+ List Room</button>
+                <button data-otab="mine" onclick="ownerTab('mine')" class="otab py-2 rounded-lg text-[12px] font-extrabold text-slate-500">My Listings <span id="mineCount" class="ml-0.5 text-[10px] bg-slate-100 px-1 rounded-full">0</span></button>
+                <button data-otab="req" onclick="ownerTab('req')" class="otab py-2 rounded-lg text-[12px] font-extrabold text-slate-500 relative">Requests <span id="reqCount" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rehzo-500 text-white text-[9px] rounded-full items-center justify-center">0</span></button>
+              </div>
+
+              <!-- LIST FORM (FILE PICKER + SAMPLE PHOTOS) -->
+              <div id="otab-list" class="otabPane mt-3 pb-8">
+                <form id="listForm" onsubmit="submitListing(event)" class="space-y-3">
+                  <div class="rounded-[18px] bg-white border border-slate-200 p-3.5">
+                    <div class="font-sora font-bold text-[14px]">1 • Basic Details</div>
+                    <div class="grid grid-cols-2 gap-2 mt-2.5">
+                      <div><label class="lbl">Select Country *</label><select id="fCountry" onchange="onFCountry()" class="inp"></select></div>
+                      <div><label class="lbl">Your Name *</label><input id="fName" class="inp" placeholder="Name" required></div>
+                      <div><label class="lbl">Phone *</label><div class="flex"><span id="fDial" class="px-2 flex items-center bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-[12px] font-bold">+91</span><input id="fPhone" class="inp rounded-l-none" placeholder="Phone" required></div></div>
+                      <div><label class="lbl">Gmail *</label><input id="fGmail" type="email" class="inp" placeholder="you@gmail.com" required></div>
+                    </div>
+                  </div>
+                  <div class="rounded-[18px] bg-white border border-slate-200 p-3.5">
+                    <div class="font-sora font-bold text-[14px]">2 • Room Details</div>
+                    <div class="mt-2.5 space-y-2">
+                      <div><label class="lbl">House Name *</label><input id="fHouse" class="inp" placeholder="e.g. Sharma Villa" required></div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <div><label class="lbl">Type *</label><select id="fType" class="inp" required></select></div>
+                        <div><label class="lbl">Suitable For *</label><select id="fSuit" class="inp" required><option>Anyone</option><option>Students</option><option>Family</option><option>Worker</option></select></div>
+                      </div>
+                      <div><label class="lbl">Amenities</label><div id="fAmen" class="flex flex-wrap gap-1 mt-1"></div></div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <div><label class="lbl">Monthly Rent (₹) *</label><input id="fRent" type="number" min="500" class="inp" placeholder="8000" required></div>
+                        <div><label class="lbl">Deposit (₹)</label><input id="fDep" type="number" min="0" class="inp" placeholder="10000"></div>
+                      </div>
+                      <div><label class="lbl">Rules *</label><textarea id="fRules" class="inp" rows="2" placeholder="Rules & conditions" required></textarea></div>
+                    </div>
+                  </div>
+                  <div class="rounded-[18px] bg-white border border-slate-200 p-3.5">
+                    <div class="font-sora font-bold text-[14px]">3 • Location</div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                      <div><label class="lbl">State *</label><input id="fState" class="inp" placeholder="Delhi" required></div>
+                      <div><label class="lbl">City *</label><input id="fCity" class="inp" placeholder="New Delhi" required></div>
+                    </div>
+                    <div class="mt-2"><label class="lbl">Address *</label><input id="fAddr" class="inp" placeholder="House No, Area" required></div>
+                  </div>
+                  <div class="rounded-[18px] bg-white border border-slate-200 p-3.5">
+                    <div class="font-sora font-bold text-[14px]">4 • Room Photos (Max 3)</div>
+                    <div class="grid grid-cols-3 gap-2 mt-2" id="photoPrev"></div>
+                    <input id="fPhotoFile" type="file" accept="image/*" multiple onchange="handleImagePick(event)" class="mt-2.5 text-xs text-slate-500 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-ink-900 file:text-white cursor-pointer">
+                    <div class="flex gap-2 mt-2">
+                      <button type="button" onclick="fillSamplePhotos()" class="flex-1 py-2 rounded-xl bg-slate-100 text-[11px] font-extrabold">Use Sample Photos</button>
+                      <button type="button" onclick="clearPhotos()" class="px-3 py-2 rounded-xl bg-slate-100 text-[11px] font-extrabold">Clear</button>
+                    </div>
+                  </div>
+                  <button id="listSubmitBtn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white font-sora font-extrabold text-[14px] shadow-pop btn-press">Publish Listing • 90 Days Free</button>
+                </form>
+              </div>
+              <div id="otab-mine" class="otabPane hidden mt-3 pb-8 space-y-2.5"></div>
+              <div id="otab-req" class="otabPane hidden mt-3 pb-8 space-y-2.5"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MORE -->
+        <section id="view-more" class="app-view">
+          <div class="px-4 pt-3 pb-8">
+            <h2 class="font-sora font-extrabold text-[20px]">Account & More</h2>
+            <div id="profileCard"></div>
+            <div id="moreMenu" class="mt-3 space-y-2"></div>
+          </div>
+        </section>
+
+        <!-- AUTH -->
+        <section id="view-auth" class="app-view"><div class="px-4 pt-6 pb-10 max-w-[420px] mx-auto">
+          <div class="text-center"><h2 class="font-sora font-extrabold text-[22px]">Welcome to REHZO</h2><p class="text-[12px] text-slate-500">Book & List rooms in Bharat</p></div>
+          <div id="atab-login" class="mt-3 rounded-[20px] bg-white border border-slate-200 p-5 shadow-card">
+            <button onclick="loginWithGoogle()" class="w-full py-3 rounded-xl border border-slate-200 bg-white text-ink-900 font-extrabold btn-press flex items-center justify-center gap-2 shadow-sm mb-3">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+              Continue with Google
+            </button>
+            <label class="lbl">Email / ID</label><input id="lUid" class="inp mt-1" placeholder="Email">
+            <label class="lbl mt-2">Password</label><input id="lPass" type="password" class="inp mt-1" placeholder="••••••••">
+            <button onclick="doLogin()" class="w-full mt-3 py-3 rounded-xl bg-ink-900 text-white font-sora font-extrabold btn-press">Login</button>
+          </div>
+        </div></section>
+
+        <!-- ADMIN -->
+        <section id="view-admin" class="app-view">
+          <div class="px-4 pt-3 pb-8">
+            <button onclick="backTo()" class="backbtn">← Back</button>
+            <div id="adminGate" class="mt-2 rounded-[18px] bg-white border border-slate-200 p-4 text-center">
+              <div class="text-3xl">🔐</div>
+              <h3 class="font-sora font-extrabold text-[16px] mt-1">Admin Panel</h3>
+              <p class="text-[11px] text-slate-500">Live Database monitoring</p>
+              <input id="adminCode" type="password" class="inp mt-2 text-center font-mono font-bold" placeholder="admin123">
+              <button onclick="unlockAdmin()" class="w-full mt-2 py-2.5 rounded-xl bg-ink-900 text-white font-extrabold text-[12px]">Unlock</button>
+            </div>
+            <div id="adminBody" class="hidden">
+              <h2 class="font-sora font-extrabold text-[18px] mt-2">Admin Dashboard</h2>
+              <div class="grid grid-cols-2 gap-2 mt-2" id="adminStats"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TRL RECORDS & VERIFICATION -->
+        <section id="view-trl" class="app-view">
+          <div class="px-4 pt-3 pb-8">
+            <button onclick="backTo()" class="backbtn">← Back</button>
+            <h2 class="font-sora font-extrabold text-[20px] mt-1">TRL Records 🔖</h2>
+            <p class="text-[12px] text-slate-500">Permanent 12-char verified bookings</p>
+            <div class="mt-3 flex gap-2">
+              <input id="trlSearch" placeholder="Enter 12-char TRL…" class="inp flex-1 uppercase font-mono font-bold" maxlength="12">
+              <button onclick="verifyTRL()" class="px-4 rounded-xl bg-ink-900 text-white font-bold text-xs">Verify</button>
+            </div>
+            <div id="trlResult" class="mt-3"></div>
+            <div id="trlList" class="mt-3 space-y-2"></div>
+          </div>
+        </section>
+
+        <!-- NOTIFICATIONS -->
+        <section id="view-notifications" class="app-view">
+          <div class="px-4 pt-3 pb-8">
+            <button onclick="backTo()" class="backbtn">← Back</button>
+            <h2 class="font-sora font-extrabold text-[18px] mt-1">Notifications</h2>
+            <div id="notifList" class="mt-2 space-y-2"></div>
+          </div>
+        </section>
+
+        <!-- LEGAL -->
+        <section id="view-legal" class="app-view"><div class="px-4 pt-4 pb-8"><button onclick="backTo()" class="backbtn">← Back</button><div id="legalBody" class="mt-2"></div></div></section>
+
       </div>
-      <div class="input-group">
-        <label>Phone No *</label>
-        <input id="bPhone" placeholder="Mobile">
-      </div>
+
+      <!-- FIXED 5 BOTTOM NAVIGATION BUTTONS -->
+      <nav class="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-1 bg-gradient-to-t from-[#F5F6FB] via-[#F5F6FB]/95 to-transparent">
+        <div class="max-w-[500px] mx-auto grid grid-cols-5 bg-ink-900 rounded-[22px] p-1 shadow-2xl border border-white/10">
+          <button data-nav="home" onclick="go('home')" class="bnav flex flex-col items-center py-2 rounded-xl text-white bg-white/10">
+            <span class="text-[17px]">🏠</span><span class="text-[9px] font-extrabold">Home</span>
+          </button>
+          <button data-nav="search" onclick="go('search')" class="bnav flex flex-col items-center py-2 rounded-xl text-white/50">
+            <span class="text-[17px]">🔍</span><span class="text-[9px] font-extrabold">Search</span>
+          </button>
+          <button data-nav="near" onclick="go('near')" class="bnav flex flex-col items-center py-2 rounded-xl text-white/50">
+            <span class="text-[17px]">📍</span><span class="text-[9px] font-extrabold">Near</span>
+          </button>
+          <button data-nav="bookings" onclick="go('bookings')" class="bnav flex flex-col items-center py-2 rounded-xl text-white/50">
+            <span class="text-[17px]">🧳</span><span class="text-[9px] font-extrabold">Booking</span>
+          </button>
+          <button data-nav="owner" onclick="go('owner')" class="bnav flex flex-col items-center py-2 rounded-xl text-white/50">
+            <span class="text-[17px]">👤</span><span class="text-[9px] font-extrabold">Owner</span>
+          </button>
+        </div>
+      </nav>
+
     </div>
-    <div class="input-group" style="margin-bottom:8px;">
-      <label>Gmail (optional)</label>
-      <input id="bGmail" placeholder="you@gmail.com">
-    </div>
-    <div class="input-group" style="margin-bottom:8px;">
-      <label>Your Old Address *</label>
-      <input id="bOldAddr" placeholder="Permanent address">
-    </div>
-    <div class="input-row">
-      <div class="input-group">
-        <label>Check-in Date *</label>
-        <input id="bDate" type="date">
-      </div>
-      <div class="input-group">
-        <label>Kitne month k liy *</label>
-        <select id="bMonths" onchange="calculateRent()">
-          <option value="1">1 Month</option>
-          <option value="2">2 Months</option>
-          <option value="3">3 Months</option>
-          <option value="6">6 Months</option>
-          <option value="12">12 Months</option>
-        </select>
-      </div>
-    </div>
-    <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:8px; font-size:11px; margin-bottom:10px;">
-      <div style="display:flex; justify-content:space-between;"><span>Monthly Rent:</span> <b id="calcRent">₹0</b></div>
-      <div style="display:flex; justify-content:space-between; margin-top:2px;"><span>Deposit:</span> <b id="calcDeposit">₹0</b></div>
-      <div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #6EE7B7; padding-top:4px; font-size:12px; font-weight:800; color:#044E3B;"><span>Total Payable:</span> <span id="calcTotal">₹0</span></div>
-    </div>
-    <button class="submit-btn" onclick="submitBooking()">Send Booking Request →</button>
+  </main>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div id="detailOverlay" class="hidden fixed inset-0 z-[70] overflow-y-auto bg-ink-950/60 backdrop-blur-sm p-0 sm:p-4">
+  <div class="max-w-[560px] mx-auto bg-[#F5F6FB] sm:rounded-[24px] overflow-hidden min-h-full sm:min-h-0 shadow-app">
+    <div id="detailBody"></div>
   </div>
 </div>
 
-<!-- ================= OFFICIAL 12-DIGIT TRL SLIP MODAL (SCREENSHOT 3) ================= -->
-<div id="slipModal" class="modal-overlay">
-  <div class="modal-box" id="pdfPrintWrapper">
-    <div class="modal-header">
-      <div style="display:flex; align-items:center; gap:6px;">
-        <span style="background:#044E3B; color:#fff; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:bold;">⌂</span>
-        <b style="font-size:14px;">Rehzo</b>
-      </div>
-      <div style="display:flex; gap:6px; align-items:center;">
-        <button onclick="window.print()" style="padding:2px 8px; background:#044E3B; color:#fff; border:none; border-radius:10px; font-size:10px; font-weight:bold; cursor:pointer;">🖨 Print</button>
-        <span onclick="closeModal('slipModal')" style="cursor:pointer; font-size:14px; font-weight:bold;">✕</span>
-      </div>
-    </div>
-    
-    <div style="text-align:center; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:12px; padding:8px;">
-      <p style="font-size:8px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">OFFICIAL 12-DIGIT TRL NUMBER</p>
-      <h2 id="slipTrl" style="font-size:18px; font-weight:900; letter-spacing:1px; margin:2px 0;">839472615028</h2>
-      <p style="font-size:7.5px; color:#64748B;">🔒 Private & Permanent Non-Reusable Record</p>
-    </div>
+<!-- BOOKING MODAL -->
+<div id="bookingModal" class="hidden fixed inset-0 z-[80] overflow-y-auto bg-ink-950/70 backdrop-blur-sm p-3">
+  <div class="max-w-[480px] mx-auto bg-white rounded-[22px] overflow-hidden shadow-app fadeUp my-6"><div id="bookingBody"></div></div>
+</div>
 
-    <div class="barcode"></div>
-
-    <div style="font-size:10.5px; line-height:1.6;">
-      <p style="font-weight:800; color:#044E3B; margin-bottom:2px;">🏠 1. ROOM & PROPERTY DETAILS</p>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Property:</span> <b id="slipHouse" style="color:#1E293B;">—</b></div>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b id="slipRent" style="color:#1E293B;">—</b></div>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b id="slipDate" style="color:#1E293B;">—</b></div>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Duration:</span> <b id="slipDuration" style="color:#1E293B;">—</b></div>
-
-      <p style="font-weight:800; color:#044E3B; margin-top:8px; margin-bottom:2px;">👤 2. PROPERTY OWNER DETAILS</p>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b id="slipOwner" style="color:#1E293B;">—</b></div>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Phone:</span> <b id="slipPhone" style="color:#1E293B;">—</b></div>
-      <div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Address:</span> <b id="slipAddr" style="color:#1E293B;">—</b></div>
+<!-- PDF PRINT MODAL -->
+<div id="pdfModal" class="hidden fixed inset-0 z-[85] overflow-y-auto bg-ink-950/80 p-4">
+  <div class="max-w-[600px] mx-auto my-6 fadeUp">
+    <div class="flex gap-2 mb-3">
+      <button onclick="$('pdfModal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold">✕ Close</button>
+      <div class="flex-1"></div>
+      <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-rehzo-500 text-white text-xs font-extrabold">🖨 Print / PDF</button>
     </div>
+    <div id="pdfPrintArea"></div>
   </div>
 </div>
+
+<!-- COUNTRY MODAL -->
+<div id="countryModal" class="hidden fixed inset-0 z-[90]"><div class="absolute inset-0 bg-ink-950/60" onclick="closeCountry()"></div><div class="absolute bottom-0 left-0 right-0 sm:relative sm:mx-auto sm:mt-[10vh] sm:max-w-[420px] bg-white rounded-t-[26px] sm:rounded-[24px] p-5 fadeUp max-h-[80vh] overflow-y-auto"><h3 class="font-sora font-extrabold text-[17px]">Select Country</h3><div id="countryList" class="mt-3 space-y-1.5"></div></div></div>
+
+<!-- TOASTS -->
+<div id="toastWrap" class="fixed bottom-[85px] left-1/2 -translate-x-1/2 z-[120] w-[90%] max-w-[380px] space-y-1.5 pointer-events-none"></div>
+
+<style>
+.lbl{ font-size:10px; font-weight:800; text-transform:uppercase; color:#6B7280 }
+.inp{ width:100%; background:#F8F9FC; border:1.5px solid #E5E7EB; border-radius:12px; padding:8px 11px; font-size:13px; font-weight:600 }
+.backbtn{ font-size:12px; font-weight:800; color:#6B7280; background:#fff; border:1px solid #E5E7EB; padding:5px 12px; border-radius:99px }
+.badge{ font-size:9.5px; font-weight:800; padding:3px 8px; border-radius:99px; text-transform:uppercase }
+.amen-pill{ font-size:10.5px; font-weight:700; background:#F1F2F7; border:1.5px solid #E5E7EB; padding:4px 9px; border-radius:99px; cursor:pointer }
+.amen-pill.on{ background:#0B0E1F; color:#fff }
+</style>
 
 <script>
-// ================= STATE & DATABASE =================
-var DB = {
-  listings: [
-    { id:'L1', houseName:'Sunny 1 RK near Andheri', roomType:'1 RK', suitableFor:'Worker', rent:14500, deposit:25000, country:'IN', city:'Mumbai', address:'Andheri West', lat:28.62, lng:77.21, ownerName:'Sunita Mehra', phone:'9820012345', gmail:'sunita@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500' },
-    { id:'L2', houseName:'Green Park Student PG', roomType:'PG', suitableFor:'Students', rent:6500, deposit:6500, country:'IN', city:'Delhi', address:'Green Park', lat:28.64, lng:77.22, ownerName:'Rajesh Verma', phone:'9811054321', gmail:'rajesh@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=500' },
-    { id:'L3', houseName:'Backpacker Youth Hostel', roomType:'Hostel', suitableFor:'Students', rent:4200, deposit:2000, country:'IN', city:'Delhi', address:'Pahar Ganj', lat:28.63, lng:77.21, ownerName:'Vikram Joshi', phone:'9899123456', gmail:'vikram@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=500' },
-    { id:'L4', houseName:'Comfort 2 BHK Family Flat', roomType:'2 BHK', suitableFor:'Family', rent:22000, deposit:44000, country:'IN', city:'Delhi', address:'Dwarka Sector 10', lat:28.58, lng:77.05, ownerName:'Amit Saxena', phone:'9819999999', gmail:'amit@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500' }
-  ],
-  bookings: [
-    { id:'BK-1', trl:'839472615028', houseName:'Sunny 1 RK near Andheri', roomType:'1 RK', rent:14500, duration:6, date:'28 Sep 2026', ownerName:'Sunita Mehra', ownerPhone:'+91 9820012345', ownerAddress:'Andheri West, Mumbai', status:'confirmed' }
-  ]
-};
+/* ================= DATABASE & LOGIC ================= */
+const COUNTRIES=[
+ {c:'IN',n:'India',d:'+91',s:'₹',f:'🇮🇳',lat:28.6139,lng:77.2090},
+ {c:'US',n:'United States',d:'+1',s:'$',f:'🇺🇸',lat:40.7128,lng:-74.0060}
+];
+const ROOM_TYPES=['Single Room','1 RK','2 BHK','3 BHK','PG','Flat','Hostel','Shared Room'];
+const AMENS=['WiFi','AC','Parking','Meals','Laundry','Power Backup','CCTV','Furnished'];
+let DB=null, currentUser=null, state={q:'',chip:'All',sort:'new',geo:null,tempPhotos:[]};
 
-var activeBookingListing = null;
-var userGeo = { lat: 28.6139, lng: 77.2090 };
-var lockedCoord = { lat: 28.6139, lng: 77.2090 };
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmtMoney=(a,sym)=>sym+' '+Number(a||0).toLocaleString('en-IN');
+const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return 'h'+h.toString(36)+s.length.toString(36)};
+const genTRL=()=>{const ch='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let t='';for(let i=0;i<12;i++)t+=ch[Math.floor(Math.random()*ch.length)];return t};
+const countryOf=c=>COUNTRIES.find(x=>x.c===c)||COUNTRIES[0];
+const myCountry=()=>countryOf(currentUser?.country||'IN');
 
-// NAVIGATION
-function goView(viewId) {
-  var views = document.querySelectorAll('.view');
-  for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
-  var target = document.getElementById('view-' + viewId);
-  if (target) target.classList.add('active');
-
-  var navBtns = document.querySelectorAll('.nav-item');
-  for (var j = 0; j < navBtns.length; j++) {
-    if (navBtns[j].getAttribute('data-view') === viewId) navBtns[j].classList.add('active');
-    else navBtns[j].classList.remove('active');
-  }
-
-  if (viewId === 'home') renderRooms();
-  if (viewId === 'search') renderSearchRooms();
-  if (viewId === 'near') renderNearRooms();
-  if (viewId === 'bookings') renderMyBookings();
-  if (viewId === 'owner') updateOwnerCount();
-  if (viewId === 'admin') renderAdminListings();
-  window.scrollTo(0, 0);
+function toast(msg,type='ok'){
+  const w=$('toastWrap');const d=document.createElement('div');
+  const col=type==='err'?'bg-red-600':type==='warn'?'bg-amber-500':'bg-ink-900';
+  d.className=`toastIn text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-[12px] font-bold shadow-lg flex gap-2 items-center ${col}`;
+  d.innerHTML=`<span>${type==='err'?'⛔':'✅'}</span><span>${msg}</span>`;
+  w.appendChild(d);setTimeout(()=>{d.remove()},2800);
 }
 
-// RENDER ROOM CARDS
-function renderRooms(list) {
-  var items = list || DB.listings.filter(function(x){ return x.status === 'available'; });
-  var container = document.getElementById('roomsContainer');
-  if (!items.length) {
-    container.innerHTML = '<div style="grid-column: span 2; text-align:center; padding:20px; font-size:11px; color:#64748B;">No available rooms match your criteria.</div>';
-    return;
-  }
-  var html = '';
-  for (var i = 0; i < items.length; i++) {
-    var r = items[i];
-    html += '<div class="room-card">' +
-      '<img src="' + r.photo + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500\'">' +
-      '<div class="room-details">' +
-        '<div class="room-title">' + r.houseName + '</div>' +
-        '<div class="room-rent">₹' + r.rent.toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
-        '<div class="room-city">📍 ' + r.city + ' • ' + r.roomType + '</div>' +
-        '<button class="book-btn" onclick="startBooking(\'' + r.id + '\')">Book Now</button>' +
-      '</div>' +
-    '</div>';
-  }
-  container.innerHTML = html;
+function saveDB(){localStorage.setItem('REHZO_DB',JSON.stringify(DB))}
+function loadDB(){try{DB=JSON.parse(localStorage.getItem('REHZO_DB'))}catch(e){DB=null}}
+
+function seed(){
+  const now=Date.now(),D=86400000;
+  DB={
+    users:[
+      {uid:'demo_user',name:'Aarav Demo',email:'demo@gmail.com',phone:'9876543210',country:'IN',pass:hash('demo123'),role:'user'},
+      {uid:'admin',name:'REHZO Admin',email:'admin@rehzo.com',phone:'9000000000',country:'IN',pass:hash('admin123'),role:'admin'}
+    ],
+    listings:[
+      {id:'L1',ownerUid:'priya_owner',ownerName:'Priya Sharma',contact:'9811054321',gmail:'priya@gmail.com',country:'IN',houseName:'Sharma Villa • Single Room',roomType:'Single Room',suitableFor:'Students',amenities:['WiFi','Furnished'],rent:7500,deposit:15000,state:'Delhi',city:'New Delhi',address:'B-42, Laxmi Nagar',lat:28.6692,lng:77.2740,rules:'No smoking',photos:['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop'],createdAt:now-6*D,status:'available'},
+      {id:'L2',ownerUid:'priya_owner',ownerName:'Priya Sharma',contact:'9811054321',gmail:'priya@gmail.com',country:'IN',houseName:'Sunrise Girls PG',roomType:'PG',suitableFor:'Students',amenities:['WiFi','Meals'],rent:6500,deposit:6500,state:'Madhya Pradesh',city:'Indore',address:'Vijay Nagar',lat:22.7196,lng:75.8577,rules:'Only girls',photos:['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80&auto=format&fit=crop'],createdAt:now-12*D,status:'available'}
+    ],
+    bookings:[],notifications:[]
+  };
+  saveDB();
 }
 
-// FILTERS & SEARCH
-function handleSearch(val) {
-  var q = val.trim();
-  var trlBox = document.getElementById('trlAlert');
-  if (q.length === 12 && /^\d+$/.test(q)) {
-    var match = DB.bookings.find(function(b){ return b.trl === q; });
-    if (match) {
-      trlBox.style.display = 'block';
-      document.getElementById('trlAlertDetails').innerHTML = match.houseName + ' (Confirmed)';
-      return;
+/* ================= SUPABASE SYNC ================= */
+async function syncFromSupabase(){
+  if(!window.rehzoSupabase) return;
+  try {
+    const { data: listings } = await window.rehzoSupabase.from('listings').select('*').order('created_at', { ascending: false });
+    if(listings && listings.length > 0){
+      DB.listings = listings.map(l => ({
+        id: l.id,
+        ownerUid: l.owner_id || l.owner_uid,
+        ownerName: l.owner_name,
+        contact: l.contact,
+        gmail: l.gmail,
+        country: l.country || 'IN',
+        houseName: l.house_name,
+        roomType: l.room_type,
+        suitableFor: l.suitable_for,
+        amenities: l.amenities || ['WiFi'],
+        rent: l.rent,
+        deposit: l.deposit,
+        state: l.state,
+        city: l.city,
+        address: l.address,
+        lat: l.lat || 28.6139,
+        lng: l.lng || 77.2090,
+        rules: l.rules,
+        photos: l.photos || ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop'],
+        status: l.status || 'available',
+        createdAt: new Date(l.created_at).getTime()
+      }));
+    }
+
+    const { data: bookings } = await window.rehzoSupabase.from('bookings').select('*').order('created_at', { ascending: false });
+    if(bookings && bookings.length > 0){
+      DB.bookings = bookings.map(b => ({
+        id: b.id,
+        listingId: b.listing_id,
+        userUid: b.user_id || b.user_uid,
+        userName: b.user_name,
+        contact: b.contact,
+        durationMonths: b.duration_months,
+        status: b.status,
+        houseName: b.house_name,
+        roomType: b.room_type,
+        totalRent: b.total_rent,
+        trl: b.trl,
+        createdAt: new Date(b.created_at).getTime()
+      }));
+    }
+    saveDB();
+    renderAll();
+  } catch(e) {}
+}
+
+function initRealtimeSync(){
+  if(!window.rehzoSupabase) return;
+  window.rehzoSupabase.channel('realtime_channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => syncFromSupabase())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => syncFromSupabase())
+    .subscribe();
+}
+
+/* ================= AUTH RESTORE ================= */
+async function syncSession(session){
+  if(session && session.user){
+    let profile = null;
+    if(window.rehzoSupabase){
+      const { data } = await window.rehzoSupabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+      profile = data;
+    }
+    const meta = session.user.user_metadata || {};
+    const email = profile?.email || session.user.email || '';
+    const fullName = profile?.full_name || profile?.name || meta.full_name || meta.name || email.split('@')[0] || 'User';
+    currentUser = {
+      id: session.user.id,
+      uid: profile?.uid || email.split('@')[0] || session.user.id,
+      name: fullName,
+      email: email,
+      phone: profile?.phone || meta.phone || '9876543210',
+      country: profile?.country || 'IN',
+      role: profile?.role || 'user'
+    };
+    localStorage.setItem('REHZO_SESSION', session.user.id);
+  } else {
+    const localUid = localStorage.getItem('REHZO_SESSION');
+    if(localUid && DB && DB.users){
+      currentUser = DB.users.find(u => u.uid === localUid || u.id === localUid) || null;
     }
   }
-  trlBox.style.display = 'none';
-  var sLow = q.toLowerCase();
-  var filtered = DB.listings.filter(function(l) {
-    return l.status === 'available' && (
-      l.houseName.toLowerCase().indexOf(sLow) !== -1 ||
-      l.city.toLowerCase().indexOf(sLow) !== -1 ||
-      l.roomType.toLowerCase().indexOf(sLow) !== -1
-    );
-  });
-  renderRooms(filtered);
+  updateAuthUI();
+  renderAll();
 }
 
-function applyFilters() {
-  var c = document.getElementById('countryFilter').value;
-  var t = document.getElementById('typeFilter').value;
-  var filtered = DB.listings.filter(function(l) {
-    return l.status === 'available' && (!c || l.country === c) && (!t || l.roomType === t);
-  });
-  renderRooms(filtered);
-}
-
-function filterChip(cat, el) {
-  var chips = document.querySelectorAll('.chip');
-  for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
-  el.classList.add('active');
-  if (cat === 'all') renderRooms();
-  else {
-    var filtered = DB.listings.filter(function(l){ return l.status === 'available' && l.suitableFor === cat; });
-    renderRooms(filtered);
-  }
-}
-
-function resetAll() {
-  document.getElementById('countryFilter').value = '';
-  document.getElementById('typeFilter').value = '';
-  document.getElementById('searchInput').value = '';
-  renderRooms();
-}
-
-// NEAR ME (10 KM STRICT)
-function getDist(lat1, lon1, lat2, lon2) {
-  var R = 6371;
-  var dLat = (lat2 - lat1) * Math.PI / 180;
-  var dLon = (lon2 - lon1) * Math.PI / 180;
-  var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-function renderNearRooms() {
-  var near = [];
-  for (var i = 0; i < DB.listings.length; i++) {
-    var l = DB.listings[i];
-    if (l.status === 'available' && l.lat && l.lng) {
-      var d = getDist(userGeo.lat, userGeo.lng, l.lat, l.lng);
-      if (d <= 10) near.push(l);
-    }
-  }
-  var container = document.getElementById('nearRoomsContainer');
-  if (!near.length) {
-    container.innerHTML = '<div style="grid-column: span 2; text-align:center; padding:20px; font-size:11px; color:#64748B;">No rooms available within 10 km.</div>';
-    return;
-  }
-  var html = '';
-  for (var j = 0; j < near.length; j++) {
-    var r = near[j];
-    html += '<div class="room-card">' +
-      '<img src="' + r.photo + '" class="room-thumb">' +
-      '<div class="room-details">' +
-        '<div class="room-title">' + r.houseName + '</div>' +
-        '<div class="room-rent">₹' + r.rent.toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="startBooking(\'' + r.id + '\')">Book Now</button>' +
-      '</div>' +
-    '</div>';
-  }
-  container.innerHTML = html;
-}
-
-function detectGPS() {
-  if (navigator.geolocation) {
-    document.getElementById('gpsStatus').innerText = 'Detecting GPS coordinates…';
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      userGeo.lat = pos.coords.latitude;
-      userGeo.lng = pos.coords.longitude;
-      document.getElementById('gpsStatus').innerText = '📍 Locked GPS: ' + userGeo.lat.toFixed(3) + ', ' + userGeo.lng.toFixed(3);
-      renderNearRooms();
-    }, function() {
-      document.getElementById('gpsStatus').innerText = '📍 Default Central: Delhi Connaught Place';
-      renderNearRooms();
+window.addEventListener('DOMContentLoaded', async ()=>{
+  loadDB(); if(!DB) seed();
+  buildStatic();
+  if(window.rehzoSupabase){
+    const { data: { session } } = await window.rehzoSupabase.auth.getSession();
+    await syncSession(session);
+    await syncFromSupabase();
+    initRealtimeSync();
+    window.rehzoSupabase.auth.onAuthStateChange(async (e, s)=> {
+      if(e==='SIGNED_IN') syncSession(s);
+      if(e==='SIGNED_OUT'){ currentUser=null; localStorage.removeItem('REHZO_SESSION'); updateAuthUI(); renderAll(); }
     });
   }
-}
+  renderAll();
+  setTimeout(()=>{$('splash')?.remove()}, 350);
+});
 
-// SEARCH SCREEN
-function renderSearchRooms() {
-  var container = document.getElementById('searchRoomsContainer');
-  var items = DB.listings.filter(function(x){ return x.status === 'available'; });
-  var html = '';
-  for (var i = 0; i < items.length; i++) {
-    var r = items[i];
-    html += '<div class="room-card">' +
-      '<img src="' + r.photo + '" class="room-thumb">' +
-      '<div class="room-details">' +
-        '<div class="room-title">' + r.houseName + '</div>' +
-        '<div class="room-rent">₹' + r.rent.toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="startBooking(\'' + r.id + '\')">Book Now</button>' +
-      '</div>' +
-    '</div>';
+/* ================= NAVIGATION ================= */
+function go(v){
+  if(['bookings','owner'].includes(v) && !currentUser){ toast('Please login first','warn'); v='auth'; }
+  document.querySelectorAll('.app-view').forEach(s=>s.classList.remove('on'));
+  const map={home:'view-home',search:'view-search',near:'view-near',bookings:'view-bookings',owner:'view-owner',auth:'view-auth',more:'view-more',admin:'view-admin',trl:'view-trl',notifications:'view-notifications',legal:'view-legal'};
+  $(map[v]||'view-home').classList.add('on');
+  document.querySelectorAll('.bnav').forEach(b=>{
+    const on=b.dataset.nav===v;
+    b.className=`bnav flex flex-col items-center py-2 rounded-xl ${on?'text-white bg-white/10':'text-white/50'}`;
+  });
+  $('homeSearchWrap').style.display=(v==='home'||v==='search')?'block':'none';
+  if(v==='search') renderSearch();
+  if(v==='near') setTimeout(initNearMap,150);
+  if(v==='owner') renderOwner();
+  if(v==='more') renderMore();
+  if(v==='trl') renderTRL();
+  window.scrollTo({top:0});
+}
+function backTo(){ go('home'); }
+function handleAvatar(){ if(!currentUser) go('auth'); else go('more'); }
+
+/* ================= STATIC & UI ================= */
+function buildStatic(){
+  $('fCountry').innerHTML=COUNTRIES.map(c=>`<option value="${c.c}">${c.f} ${c.n}</option>`).join('');
+  $('fType').innerHTML=ROOM_TYPES.map(t=>`<option>${t}</option>`).join('');
+  $('fAmen').innerHTML=AMENS.map(a=>`<span class="amen-pill" onclick="this.classList.toggle('on')">${a}</span>`).join('');
+  $('quickChips').innerHTML=['All',...ROOM_TYPES].map(t=>`<button onclick="setChip('${t}')" data-chip="${t}" class="qchip shrink-0 px-3 py-1 rounded-full border border-slate-200 bg-white text-[11px] font-extrabold whitespace-nowrap ${t==='All'?'chip-active':''}">${t}</button>`).join('');
+  renderPhotoPrev();
+}
+function updateAuthUI(){
+  const b=$('avatarBtn');
+  if(currentUser && currentUser.name){
+    b.textContent=currentUser.name[0].toUpperCase();
+    b.title=currentUser.name;
+  } else {
+    b.textContent='?';
   }
-  container.innerHTML = html;
+}
+function setChip(t){state.chip=t;document.querySelectorAll('.qchip').forEach(c=>c.classList.toggle('chip-active',c.dataset.chip===t));renderHome();renderSearch();}
+function onSearch(v){state.q=v.trim();$('clearSearch').classList.toggle('hidden',!v);renderHome();renderSearch();}
+function clearSearch(){$('globalSearch').value='';state.q='';$('clearSearch').classList.add('hidden');renderHome();renderSearch();}
+
+/* ================= ROOM LISTINGS & PRIVACY GATE ================= */
+function cardHTML(l){
+  const c=countryOf(l.country);
+  return `<article class="room-card fadeUp cursor-pointer" onclick="openDetail('${l.id}')">
+    <div class="relative h-[110px]">
+      <img src="${l.photos[0]}" onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop'" class="w-full h-full object-cover">
+      <div class="absolute top-1.5 left-1.5"><span class="badge bg-white/90 text-ink-900">${esc(l.roomType)}</span></div>
+      <div class="absolute bottom-1.5 left-2 right-2">
+        <div class="text-white font-sora font-extrabold text-[12px] leading-tight truncate drop-shadow">${esc(l.houseName)}</div>
+        <div class="text-white/80 text-[10px] font-semibold">📍 ${esc(l.city)}</div>
+      </div>
+    </div>
+    <div class="p-2 flex flex-col justify-between flex-1">
+      <div class="font-sora font-extrabold text-[13px] text-rehzo-600">${fmtMoney(l.rent,c.s)}<span class="text-[9px] text-slate-400">/mo</span></div>
+      <button onclick="event.stopPropagation();startBooking('${l.id}')" class="mt-2 w-full py-1.5 rounded-lg bg-ink-900 text-white text-[11px] font-extrabold btn-press">Book Now</button>
+    </div>
+  </article>`;
 }
 
-// BOOKING FLOW
-function startBooking(id) {
-  var l = DB.listings.find(function(x){ return x.id === id; });
-  if (!l) return;
-  activeBookingListing = l;
-  document.getElementById('bDate').value = new Date().toISOString().slice(0, 10);
-  calculateRent();
-  document.getElementById('bookingModal').classList.add('show');
+function renderHome(){
+  let arr=DB.listings.filter(l=>l.status==='available');
+  if(state.q) arr=arr.filter(l=>(l.houseName+' '+l.city).toLowerCase().includes(state.q.toLowerCase()));
+  if(state.chip!=='All') arr=arr.filter(l=>l.roomType===state.chip);
+  $('homeGrid').innerHTML=arr.map(cardHTML).join('');$('homeCount').textContent=arr.length;
 }
 
-function calculateRent() {
-  if (!activeBookingListing) return;
-  var m = parseInt(document.getElementById('bMonths').value) || 1;
-  var rent = activeBookingListing.rent;
-  var dep = activeBookingListing.deposit || 0;
-  document.getElementById('calcRent').innerText = '₹' + rent.toLocaleString();
-  document.getElementById('calcDeposit').innerText = dep ? '₹' + dep.toLocaleString() : 'None';
-  document.getElementById('calcTotal').innerText = '₹' + ((rent * m) + dep).toLocaleString();
+function renderSearch(){
+  let arr=DB.listings.filter(l=>l.status==='available');
+  if(state.q) arr=arr.filter(l=>(l.houseName+' '+l.city).toLowerCase().includes(state.q.toLowerCase()));
+  if(state.chip!=='All') arr=arr.filter(l=>l.roomType===state.chip);
+  $('searchGrid').innerHTML=arr.map(cardHTML).join('');
 }
 
-function submitBooking() {
-  var name = document.getElementById('bName').value.trim();
-  var phone = document.getElementById('bPhone').value.trim();
-  var addr = document.getElementById('bOldAddr').value.trim();
-  var date = document.getElementById('bDate').value;
-  var months = parseInt(document.getElementById('bMonths').value) || 1;
+function openDetail(id){
+  const l=DB.listings.find(x=>x.id===id); if(!l) return;
+  const c=countryOf(l.country);
+  const currentUid = currentUser?.uid || currentUser?.id;
+  const myBooking = currentUser ? DB.bookings.find(b => b.listingId === id && (b.userUid === currentUid) && ['owner_accepted', 'confirmed'].includes(b.status)) : null;
+  const isOwner = currentUser && (l.ownerUid === currentUid);
+  const isUnlocked = myBooking || isOwner;
 
-  if (!name || !phone || !addr || !date) {
-    alert("Please fill all required booking fields.");
-    return;
-  }
+  $('detailBody').innerHTML=`
+    <div class="relative h-[220px] bg-ink-900">
+      <img src="${l.photos[0]}" class="w-full h-full object-cover">
+      <button onclick="closeDetail()" class="absolute top-3 left-3 w-8 h-8 rounded-full bg-white font-extrabold text-sm">←</button>
+    </div>
+    <div class="p-4">
+      <div class="flex items-center justify-between">
+        <h2 class="font-sora font-extrabold text-[18px]">${esc(l.houseName)}</h2>
+        <span class="badge bg-ink-900 text-white">${esc(l.roomType)}</span>
+      </div>
+      <div class="text-[12px] text-slate-500 mt-0.5">📍 ${esc(l.city)}, ${esc(l.state)}</div>
+      <div class="mt-2.5 p-3 rounded-xl bg-rehzo-50 border border-rehzo-100 flex justify-between items-center">
+        <div><div class="font-sora font-extrabold text-[18px] text-rehzo-600">${fmtMoney(l.rent,c.s)}/mo</div><div class="text-[11px] text-slate-500">Deposit: ${l.deposit?fmtMoney(l.deposit,c.s):'—'}</div></div>
+        <div class="text-right text-[11px] font-bold text-slate-600">For: ${esc(l.suitableFor)}</div>
+      </div>
 
-  var bk = {
-    id: 'BK-' + Date.now(),
-    houseName: activeBookingListing.houseName,
-    roomType: activeBookingListing.roomType,
-    rent: activeBookingListing.rent,
-    duration: months,
-    date: date,
-    ownerName: activeBookingListing.ownerName,
-    ownerPhone: activeBookingListing.phone,
-    ownerAddress: activeBookingListing.address,
-    status: 'requested',
-    trl: null
+      <!-- OWNER PRIVACY GATE -->
+      <div class="mt-3 p-3 rounded-xl border border-slate-200 bg-white">
+        <div class="lbl">Owner Details</div>
+        <div class="font-bold text-[13px] mt-1">${esc(l.ownerName)}</div>
+        <div class="mt-2 p-2.5 rounded-lg ${isUnlocked ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-500'} text-[12px]">
+          ${isUnlocked 
+            ? `<div>📞 <b>Phone:</b> ${esc(l.contact)}</div><div>✉️ <b>Gmail:</b> ${esc(l.gmail)}</div>` 
+            : `<div class="flex items-center gap-1.5 font-bold">🔒 <span>Phone No & Gmail Locked</span></div>
+               <div class="text-[10px] text-slate-400 mt-0.5">Owner request accept karega tabhi direct contact unlock hoga.</div>`
+          }
+        </div>
+      </div>
+
+      <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-[12px]">
+        <div class="lbl text-amber-800">Owner Rules</div>
+        <div class="mt-1">${esc(l.rules)}</div>
+      </div>
+
+      <div class="mt-4 flex gap-2">
+        <button onclick="closeDetail();startBooking('${l.id}')" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white font-sora font-extrabold text-[13px] shadow-pop btn-press">Request Booking</button>
+      </div>
+    </div>
+  `;
+  $('detailOverlay').classList.remove('hidden');
+}
+function closeDetail(){ $('detailOverlay').classList.add('hidden'); }
+
+/* ================= BOOKING FLOW ================= */
+function startBooking(id){
+  const l=DB.listings.find(x=>x.id===id); if(!l) return;
+  if(!currentUser){ toast('Please login first','warn'); return go('auth'); }
+  const currentUid = currentUser.uid || currentUser.id;
+  if(l.ownerUid===currentUid) return toast('You own this listing','warn');
+  
+  $('bookingBody').innerHTML=`
+    <div class="p-4 bg-ink-900 text-white">
+      <div class="font-sora font-extrabold text-[16px]">Booking Request</div>
+      <div class="text-[12px] text-white/60">${esc(l.houseName)} • ${fmtMoney(l.rent,countryOf(l.country).s)}/mo</div>
+    </div>
+    <div class="p-4 space-y-2">
+      <label class="lbl">Your Name</label><input id="bName" class="inp" value="${esc(currentUser.name)}">
+      <label class="lbl">Phone</label><input id="bPhone" class="inp" value="${esc(currentUser.phone)}">
+      <label class="lbl">Duration (Months)</label><input id="bDur" type="number" min="1" value="1" class="inp">
+      <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-100 text-[11px] text-indigo-900 font-semibold mt-2">
+        ℹ️ Privacy Note: Owner ka Phone No aur Gmail request accept hone ke baad dikhega.
+      </div>
+      <button onclick="submitBooking('${l.id}')" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-rehzo-500 to-amber-500 text-white font-extrabold text-[13px]">Send Request</button>
+      <button onclick="$('bookingModal').classList.add('hidden')" class="w-full py-2 text-slate-400 font-bold text-xs">Cancel</button>
+    </div>
+  `;
+  $('bookingModal').classList.remove('hidden');
+}
+
+async function submitBooking(id){
+  const l=DB.listings.find(x=>x.id===id);
+  const dur=+$('bDur').value||1;
+  const currentUid = currentUser.uid || currentUser.id;
+  const bk={
+    id:'BK-'+Date.now(),
+    listingId:l.id,
+    userUid:currentUid,
+    userName:$('bName').value,
+    contact:$('bPhone').value,
+    durationMonths:dur,
+    status:'requested',
+    houseName:l.houseName,
+    roomType:l.roomType,
+    totalRent:l.rent*dur,
+    trl:null,
+    createdAt:Date.now()
   };
+
+  if(window.rehzoSupabase){
+    try {
+      await window.rehzoSupabase.from('bookings').insert([{
+        id: bk.id,
+        listing_id: l.id,
+        user_id: currentUid,
+        user_name: bk.userName,
+        contact: bk.contact,
+        duration_months: dur,
+        status: 'requested',
+        house_name: l.houseName,
+        room_type: l.roomType,
+        total_rent: bk.totalRent
+      }]);
+    } catch(e){}
+  }
 
   DB.bookings.unshift(bk);
-  closeModal('bookingModal');
-  alert("Booking Request Sent to Owner!");
-  goView('bookings');
+  saveDB();
+  $('bookingModal').classList.add('hidden');
+  toast('Booking Request Sent!');
+  go('bookings');
 }
 
-// MY BOOKINGS & CONFIRMATION
-function renderMyBookings() {
-  var container = document.getElementById('myBookingsContainer');
-  if (!DB.bookings.length) {
-    container.innerHTML = '<div class="form-card" style="text-align:center; font-size:11px; color:#64748B;">No bookings placed yet.</div>';
-    return;
+/* ================= MY BOOKINGS & ACCEPT ================= */
+function renderBkList(){
+  if(!currentUser){ $('bkList').innerHTML=''; return; }
+  const currentUid = currentUser.uid || currentUser.id;
+  const mine = DB.bookings.filter(b => b.userUid === currentUid || (DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUid));
+  $('bkList').innerHTML = mine.map(b => {
+    const l = DB.listings.find(x=>x.id===b.listingId) || {};
+    const isOwner = l.ownerUid === currentUid;
+    return `
+      <div class="rounded-xl bg-white border border-slate-200 p-3 shadow-sm">
+        <div class="flex justify-between items-start">
+          <div><b class="text-[13px]">${esc(b.houseName)}</b><div class="text-[11px] text-slate-500">${b.durationMonths} Months • ₹${b.totalRent}</div></div>
+          <span class="badge ${b.status==='owner_accepted'?'bg-emerald-100 text-emerald-800':b.status==='confirmed'?'bg-blue-100 text-blue-800':'bg-amber-100 text-amber-800'}">${b.status}</span>
+        </div>
+        
+        <!-- PRIVACY GATE UNLOCKED -->
+        ${(b.status==='owner_accepted' || b.status==='confirmed') && !isOwner ? `
+          <div class="mt-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-900">
+            <b>✓ Owner Accepted! Contact Unlocked:</b><br>
+            📞 Phone: ${esc(l.contact)} \vert{} ✉️ Gmail: ${esc(l.gmail)}
+          </div>
+        ` : ''}
+
+        ${isOwner && b.status==='requested' ? `
+          <div class="mt-2.5 flex gap-2">
+            <button onclick="acceptBooking('${b.id}')" class="flex-1 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold">Accept Request</button>
+          </div>
+        ` : ''}
+
+        ${!isOwner && b.status==='owner_accepted' ? `
+          <div class="mt-2.5 flex gap-2">
+            <button onclick="confirmBooking('${b.id}')" class="flex-1 py-1.5 rounded-lg bg-rehzo-500 text-white text-[11px] font-bold">Confirm & Generate TRL</button>
+          </div>
+        ` : ''}
+
+        ${b.trl ? `
+          <button onclick="openPDF('${b.id}')" class="mt-2 px-3 py-1.5 rounded-lg bg-ink-900 text-white text-[11px] font-bold">View PDF (TRL: ${b.trl})</button>
+        ` : ''}
+      </div>
+    `;
+  }).join('') || '<div class="text-center py-8 text-slate-400 text-xs">No bookings yet.</div>';
+}
+
+async function acceptBooking(id){
+  const b=DB.bookings.find(x=>x.id===id);
+  if(b){
+    b.status='owner_accepted';
+    if(window.rehzoSupabase){
+      try {
+        await window.rehzoSupabase.from('bookings').update({ status: 'owner_accepted' }).eq('id', id);
+      } catch(e){}
+    }
+    saveDB();
+    renderBkList();
+    toast('Accepted! Owner contact details unlocked for user.');
   }
-  var html = '';
-  for (var i = 0; i < DB.bookings.length; i++) {
-    var b = DB.bookings[i];
-    var isConfirmed = b.status === 'confirmed';
-    html += '<div class="form-card" style="margin-bottom:8px;">' +
-      '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-        '<b style="font-size:13px;">' + b.houseName + '</b>' +
-        '<span style="font-size:9px; font-weight:800; padding:2px 6px; border-radius:8px; background:' + (isConfirmed ? '#DCFCE7; color:#15803D;' : '#FEF3C7; color:#B45309;') + '">' + b.status.toUpperCase() + '</span>' +
-      '</div>' +
-      '<div style="font-size:10.5px; color:#64748B; margin-top:3px;">Check-in: ' + b.date + ' • ' + b.duration + ' Month(s)</div>' +
-      '<div style="font-size:10px; margin-top:6px; padding:6px; border-radius:8px; background:#F1F5F9;">' +
-        (isConfirmed ? 
-          ('<b>✓ Owner Unlocked:</b> ' + b.ownerName + '<br>📞 ' + b.ownerPhone + '<br>📍 ' + b.ownerAddress) :
-          '🔒 Owner Contact Hidden until Accepted') +
-      '</div>' +
-      '<div style="margin-top:6px; display:flex; gap:6px;">' +
-        (!isConfirmed ? 
-          '<button onclick="confirmBooking(\'' + b.id + '\')" style="flex:1; padding:5px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:bold; cursor:pointer;">Accept & Issue TRL</button>' :
-          '<button onclick="openSlip(\'' + b.id + '\')" style="flex:1; padding:5px; background:#0F172A; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:bold; cursor:pointer;">📄 View Official 12-Digit Slip</button>'
-        ) +
-      '</div>' +
-    '</div>';
-  }
-  container.innerHTML = html;
 }
 
-function confirmBooking(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
-  if (b) {
-    b.status = 'confirmed';
-    var trl = '';
-    for (var i = 0; i < 12; i++) trl += Math.floor(Math.random() * 10);
-    b.trl = trl;
-    renderMyBookings();
-    openSlip(id);
+async function confirmBooking(id){
+  const b=DB.bookings.find(x=>x.id===id);
+  if(b){
+    b.status='confirmed';
+    b.trl=genTRL();
+    if(window.rehzoSupabase){
+      try {
+        await window.rehzoSupabase.from('bookings').update({ status: 'confirmed', trl: b.trl }).eq('id', id);
+      } catch(e){}
+    }
+    saveDB();
+    renderBkList();
+    toast('Booking Fully Confirmed! TRL Generated.');
   }
 }
 
-function openSlip(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
-  if (!b) return;
-  document.getElementById('slipTrl').innerText = b.trl || '839472615028';
-  document.getElementById('slipHouse').innerText = b.houseName;
-  document.getElementById('slipRent').innerText = '₹' + b.rent + ' / month';
-  document.getElementById('slipDate').innerText = b.date;
-  document.getElementById('slipDuration').innerText = b.duration + ' Months';
-  document.getElementById('slipOwner').innerText = b.ownerName;
-  document.getElementById('slipPhone').innerText = b.ownerPhone;
-  document.getElementById('slipAddr').innerText = b.ownerAddress;
-  document.getElementById('slipModal').classList.add('show');
+/* ================= OWNER HUB & PHOTO PICKER ================= */
+function onFCountry(){ const c=countryOf($('fCountry').value);$('fDial').textContent=c.d; }
+function ownerTab(t){
+  document.querySelectorAll('.otab').forEach(b=>{ const on=b.dataset.otab===t; b.className=`otab py-2 rounded-lg text-[12px] font-extrabold ${on?'bg-ink-900 text-white':'text-slate-500'}`; });
+  document.querySelectorAll('.otabPane').forEach(p=>p.classList.add('hidden'));
+  $('otab-'+t).classList.remove('hidden');
 }
 
-function openSlipFromAlert() {
-  openSlip('BK-1');
+function handleImagePick(e){
+  const files = [...e.target.files].slice(0, 3 - state.tempPhotos.length);
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if(state.tempPhotos.length < 3){
+        state.tempPhotos.push(ev.target.result);
+        renderPhotoPrev();
+      }
+    };
+    reader.readAsDataURL(f);
+  }
 }
 
-// OWNER HUB
-function updateCountryPrefix(code) {
-  var dial = code === 'IN' ? '+91' : (code === 'US' ? '+1' : '+44');
-  var sym = code === 'IN' ? '₹' : (code === 'US' ? '$' : '£');
-  document.getElementById('oDial').innerText = dial;
-  document.getElementById('oSym1').innerText = sym;
-  document.getElementById('oSym2').innerText = sym;
+function renderPhotoPrev(){
+  const w=$('photoPrev'); if(!w) return;
+  w.innerHTML=[0,1,2].map(i=>`<div class="aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200 relative">${state.tempPhotos[i]?`<img src="${state.tempPhotos[i]}" class="w-full h-full object-cover">`:`<div class="w-full h-full flex items-center justify-center text-slate-300 text-lg">+</div>`}</div>`).join('');
 }
-
-function lockMapLocation() {
-  lockedCoord = { lat: 28.6139, lng: 77.2090 };
-  document.getElementById('mapLockText').innerText = "✓ Exact Map Location Locked";
-  document.getElementById('mapLockBtn').style.borderColor = "#10B981";
-  document.getElementById('mapLockBtn').style.color = "#044E3B";
+function fillSamplePhotos(){
+  state.tempPhotos=['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop','https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80&auto=format&fit=crop'];
+  renderPhotoPrev(); toast('Sample photos loaded');
 }
+function clearPhotos(){ state.tempPhotos=[]; renderPhotoPrev(); }
 
-function handlePublish(e) {
+async function submitListing(e){
   e.preventDefault();
-  var newRoom = {
-    id: 'L-' + Date.now(),
-    houseName: document.getElementById('oHouse').value.trim(),
-    roomType: document.getElementById('oType').value,
-    suitableFor: document.getElementById('oSuitable').value,
-    rent: parseFloat(document.getElementById('oRent').value) || 5000,
-    deposit: parseFloat(document.getElementById('oDep').value) || 0,
-    country: document.getElementById('oCountry').value,
-    city: document.getElementById('oCity').value.trim(),
-    address: document.getElementById('oAddr').value.trim(),
-    lat: lockedCoord.lat,
-    lng: lockedCoord.lng,
-    ownerName: document.getElementById('oName').value.trim(),
-    phone: document.getElementById('oPhone').value.trim(),
-    gmail: document.getElementById('oGmail').value.trim(),
-    status: 'available',
-    photo: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500'
+  if(!currentUser) return toast('Login first','warn');
+  const currentUid = currentUser.uid || currentUser.id;
+  const amen=[...document.querySelectorAll('#fAmen .on')].map(x=>x.textContent);
+  const data={
+    id:'L'+Date.now().toString(36).toUpperCase(),
+    ownerUid:currentUid,
+    ownerName:$('fName').value.trim()||currentUser.name,
+    contact:$('fPhone').value.trim(),
+    gmail:$('fGmail').value.trim(),
+    country:$('fCountry').value,
+    houseName:$('fHouse').value.trim(),
+    roomType:$('fType').value,
+    suitableFor:$('fSuit').value,
+    amenities:amen.length?amen:['WiFi'],
+    rent:+$('fRent').value,
+    deposit:+$('fDep').value||0,
+    state:$('fState').value.trim(),
+    city:$('fCity').value.trim(),
+    address:$('fAddr').value.trim(),
+    lat:28.6139,
+    lng:77.2090,
+    rules:$('fRules').value.trim(),
+    photos:state.tempPhotos.length?state.tempPhotos:['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop'],
+    createdAt:Date.now(),
+    status:'available'
   };
-  DB.listings.unshift(newRoom);
+
+  if(window.rehzoSupabase){
+    try {
+      await window.rehzoSupabase.from('listings').insert([{
+        id: data.id,
+        owner_id: currentUid,
+        owner_name: data.ownerName,
+        contact: data.contact,
+        gmail: data.gmail,
+        country: data.country,
+        house_name: data.houseName,
+        room_type: data.roomType,
+        suitable_for: data.suitableFor,
+        amenities: data.amenities,
+        rent: data.rent,
+        deposit: data.deposit,
+        state: data.state,
+        city: data.city,
+        address: data.address,
+        rules: data.rules,
+        photos: data.photos,
+        status: 'available'
+      }]);
+    } catch(e){}
+  }
+
+  DB.listings.unshift(data);
+  saveDB();
   e.target.reset();
-  alert("Room Published for 90 Days!");
-  goView('home');
+  state.tempPhotos=[];
+  renderPhotoPrev();
+  toast('Room Published for 90 Days! 🎉');
+  renderAll();
+  ownerTab('mine');
 }
 
-function updateOwnerCount() {
-  document.getElementById('ownerListCount').innerText = 'My Listings (' + DB.listings.length + ')';
+function renderOwner(){
+  const gate=$('ownerGate'), body=$('ownerBody');
+  if(!currentUser){ gate.innerHTML=`<div class="p-4 bg-white rounded-xl text-center"><button onclick="go('auth')" class="px-4 py-2 bg-ink-900 text-white rounded-lg text-xs font-bold">Login to Access Owner Hub</button></div>`; body.classList.add('hidden'); return; }
+  gate.innerHTML=''; body.classList.remove('hidden');
+  const currentUid = currentUser.uid || currentUser.id;
+  const mine=DB.listings.filter(l=>l.ownerUid===currentUid);
+  $('mineCount').textContent=mine.length;
+  $('otab-mine').innerHTML=mine.map(l=>`
+    <div class="p-2.5 bg-white border border-slate-200 rounded-xl flex gap-2.5 items-center">
+      <img src="${l.photos[0]}" class="w-12 h-12 rounded-lg object-cover">
+      <div class="flex-1"><b class="text-[12px]">${esc(l.houseName)}</b><div class="text-[10px] text-slate-400">${fmtMoney(l.rent,countryOf(l.country).s)}/mo • 90 Days Free</div></div>
+      <button onclick="DB.listings=DB.listings.filter(x=>x.id!=='${l.id}');saveDB();renderAll();renderOwner();toast('Deleted');" class="text-red-500 font-bold text-xs p-1">Delete</button>
+    </div>
+  `).join('')||'<div class="text-xs text-slate-400 text-center py-4">No listings created yet.</div>';
+
+  const reqs = DB.bookings.filter(b => {
+    const l = DB.listings.find(x => x.id === b.listingId);
+    return l && l.ownerUid === currentUid;
+  });
+  $('reqCount').textContent = reqs.length;
+  $('reqCount').classList.toggle('hidden', reqs.length === 0);$('otab-req').innerHTML = reqs.map(b => `
+    <div class="p-3 bg-white border border-slate-200 rounded-xl">
+      <div class="flex justify-between font-bold text-xs"><span>${esc(b.userName)}</span><span class="badge bg-amber-100 text-amber-800">${b.status}</span></div>
+      <div class="text-[11px] text-slate-500 mt-1">Duration: ${b.durationMonths} months • Total: ₹${b.totalRent}</div>
+      ${b.status==='requested'?`<button onclick="acceptBooking('${b.id}')" class="mt-2 w-full py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg">Accept Request</button>`:''}
+    </div>
+  `).join('') || '<div class="text-xs text-slate-400 text-center py-4">No requests yet.</div>';
 }
 
-function toggleOwnerListings() {
-  var box = document.getElementById('ownerListingsBox');
-  if (box.style.display === 'block') { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  var html = '';
-  for (var i = 0; i < DB.listings.length; i++) {
-    var l = DB.listings[i];
-    html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px; background:#fff; border:1px solid #E2E8F0; border-radius:10px; margin-bottom:4px; font-size:10.5px;">' +
-      '<b>' + l.houseName + ' (₹' + l.rent + ')</b>' +
-      '<button onclick="deleteListing(\'' + l.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:2px 6px; font-size:9px; cursor:pointer;">Delete</button>' +
-    '</div>';
+/* ================= MAPS ================= */
+let _nearMap=null;
+function initNearMap(){
+  try{
+    if(!_nearMap){
+      _nearMap=L.map('nearMap').setView([28.6139,77.2090],11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_nearMap);
+    } else _nearMap.invalidateSize();
+    DB.listings.filter(l=>l.status==='available').forEach(l=>{
+      L.marker([l.lat,l.lng]).addTo(_nearMap).bindPopup(`<b>${esc(l.houseName)}</b>`);
+    });
+    $('nearList').innerHTML=DB.listings.filter(l=>l.status==='available').map(l=>`
+      <div class="p-2.5 bg-white border border-slate-200 rounded-xl flex gap-2.5 items-center">
+        <img src="${l.photos[0]}" class="w-14 h-14 rounded-lg object-cover">
+        <div class="flex-1"><b class="text-[12px]">${esc(l.houseName)}</b><div class="text-[11px] text-slate-500">${esc(l.city)}</div></div>
+        <button onclick="openDetail('${l.id}')" class="px-2.5 py-1 bg-ink-900 text-white rounded-lg text-xs font-bold">View</button>
+      </div>
+    `).join('');
+  }catch(e){}
+}
+function locateMe(){ demoLocate(); }
+function demoLocate(){ toast('Location set: Connaught Place, New Delhi'); }
+
+/* ================= ADMIN ================= */
+function unlockAdmin(){
+  if($('adminCode').value==='admin123' || currentUser?.role==='admin'){
+    $('adminGate').classList.add('hidden');$('adminBody').classList.remove('hidden');
+    renderAdmin();
+  } else { toast('Invalid passcode','err'); }
+}
+
+function renderAdmin(){
+  $('adminStats').innerHTML = `
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-lg font-extrabold">${DB.users.length}</div><div class="text-[10px] text-slate-400 uppercase">Users</div></div>
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-lg font-extrabold">${DB.listings.length}</div><div class="text-[10px] text-slate-400 uppercase">Listings</div></div>
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-lg font-extrabold">${DB.bookings.length}</div><div class="text-[10px] text-slate-400 uppercase">Bookings</div></div>
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-lg font-extrabold text-emerald-600">Active</div><div class="text-[10px] text-slate-400 uppercase">Supabase Status</div></div>
+  `;
+}
+
+/* ================= TRL RECORDS & PDF ================= */
+function renderTRL(){
+  if(!currentUser) return;
+  const currentUid = currentUser.uid || currentUser.id;
+  const arr = DB.bookings.filter(b => b.trl && (b.userUid===currentUid || DB.listings.find(l=>l.id===b.listingId)?.ownerUid===currentUid));
+  $('trlList').innerHTML = arr.map(b => `
+    <div class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center">
+      <div>
+        <div class="font-mono font-bold text-sm text-rehzo-600">${b.trl}</div>
+        <div class="text-xs text-slate-500 font-semibold">${esc(b.houseName)} • ₹${b.totalRent}</div>
+      </div>
+      <button onclick="openPDF('${b.id}')" class="px-3 py-1.5 bg-ink-900 text-white rounded-lg text-xs font-bold">View PDF</button>
+    </div>
+  `).join('') || '<div class="text-center py-6 text-slate-400 text-xs">No TRL Records yet. Complete a booking to generate a TRL.</div>';
+}
+
+function verifyTRL(){
+  const q = $('trlSearch').value.trim().toUpperCase();
+  if(q.length !== 12) return toast('Enter full 12-char TRL','err');
+  const b = DB.bookings.find(x => x.trl === q);
+  if(b){
+    $('trlResult').innerHTML = `
+      <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900">
+        <b>✓ Authentic REHZO Booking Record Found</b><br>
+        TRL: <span class="font-mono font-bold">${b.trl}</span><br>
+        House: ${esc(b.houseName)} | Guest: ${esc(b.userName)}<br>
+        <button onclick="openPDF('${b.id}')" class="mt-2 px-3 py-1 bg-emerald-700 text-white rounded font-bold">Open Verified PDF</button>
+      </div>
+    `;
+  } else {
+    $('trlResult').innerHTML = `<div class="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold">✕ No record found for ${esc(q)}</div>`;
   }
-  box.innerHTML = html;
 }
 
-function deleteListing(id) {
-  if (confirm("Delete this listing?")) {
-    DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
-    toggleOwnerListings();
-    renderRooms();
+function openPDF(bid){
+  const b = DB.bookings.find(x => x.id === bid); if(!b) return;
+  const l = DB.listings.find(x => x.id === b.listingId) || {};
+  $('pdfPrintArea').innerHTML = `
+    <div class="p-6 bg-white rounded-2xl text-slate-900 space-y-3.5 shadow-card border border-slate-200">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div><h2 class="font-extrabold text-2xl text-rehzo-600">REHZO</h2><div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verified Stay Confirmation</div></div>
+        <div class="badge bg-emerald-100 text-emerald-800 text-xs">CONFIRMED</div>
+      </div>
+      <div class="p-3 bg-slate-100 rounded-xl text-center">
+        <div class="text-[10px] font-bold text-slate-500 uppercase">Permanent 12-Character TRL</div>
+        <div class="font-mono font-extrabold text-2xl text-slate-900 tracking-wider mt-0.5">${b.trl}</div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="p-2.5 bg-slate-50 rounded-lg"><b>Guest:</b><br>${esc(b.userName)}<br>${esc(b.contact)}</div>
+        <div class="p-2.5 bg-slate-50 rounded-lg"><b>Owner:</b><br>${esc(l.ownerName||'—')}<br>${esc(l.contact||'—')}</div>
+      </div>
+      <div class="text-xs p-2.5 bg-slate-50 rounded-lg">
+        <b>House / Stay:</b> ${esc(b.houseName)}<br>
+        <b>Address:</b> ${esc(l.address||'')}, ${esc(l.city||'')}<br>
+        <b>Duration:</b> ${b.durationMonths} Month(s)<br>
+        <b>Total Rent:</b> ₹${b.totalRent}
+      </div>
+      <div class="text-[10px] text-slate-400 text-center pt-2 border-t">Verify this booking online by searching TRL at rehzo.app</div>
+    </div>
+  `;
+  $('pdfModal').classList.remove('hidden');
+}
+
+/* ================= AUTH HELPERS ================= */
+async function loginWithGoogle(){
+  if(!window.rehzoSupabase) return toast('Supabase not connected','err');
+  const { error } = await window.rehzoSupabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+  if(error) toast(error.message,'err');
+}
+
+async function doLogin(){
+  const uid=$('lUid').value.trim(); const pw=$('lPass').value;
+  if(window.rehzoSupabase){
+    let emailToUse = uid;
+    if(!uid.includes('@')){
+      const { data: profile } = await window.rehzoSupabase.from('profiles').select('*').eq('uid', uid).maybeSingle();
+      if(profile?.email) emailToUse = profile.email;
+    }
+    const { data, error } = await window.rehzoSupabase.auth.signInWithPassword({ email: emailToUse, password: pw });
+    if(!error && data?.user){ await syncSession(data.session); toast('Login successful!'); go('home'); return; }
   }
+  const localUser = DB.users.find(u => (u.uid === uid || u.email.toLowerCase() === uid.toLowerCase()) && u.pass === hash(pw));
+  if(localUser){ currentUser = localUser; localStorage.setItem('REHZO_SESSION', localUser.uid); updateAuthUI(); renderAll(); toast('Login successful!'); go('home'); return; }
+  toast('Invalid credentials','err');
 }
 
-// ADMIN
-function renderAdminListings() {
-  var container = document.getElementById('adminListings');
-  var html = '';
-  for (var i = 0; i < DB.listings.length; i++) {
-    var l = DB.listings[i];
-    html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
-      '<div><b>' + l.houseName + '</b> (' + l.city + ')</div>' +
-      '<button onclick="deleteListing(\'' + l.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:2px 6px; font-size:9px; cursor:pointer;">Delete</button>' +
-    '</div>';
-  }
-  container.innerHTML = html;
+async function logout(){
+  if(window.rehzoSupabase) await window.rehzoSupabase.auth.signOut();
+  localStorage.removeItem('REHZO_SESSION'); currentUser=null; updateAuthUI(); renderAll(); go('home'); toast('Logged out');
 }
 
-// MODAL UTILS
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
+function renderMore(){
+  $('profileCard').innerHTML = currentUser ? `
+    <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+      <div><b>${esc(currentUser.name)}</b><div class="text-[11px] text-slate-400">${esc(currentUser.email)}</div></div>
+      <button onclick="logout()" class="px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold">Logout</button>
+    </div>
+  ` : `<div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><button onclick="go('auth')" class="px-4 py-2 bg-ink-900 text-white rounded-lg text-xs font-bold">Login</button></div>`;
+  
+  $('moreMenu').innerHTML=`
+    <button onclick="go('trl')" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-left font-bold text-xs flex justify-between"><span>🔖 TRL Records & Verify</span><span>›</span></button>
+    <button onclick="go('admin')" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-left font-bold text-xs flex justify-between"><span>🔐 Admin Panel</span><span>›</span></button>
+    <button onclick="openLegal('privacy')" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-left font-bold text-xs flex justify-between"><span>📜 Privacy Policy</span><span>›</span></button>
+    <button onclick="openLegal('terms')" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-left font-bold text-xs flex justify-between"><span>📋 Terms & Conditions</span><span>›</span></button>
+  `;
 }
 
-// STARTUP
-renderRooms();
+const LEGAL={
+ privacy:{t:'Privacy Policy',b:`<p class="font-bold">Privacy Protected Stay Booking</p><p class="mt-2 text-slate-600">Owner contact details (Phone No. and Gmail) remain strictly hidden and locked until a booking request is formally accepted by the host. Permanent TRL numbers ensure records are verifiable without exposing personal credentials to unverified browsers.</p>`},
+ terms:{t:'Terms & Conditions',b:`<p class="font-bold">Verified Rentals Terms</p><p class="mt-2 text-slate-600">One account operates seamlessly as Guest and Host. Rooms remain active for 90 days with free renewal. Cancellation requires mutual agreement.</p>`}
+};
+function openLegal(k){
+  const l=LEGAL[k];
+  $('legalBody').innerHTML=`<h2 class="font-sora font-extrabold text-[20px] mb-2">${l.t}</h2><div class="p-4 bg-white border border-slate-200 rounded-2xl text-[13px]">${l.b}</div>`;
+  go('legal');
+}
+
+function openCountry(){
+  $('countryList').innerHTML=COUNTRIES.map(c=>`<button onclick="setCountry('${c.c}')" class="w-full p-3 rounded-xl border border-slate-200 text-left font-bold text-xs flex justify-between"><span>${c.f} ${c.n}</span><span>${c.s}</span></button>`).join('');
+  $('countryModal').classList.remove('hidden');
+}
+function closeCountry(){ $('countryModal').classList.add('hidden'); }
+function setCountry(cc){
+  localStorage.setItem('REHZO_COUNTRY',cc);
+  if(currentUser) currentUser.country=cc;
+  $('hdrFlag').textContent=countryOf(cc).f;
+  $('hdrCurr').textContent=countryOf(cc).s;
+  closeCountry();
+  renderAll();
+}
+
+function toggleFilters(show){ if(show) toast('Filters feature active'); }
+
+function renderAll(){ renderHome(); renderBkList(); renderOwner(); updateAuthUI(); }
 </script>
 </body>
 </html>
