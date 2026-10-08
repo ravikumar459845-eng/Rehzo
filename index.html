@@ -8,12 +8,25 @@
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
 
-/* Sticky Header */
+/* Splash Screen */
+#splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; }
+.splash-logo { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 12px; animation: pulse 1.4s infinite alternate; }
+.splash-title { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
+.splash-sub { font-size: 12px; opacity: 0.85; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
+
+@keyframes pulse {
+  0% { transform: scale(0.96); opacity: 0.9; }
+  100% { transform: scale(1.04); opacity: 1; }
+}
+
+/* Header */
 .top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
 .brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.user-chip { background: #ECFDF5; border: 1px solid #A7F3D0; color: #044E3B; border-radius: 20px; padding: 4px 10px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
 .icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; position: relative; }
 .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #EF4444; display: none; }
 
@@ -22,7 +35,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .view { display: none; }
 .view.active { display: block; }
 
-/* Banner & Search */
+/* Banner */
 .banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 15px; color: #fff; box-shadow: 0 4px 12px rgba(4,78,59,0.15); }
 .banner h2 { font-size: 17.5px; font-weight: 800; line-height: 1.2; }
 .banner p { font-size: 10.5px; opacity: 0.88; margin-top: 3px; }
@@ -30,7 +43,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .search-bar input { flex: 1; border: none; outline: none; font-size: 12px; font-weight: 600; color: #1E293B; }
 .search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6.5px 14px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
 
-/* Filter Bar & Chips */
+/* Filters & Chips */
 .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .pill-select { width: 100%; border: 1px solid #E2E8F0; border-radius: 30px; background: #fff; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
 .chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 4px; }
@@ -38,7 +51,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .chip { border: 1px solid #E2E8F0; border-radius: 20px; background: #fff; padding: 6px 14px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
 .chip.active { background: #044E3B; color: #fff; border-color: #044E3B; }
 
-/* 2x2 Rooms Grid on Home */
+/* 2x2 Rooms Grid */
 .section-title { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px; }
 .section-title h3 { font-size: 14px; font-weight: 800; color: #0F172A; }
 .section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
@@ -54,7 +67,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .room-city { font-size: 9.5px; color: #64748B; margin-top: 2px; }
 .book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 18px; padding: 6.5px; font-size: 10.5px; font-weight: 800; cursor: pointer; margin-top: 6px; }
 
-/* Sub Navigation Header */
+/* Sub Navigation */
 .sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .back-btn-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .back-arrow { font-size: 18px; font-weight: 800; color: #0F172A; }
@@ -71,7 +84,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .dial-prefix-wrap span { font-size: 11px; font-weight: 700; color: #475569; margin-right: 3px; white-space: nowrap; }
 .dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
 
-/* Dropdown Drawers */
+/* Drawers */
 .collapsible-trigger { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11px; font-weight: 700; color: #334155; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
 .collapsible-drawer { display: none; margin-top: 6px; padding: 8px; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; flex-direction: column; gap: 6px; }
 .collapsible-drawer.open { display: flex; }
@@ -100,7 +113,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .stat-num { font-size: 17px; font-weight: 900; color: #044E3B; }
 .stat-label { font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 2px; }
 
-/* Compact Horizontal Cards (My Rooms & My Bookings) */
+/* Compact Horizontal Cards */
 .compact-h-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; margin-bottom: 8px; display: flex; gap: 10px; padding: 8px; align-items: center; }
 .compact-h-img { width: 78px; height: 78px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
 .compact-h-content { flex: 1; min-width: 0; }
@@ -141,6 +154,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 </head>
 <body>
 
+<!-- APP SPLASH / WELCOME SCREEN -->
+<div id="splashOverlay">
+  <div class="splash-logo">⌂</div>
+  <div class="splash-title">REHZO</div>
+  <div class="splash-sub">Find Your Perfect Room</div>
+</div>
+
 <!-- TOP HEADER -->
 <header class="top-header">
   <div class="brand" ondblclick="checkAdminAccess()" onclick="goView('home')">
@@ -151,6 +171,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     </div>
   </div>
   <div class="header-actions">
+    <div class="user-chip" id="userHeaderChip" onclick="openProfileModal()">👤 Login</div>
     <button class="icon-btn" onclick="goView('notifications')">
       🔔
       <span class="notif-dot" id="headerNotifDot"></span>
@@ -178,24 +199,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       <button onclick="openSlipModal(matchedBookingId)" style="margin-top:6px; padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">View Official TRL Slip</button>
     </div>
 
-    <!-- Auto-Detected Full Country & Room Type Filters -->
+    <!-- Complete Worldwide Countries Dropdown -->
     <div class="filter-row">
       <select id="countryFilter" class="pill-select" onchange="applyFilters()">
         <option value="">All Countries</option>
-        <option value="IN">🇮🇳 India</option>
-        <option value="US">🇺🇸 United States</option>
-        <option value="GB">🇬🇧 United Kingdom</option>
-        <option value="AE">🇦🇪 United Arab Emirates</option>
-        <option value="CA">🇨🇦 Canada</option>
-        <option value="AU">🇦🇺 Australia</option>
-        <option value="DE">🇩🇪 Germany</option>
-        <option value="FR">🇫🇷 France</option>
-        <option value="SG">🇸🇬 Singapore</option>
-        <option value="SA">🇸🇦 Saudi Arabia</option>
-        <option value="NP">🇳🇵 Nepal</option>
-        <option value="BD">🇧🇩 Bangladesh</option>
-        <option value="MY">🇲🇾 Malaysia</option>
-        <option value="NZ">🇳🇿 New Zealand</option>
       </select>
       <select id="typeFilter" class="pill-select" onchange="applyFilters()">
         <option value="">All Room Types</option>
@@ -234,7 +241,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="room-grid" id="searchRoomsGrid"></div>
   </section>
 
-  <!-- ================= 3. NEAR ME VIEW (10 KM Strict Real GPS) ================= -->
+  <!-- ================= 3. NEAR ME VIEW (10 KM Strict GPS) ================= -->
   <section id="view-near" class="view">
     <div class="sub-header">
       <div class="back-btn-row" onclick="goView('home')">
@@ -271,7 +278,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div id="ownerDashboardWrap">
       <div class="sub-header">
         <h3 class="sub-title">Owner Dashboard</h3>
-        <button onclick="toggleOwnerForm(true)" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; cursor:pointer;">+ Add</button>
+        <button onclick="checkOwnerAddAction()" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; cursor:pointer;">+ Add</button>
       </div>
 
       <div class="owner-stats-grid">
@@ -298,7 +305,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       <div id="ownerContentContainer"></div>
     </div>
 
-    <!-- OWNER LIST PROPERTY FORM (Balanced & Compact) -->
+    <!-- OWNER LIST PROPERTY FORM -->
     <div id="ownerFormWrap" style="display:none;">
       <div class="sub-header">
         <div class="back-btn-row" onclick="toggleOwnerForm(false)">
@@ -312,22 +319,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         <div class="pill-grid">
           <div class="field-box">
             <label class="field-label">Select Country *</label>
-            <select id="opCountry" class="pill-input" onchange="updateDialPrefix(this.value)">
-              <option value="IN">🇮🇳 India (+91 / ₹)</option>
-              <option value="US">🇺🇸 United States (+1 / $)</option>
-              <option value="GB">🇬🇧 United Kingdom (+44 / £)</option>
-              <option value="AE">🇦🇪 UAE (+971 / AED)</option>
-              <option value="CA">🇨🇦 Canada (+1 / C$)</option>
-              <option value="AU">🇦🇺 Australia (+61 / A$)</option>
-              <option value="DE">🇩🇪 Germany (+49 / €)</option>
-              <option value="FR">🇫🇷 France (+33 / €)</option>
-              <option value="SG">🇸🇬 Singapore (+65 / S$)</option>
-              <option value="SA">🇸🇦 Saudi Arabia (+966 / SAR)</option>
-              <option value="NP">🇳🇵 Nepal (+977 / NPR)</option>
-              <option value="BD">🇧🇩 Bangladesh (+880 / BDT)</option>
-              <option value="MY">🇲🇾 Malaysia (+60 / RM)</option>
-              <option value="NZ">🇳🇿 New Zealand (+64 / NZ$)</option>
-            </select>
+            <select id="opCountry" class="pill-input" onchange="updateDialPrefix(this.value)"></select>
           </div>
           <div class="field-box">
             <label class="field-label">Your Name *</label>
@@ -455,7 +447,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           </div>
         </div>
 
-        <!-- Map Location Button -->
         <button type="button" class="map-lock-btn" id="opMapLockBtn" onclick="saveExactMapLocation()">
           <span>📍</span> <span id="opMapLockText">Use Exact Map Location *</span>
         </button>
@@ -538,8 +529,70 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <div id="modalSlot"></div>
 
 <script>
+// ================= EXTENSIVE WORLDWIDE COUNTRIES LIST =================
+var WORLD_COUNTRIES = [
+  { code: 'IN', name: 'India', dial: '+91', sym: '₹' },
+  { code: 'US', name: 'United States', dial: '+1', sym: '$' },
+  { code: 'GB', name: 'United Kingdom', dial: '+44', sym: '£' },
+  { code: 'AE', name: 'United Arab Emirates', dial: '+971', sym: 'AED' },
+  { code: 'CA', name: 'Canada', dial: '+1', sym: 'C$' },
+  { code: 'AU', name: 'Australia', dial: '+61', sym: 'A$' },
+  { code: 'DE', name: 'Germany', dial: '+49', sym: '€' },
+  { code: 'FR', name: 'France', dial: '+33', sym: '€' },
+  { code: 'SG', name: 'Singapore', dial: '+65', sym: 'S$' },
+  { code: 'SA', name: 'Saudi Arabia', dial: '+966', sym: 'SAR' },
+  { code: 'NP', name: 'Nepal', dial: '+977', sym: 'NPR' },
+  { code: 'BD', name: 'Bangladesh', dial: '+880', sym: 'BDT' },
+  { code: 'MY', name: 'Malaysia', dial: '+60', sym: 'RM' },
+  { code: 'NZ', name: 'New Zealand', dial: '+64', sym: 'NZ$' },
+  { code: 'ZA', name: 'South Africa', dial: '+27', sym: 'R' },
+  { code: 'JP', name: 'Japan', dial: '+81', sym: '¥' },
+  { code: 'CN', name: 'China', dial: '+86', sym: '¥' },
+  { code: 'KR', name: 'South Korea', dial: '+82', sym: '₩' },
+  { code: 'BR', name: 'Brazil', dial: '+55', sym: 'R$' },
+  { code: 'MX', name: 'Mexico', dial: '+52', sym: '$' },
+  { code: 'IT', name: 'Italy', dial: '+39', sym: '€' },
+  { code: 'ES', name: 'Spain', dial: '+34', sym: '€' },
+  { code: 'NL', name: 'Netherlands', dial: '+31', sym: '€' },
+  { code: 'SE', name: 'Sweden', dial: '+46', sym: 'kr' },
+  { code: 'CH', name: 'Switzerland', dial: '+41', sym: 'CHF' },
+  { code: 'RU', name: 'Russia', dial: '+7', sym: '₽' },
+  { code: 'TR', name: 'Turkey', dial: '+90', sym: '₺' },
+  { code: 'ID', name: 'Indonesia', dial: '+62', sym: 'Rp' },
+  { code: 'TH', name: 'Thailand', dial: '+66', sym: '฿' },
+  { code: 'VN', name: 'Vietnam', dial: '+84', sym: '₫' },
+  { code: 'PH', name: 'Philippines', dial: '+63', sym: '₱' },
+  { code: 'EG', name: 'Egypt', dial: '+20', sym: 'E£' },
+  { code: 'NG', name: 'Nigeria', dial: '+234', sym: '₦' },
+  { code: 'KE', name: 'Kenya', dial: '+254', sym: 'KSh' },
+  { code: 'PK', name: 'Pakistan', dial: '+92', sym: 'Rs' },
+  { code: 'LK', name: 'Sri Lanka', dial: '+94', sym: 'Rs' },
+  { code: 'QA', name: 'Qatar', dial: '+974', sym: 'QR' },
+  { code: 'KW', name: 'Kuwait', dial: '+965', sym: 'KD' },
+  { code: 'OM', name: 'Oman', dial: '+968', sym: 'OMR' },
+  { code: 'BH', name: 'Bahrain', dial: '+973', sym: 'BD' }
+];
+
+function populateCountryDropdowns() {
+  var cf = document.getElementById('countryFilter');
+  var op = document.getElementById('opCountry');
+
+  WORLD_COUNTRIES.forEach(function(c) {
+    var opt1 = document.createElement('option');
+    opt1.value = c.code;
+    opt1.textContent = c.name + ' (' + c.dial + ' / ' + c.sym + ')';
+    if (cf) cf.appendChild(opt1);
+
+    var opt2 = document.createElement('option');
+    opt2.value = c.code;
+    opt2.textContent = c.name + ' (' + c.dial + ' / ' + c.sym + ')';
+    if (op) op.appendChild(opt2);
+  });
+}
+
 // ================= PERMANENT STORAGE SYNC =================
 var SEED_DATA = {
+  currentUser: null, // { uid, name, phone, gmail }
   listings: [
     {
       id: 'L-101',
@@ -557,6 +610,7 @@ var SEED_DATA = {
       address: 'Near Old Bus Stand, Sasaram',
       lat: 24.9536,
       lng: 84.0321,
+      ownerUid: 'UID-OWNER1',
       ownerName: 'Awakash Kumar Patel',
       phone: '+91 7707064294',
       gmail: 'awakashkumarpatel@gmail.com',
@@ -571,7 +625,7 @@ var SEED_DATA = {
 
 function loadStorage() {
   try {
-    var raw = localStorage.getItem('REHZO_STATE_V2');
+    var raw = localStorage.getItem('REHZO_STATE_V3');
     if (raw) return JSON.parse(raw);
   } catch (e) {}
   return JSON.parse(JSON.stringify(SEED_DATA));
@@ -579,7 +633,7 @@ function loadStorage() {
 
 function saveStorage() {
   try {
-    localStorage.setItem('REHZO_STATE_V2', JSON.stringify(DB));
+    localStorage.setItem('REHZO_STATE_V3', JSON.stringify(DB));
   } catch (e) {}
 }
 
@@ -596,11 +650,151 @@ var selectedRules = ['No Smoking'];
 var activeBookingRoom = null;
 var matchedBookingId = null;
 
+// ================= SPLASH & AUTO INITIALIZATION =================
+window.addEventListener('DOMContentLoaded', function() {
+  populateCountryDropdowns();
+  detectUserCountry();
+  updateUserHeaderChip();
+  renderHomeGrid();
+
+  setTimeout(function() {
+    var splash = document.getElementById('splashOverlay');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(function() { splash.style.display = 'none'; }, 500);
+    }
+  }, 1200);
+});
+
+// ================= USER AUTHENTICATION & UNIQUE PROFILE =================
+function updateUserHeaderChip() {
+  var chip = document.getElementById('userHeaderChip');
+  if (chip) {
+    if (DB.currentUser) {
+      chip.innerText = '👤 ' + DB.currentUser.name.split(' ')[0] + ' (' + DB.currentUser.uid + ')';
+    } else {
+      chip.innerText = '👤 Login / Sign Up';
+    }
+  }
+}
+
+function openProfileModal(callbackAction) {
+  if (DB.currentUser) {
+    // Show logged-in profile details
+    document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+      '<div class="modal-box">' +
+        '<div class="modal-header">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your Unique Profile</h3>' +
+          '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+        '</div>' +
+        '<div style="text-align:center; padding:10px 0;">' +
+          '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
+          '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + DB.currentUser.name + '</h2>' +
+          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">Unique ID: ' + DB.currentUser.uid + '</div>' +
+        '</div>' +
+        '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
+          '<div>📞 <b>Phone:</b> ' + DB.currentUser.phone + '</div>' +
+          '<div>✉️ <b>Gmail:</b> ' + (DB.currentUser.gmail || 'None') + '</div>' +
+          '<div>🔒 <b>Status:</b> Verified Active Member</div>' +
+        '</div>' +
+        '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
+      '</div>' +
+    '</div>';
+  } else {
+    // Show Registration / Login Modal
+    document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+      '<div class="modal-box">' +
+        '<div class="modal-header">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Login or Create Account</h3>' +
+          '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+        '</div>' +
+        '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Please enter your details to generate your verified profile ID for room booking and listings.</p>' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Full Name *</label>' +
+          '<input id="authName" class="pill-input" placeholder="Your full name">' +
+        '</div>' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Real Mobile Number *</label>' +
+          '<input id="authPhone" type="tel" class="pill-input" placeholder="e.g. +91 9876543210">' +
+        '</div>' +
+        '<div class="field-box" style="margin-bottom:12px;">' +
+          '<label class="field-label">Gmail (optional, must be valid)</label>' +
+          '<input id="authGmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+        '</div>' +
+        '<button class="big-action-btn" onclick="submitUserAuth(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Continue to REHZO →</button>' +
+      '</div>' +
+    '</div>';
+  }
+}
+
+function submitUserAuth(callbackAction) {
+  var name = document.getElementById('authName').value.trim();
+  var phone = document.getElementById('authPhone').value.trim();
+  var gmail = document.getElementById('authGmail').value.trim();
+
+  if (!name || name.length < 2) {
+    alert("Please provide a valid full name.");
+    return;
+  }
+  // Real Phone Number Check (min 7 digits)
+  var cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (!phone || cleanPhone.length < 7 || cleanPhone.length > 15) {
+    alert("Please provide a valid and real mobile number.");
+    return;
+  }
+  // Real Gmail Check (if provided)
+  if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
+    alert("Please provide a real valid Gmail/email address.");
+    return;
+  }
+
+  // Generate Unique Profile ID
+  var uid = 'UID-' + Math.floor(100000 + Math.random() * 900000);
+  DB.currentUser = {
+    uid: uid,
+    name: name,
+    phone: phone,
+    gmail: gmail || 'N/A'
+  };
+
+  saveStorage();
+  updateUserHeaderChip();
+  closeModal();
+  alert("Welcome " + name + "!\nYour Unique Profile ID is: " + uid);
+
+  if (callbackAction === 'openOwnerForm') {
+    toggleOwnerForm(true);
+  } else if (callbackAction && callbackAction.indexOf('bookRoom:') === 0) {
+    var rId = callbackAction.split(':')[1];
+    openBookingPillModal(rId);
+  }
+}
+
+function logoutUser() {
+  if (confirm("Do you want to log out from this account?")) {
+    DB.currentUser = null;
+    saveStorage();
+    updateUserHeaderChip();
+    closeModal();
+    alert("Logged out successfully.");
+  }
+}
+
+function checkOwnerAddAction() {
+  if (!DB.currentUser) {
+    alert("Please login or create your profile to list a property.");
+    openProfileModal('openOwnerForm');
+  } else {
+    toggleOwnerForm(true);
+  }
+}
+
 // ================= AUTOMATIC COUNTRY DETECTION =================
 function detectUserCountry() {
   try {
-    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     var detected = 'IN';
+
     if (tz.indexOf('Calcutta') !== -1 || tz.indexOf('Kolkata') !== -1) detected = 'IN';
     else if (tz.indexOf('New_York') !== -1 || tz.indexOf('Los_Angeles') !== -1 || tz.indexOf('Chicago') !== -1) detected = 'US';
     else if (tz.indexOf('London') !== -1) detected = 'GB';
@@ -675,13 +869,33 @@ function renderHomeGrid(items) {
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
         '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
         '<div class="room-city">📍 ' + r.city + ' • ' + r.roomType + '</div>' +
-        '<button class="book-btn" onclick="openBookingPillModal(\'' + r.id + '\')">Book Now</button>' +
+        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-// ================= USER ROOM DETAILS MODAL (Photo Click Feature) =================
+// Check Login & Block Self-Booking Before Modal Opens
+function triggerBookRoomFlow(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  if (!DB.currentUser) {
+    alert("Please login or create your profile to proceed with room booking.");
+    openProfileModal('bookRoom:' + roomId);
+    return;
+  }
+
+  // SELF-BOOKING BLOCK RULE
+  if (DB.currentUser.uid === r.ownerUid || DB.currentUser.phone === r.phone) {
+    alert("Cannot book this room!\nYou are the registered owner of this property.");
+    return;
+  }
+
+  openBookingPillModal(roomId);
+}
+
+// ================= USER ROOM DETAILS MODAL =================
 function openRoomDetailsModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
@@ -713,7 +927,7 @@ function openRoomDetailsModal(roomId) {
       
       '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; margin-bottom:10px; line-height:1.6;">' +
         '<div>📍 <b>Location & Address:</b> ' + r.address + ', ' + r.city + ' (' + (r.state||'') + ' - ' + r.pin + ')</div>' +
-        '<div style="margin-top:2px;">👤 <b>Owner:</b> ' + r.ownerName + '</div>' +
+        '<div style="margin-top:2px;">👤 <b>Host:</b> ' + r.ownerName + '</div>' +
       '</div>' +
 
       '<div style="margin-bottom:8px;">' +
@@ -731,7 +945,7 @@ function openRoomDetailsModal(roomId) {
         '<div>' + rulesBadges + '</div>' +
       '</div>' +
 
-      '<button class="big-action-btn" onclick="closeModal(); openBookingPillModal(\'' + r.id + '\')">Book This Room Now →</button>' +
+      '<button class="big-action-btn" onclick="closeModal(); triggerBookRoomFlow(\'' + r.id + '\')">Book This Room Now →</button>' +
     '</div>' +
   '</div>';
 }
@@ -824,7 +1038,7 @@ function renderNearGrid() {
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
         '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="openBookingPillModal(\'' + r.id + '\')">Book Now</button>' +
+        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -869,7 +1083,7 @@ function renderSearchGrid() {
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
         '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="openBookingPillModal(\'' + r.id + '\')">Book Now</button>' +
+        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -971,7 +1185,16 @@ function acceptCancelBooking(id) {
 function toggleOwnerForm(show) {
   document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
   document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
-  if (show) renderPhotoPreviewList();
+  if (show) {
+    if (DB.currentUser) {
+      document.getElementById('opName').value = DB.currentUser.name;
+      document.getElementById('opPhone').value = DB.currentUser.phone;
+      if (DB.currentUser.gmail && DB.currentUser.gmail !== 'N/A') {
+        document.getElementById('opGmail').value = DB.currentUser.gmail;
+      }
+    }
+    renderPhotoPreviewList();
+  }
 }
 
 function switchOwnerTab(tab) {
@@ -1002,7 +1225,7 @@ function renderOwnerView() {
           '<div class="compact-h-rent">₹' + Number(r.rent).toLocaleString() + '/mo</div>' +
           '<div class="compact-h-sub">' + r.city + ', ' + r.country + ' • ' + r.daysLeft + ' days left</div>' +
           '<div class="action-row-mini">' +
-            '<button class="btn-mini" onclick="openOwnerEditModal(\'' + r.id + '\')">✏️ Edit</button>' +
+            '<button class="btn-mini" onclick="openOwnerFullEditModal(\'' + r.id + '\')">✏️ Edit</button>' +
             '<button class="btn-mini" onclick="openOwnerViewRoomModal(\'' + r.id + '\')">View</button>' +
             (isExpired ? 
               '<button class="btn-mini danger" onclick="deleteExpiredRoom(\'' + r.id + '\')">Delete</button>' :
@@ -1051,39 +1274,47 @@ function renderOwnerView() {
   }
 }
 
-// OWNER COMPLETE EDIT MODAL
-function openOwnerEditModal(roomId) {
+// OWNER COMPLETE FULL EDIT MODAL
+function openOwnerFullEditModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
-        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Edit Room Details</h3>' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Full Edit Room Details</h3>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">House Name</label><input id="editHouse" class="pill-input" value="' + r.houseName + '"></div>' +
-        '<div class="field-box"><label class="field-label">Room Type</label><input id="editType" class="pill-input" value="' + r.roomType + '"></div>' +
+        '<div class="field-box"><label class="field-label">House Name *</label><input id="editHouse" class="pill-input" value="' + r.houseName + '"></div>' +
+        '<div class="field-box"><label class="field-label">Room Type *</label><input id="editType" class="pill-input" value="' + r.roomType + '"></div>' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Monthly Rent (₹)</label><input id="editRent" type="number" class="pill-input" value="' + r.rent + '"></div>' +
+        '<div class="field-box"><label class="field-label">Monthly Rent (₹) *</label><input id="editRent" type="number" class="pill-input" value="' + r.rent + '"></div>' +
         '<div class="field-box"><label class="field-label">Deposit (₹)</label><input id="editDeposit" type="number" class="pill-input" value="' + (r.deposit||0) + '"></div>' +
       '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">City *</label><input id="editCity" class="pill-input" value="' + r.city + '"></div>' +
+        '<div class="field-box"><label class="field-label">Pin code</label><input id="editPin" class="pill-input" value="' + (r.pin||'') + '"></div>' +
+      '</div>' +
       '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Full Address</label>' +
+        '<label class="field-label">Full Address *</label>' +
         '<input id="editAddr" class="pill-input" value="' + r.address + '">' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Suitable For (comma separated)</label><input id="editSuitable" class="pill-input" value="' + (r.suitableFor ? r.suitableFor.join(', ') : '') + '"></div>' +
-        '<div class="field-box"><label class="field-label">Amenities (comma separated)</label><input id="editAmenities" class="pill-input" value="' + (r.amenities ? r.amenities.join(', ') : '') + '"></div>' +
+        '<div class="field-box"><label class="field-label">Suitable For</label><input id="editSuitable" class="pill-input" value="' + (r.suitableFor ? r.suitableFor.join(', ') : '') + '"></div>' +
+        '<div class="field-box"><label class="field-label">Amenities</label><input id="editAmenities" class="pill-input" value="' + (r.amenities ? r.amenities.join(', ') : '') + '"></div>' +
       '</div>' +
-      '<button class="big-action-btn" onclick="saveOwnerRoomEdit(\'' + r.id + '\')">Save & Update Room</button>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">Conditions & Rules</label>' +
+        '<input id="editRules" class="pill-input" value="' + (r.rules ? r.rules.join(', ') : '') + '">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="saveOwnerFullEdit(\'' + r.id + '\')">Save & Update Room</button>' +
     '</div>' +
   '</div>';
 }
 
-function saveOwnerRoomEdit(roomId) {
+function saveOwnerFullEdit(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
 
@@ -1091,6 +1322,8 @@ function saveOwnerRoomEdit(roomId) {
   r.roomType = document.getElementById('editType').value.trim() || r.roomType;
   r.rent = parseFloat(document.getElementById('editRent').value) || r.rent;
   r.deposit = parseFloat(document.getElementById('editDeposit').value) || 0;
+  r.city = document.getElementById('editCity').value.trim() || r.city;
+  r.pin = document.getElementById('editPin').value.trim() || r.pin;
   r.address = document.getElementById('editAddr').value.trim() || r.address;
 
   var sStr = document.getElementById('editSuitable').value.trim();
@@ -1099,14 +1332,17 @@ function saveOwnerRoomEdit(roomId) {
   var aStr = document.getElementById('editAmenities').value.trim();
   if (aStr) r.amenities = aStr.split(',').map(function(a){ return a.trim(); }).filter(Boolean);
 
+  var ruStr = document.getElementById('editRules').value.trim();
+  if (ruStr) r.rules = ruStr.split(',').map(function(ru){ return ru.trim(); }).filter(Boolean);
+
   saveStorage();
   closeModal();
-  alert("Room details updated successfully!");
+  alert("Room details fully updated successfully!");
   renderOwnerView();
   renderHomeGrid();
 }
 
-// OWNER VIEW ROOM MODAL
+// OWNER VIEW ROOM OVERVIEW
 function openOwnerViewRoomModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
@@ -1202,17 +1438,12 @@ function toggleSelectChip(el, group, val) {
 }
 
 function updateDialPrefix(code) {
-  var map = {
-    IN: { d: '+91', s: '₹' }, US: { d: '+1', s: '$' }, GB: { d: '+44', s: '£' },
-    AE: { d: '+971', s: 'AED' }, CA: { d: '+1', s: 'C$' }, AU: { d: '+61', s: 'A$' },
-    DE: { d: '+49', s: '€' }, FR: { d: '+33', s: '€' }, SG: { d: '+65', s: 'S$' },
-    SA: { d: '+966', s: 'SAR' }, NP: { d: '+977', s: 'NPR' }, BD: { d: '+880', s: 'BDT' },
-    MY: { d: '+60', s: 'RM' }, NZ: { d: '+64', s: 'NZ$' }
-  };
-  var item = map[code] || { d: '+91', s: '₹' };
-  document.getElementById('opDialPrefix').innerText = item.d;
-  document.getElementById('opRentSym').innerText = item.s;
-  document.getElementById('opDepSym').innerText = item.s;
+  var c = WORLD_COUNTRIES.find(function(item){ return item.code === code; });
+  if (c) {
+    document.getElementById('opDialPrefix').innerText = c.dial;
+    document.getElementById('opRentSym').innerText = c.sym;
+    document.getElementById('opDepSym').innerText = c.sym;
+  }
 }
 
 function saveExactMapLocation() {
@@ -1267,6 +1498,24 @@ function renderPhotoPreviewList() {
 
 function handlePublishProperty(e) {
   e.preventDefault();
+
+  var name = document.getElementById('opName').value.trim();
+  var phone = document.getElementById('opPhone').value.trim();
+  var gmail = document.getElementById('opGmail').value.trim();
+
+  // Validate Real Phone
+  var cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (!phone || cleanPhone.length < 7 || cleanPhone.length > 15) {
+    alert("Please provide a valid and real contact phone number.");
+    return;
+  }
+
+  // Validate Real Gmail if provided
+  if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
+    alert("Please enter a valid real Gmail address or leave it empty.");
+    return;
+  }
+
   var house = document.getElementById('opHouse').value.trim();
   var rent = parseFloat(document.getElementById('opRent').value) || 2500;
 
@@ -1286,9 +1535,10 @@ function handlePublishProperty(e) {
     address: document.getElementById('opAddr').value.trim(),
     lat: lockedMapCoord.lat,
     lng: lockedMapCoord.lng,
-    ownerName: document.getElementById('opName').value.trim(),
-    phone: document.getElementById('opPhone').value.trim(),
-    gmail: (document.getElementById('opGmail').value.trim()) || 'N/A',
+    ownerUid: DB.currentUser ? DB.currentUser.uid : ('UID-' + Math.floor(100000 + Math.random() * 900000)),
+    ownerName: name,
+    phone: phone,
+    gmail: gmail || 'N/A',
     status: 'available',
     photos: uploadedPhotos.length ? uploadedPhotos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'],
     daysLeft: 90
@@ -1314,6 +1564,10 @@ function openBookingPillModal(id) {
     ? l.rules.map(function(r){ return '<span style="display:inline-block; padding:3px 8px; background:#E2E8F0; border-radius:12px; font-size:10px; font-weight:700; margin:2px;">• ' + r + '</span>'; }).join('')
     : '<span style="font-size:10px; color:#64748B;">Standard house rules apply</span>';
 
+  var prefillName = DB.currentUser ? DB.currentUser.name : '';
+  var prefillPhone = DB.currentUser ? DB.currentUser.phone : '';
+  var prefillGmail = (DB.currentUser && DB.currentUser.gmail !== 'N/A') ? DB.currentUser.gmail : '';
+
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
@@ -1321,16 +1575,16 @@ function openBookingPillModal(id) {
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" placeholder="Full Name"></div>' +
-        '<div class="field-box"><label class="field-label">Phone No *</label><input id="bpPhone" class="pill-input" placeholder="Mobile"></div>' +
+        '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" value="' + prefillName + '" placeholder="Full Name"></div>' +
+        '<div class="field-box"><label class="field-label">Real Mobile No *</label><input id="bpPhone" class="pill-input" value="' + prefillPhone + '" placeholder="Mobile"></div>' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" placeholder="name@email.com"></div>' +
-        '<div class="field-box"><label class="field-label">Your Old/Permanent Address *</label><input id="bpOldAddr" class="pill-input" placeholder="Permanent address"></div>' +
+        '<div class="field-box"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" value="' + prefillGmail + '" placeholder="name@email.com"></div>' +
+        '<div class="field-box"><label class="field-label">Your Permanent Address *</label><input id="bpOldAddr" class="pill-input" placeholder="Permanent address"></div>' +
       '</div>' +
       '<div class="pill-grid">' +
         '<div class="field-box"><label class="field-label">Check-in Date *</label><input id="bpDate" type="date" value="' + today + '" class="pill-input"></div>' +
-        '<div class="field-box"><label class="field-label">Kitne month k liy *</label><select id="bpMonths" class="pill-input" onchange="calculateBookingRent()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
+        '<div class="field-box"><label class="field-label">Stay Duration *</label><select id="bpMonths" class="pill-input" onchange="calculateBookingRent()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
       '</div>' +
 
       '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; margin:8px 0;">' +
@@ -1365,6 +1619,7 @@ function calculateBookingRent() {
 function submitBookingRequest() {
   var name = document.getElementById('bpName').value.trim();
   var phone = document.getElementById('bpPhone').value.trim();
+  var gmail = document.getElementById('bpGmail').value.trim();
   var addr = document.getElementById('bpOldAddr').value.trim();
   var date = document.getElementById('bpDate').value;
   var months = parseInt(document.getElementById('bpMonths').value) || 1;
@@ -1374,6 +1629,20 @@ function submitBookingRequest() {
     alert("Please fill all required booking fields.");
     return;
   }
+
+  // Validate Real Phone
+  var cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (cleanPhone.length < 7 || cleanPhone.length > 15) {
+    alert("Please enter a valid real mobile number.");
+    return;
+  }
+
+  // Validate Real Gmail if provided
+  if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
+    alert("Please enter a real valid Gmail address or leave it empty.");
+    return;
+  }
+
   if (!agreed) {
     alert("You must agree to Owner Conditions & Rules to proceed.");
     return;
@@ -1389,9 +1658,10 @@ function submitBookingRequest() {
     duration: months,
     date: date,
     people: 1,
+    userUid: DB.currentUser ? DB.currentUser.uid : 'UID-GUEST',
     userName: name,
     userPhone: phone,
-    userGmail: document.getElementById('bpGmail').value.trim() || 'N/A',
+    userGmail: gmail || 'N/A',
     userOldAddress: addr,
     ownerName: activeBookingRoom.ownerName,
     ownerPhone: activeBookingRoom.phone,
@@ -1495,10 +1765,6 @@ function renderAdminModeration() {
     '</div>';
   }).join('');
 }
-
-// Initial Boot
-detectUserCountry();
-renderHomeGrid();
 </script>
 </body>
 </html>
