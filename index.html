@@ -6,9 +6,10 @@
 <title>REHZO — Find Your Perfect Room</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 75px; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 78px; }
 
-.top-header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
+/* Fixed Header */
+.top-header { position: sticky; top: 0; z-index: 25; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
@@ -16,55 +17,129 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .header-actions { display: flex; gap: 8px; }
 .icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
-.main-wrapper { max-width: 500px; margin: 0 auto; padding: 10px 12px; }
+/* Main Wrapper */
+.main-wrapper { max-width: 500px; margin: 0 auto; padding: 12px 14px; }
+.view { display: none; }
+.view.active { display: block; }
 
+/* Home Banner & Search */
 .banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; }
 .banner h2 { font-size: 17px; font-weight: 800; line-height: 1.2; }
 .banner p { font-size: 10.5px; opacity: 0.85; margin-top: 3px; }
 .search-bar { display: flex; background: #fff; border-radius: 30px; padding: 4px 6px 4px 12px; margin-top: 10px; align-items: center; }
 .search-bar input { flex: 1; border: none; outline: none; font-size: 12px; font-weight: 600; color: #1E293B; }
-.search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6px 12px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
+.search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6px 14px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
 
-.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-.select-box { width: 100%; border: 1px solid #CBD5E1; border-radius: 20px; background: #fff; padding: 6px 10px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
-.chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 4px; }
+/* Pill Filter Row */
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.pill-select { width: 100%; border: 1px solid #E2E8F0; border-radius: 30px; background: #fff; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
+.chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 4px; }
 .chip-row::-webkit-scrollbar { display: none; }
-.chip { border: 1px solid #CBD5E1; border-radius: 20px; background: #fff; padding: 5px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
+.chip { border: 1px solid #E2E8F0; border-radius: 20px; background: #fff; padding: 6px 14px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
 .chip.active { background: #044E3B; color: #fff; border-color: #044E3B; }
 
-.section-title { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 8px; }
+/* Room Grid (2x2) */
+.section-title { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px; }
 .section-title h3 { font-size: 14px; font-weight: 800; }
 .section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
 .room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
-.room-thumb { width: 100%; height: 105px; object-fit: cover; }
-.room-details { padding: 8px; }
-.room-title { font-size: 11.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.room-rent { font-size: 12px; font-weight: 800; color: #044E3B; margin-top: 2px; }
+.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+.room-thumb-wrap { position: relative; width: 100%; height: 110px; }
+.room-thumb { width: 100%; height: 100%; object-fit: cover; }
+.avail-badge { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.95); color: #044E3B; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
+.avail-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
+.room-details { padding: 9px; }
+.room-title { font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0F172A; }
+.room-rent { font-size: 12.5px; font-weight: 800; color: #044E3B; margin-top: 2px; }
 .room-city { font-size: 9.5px; color: #64748B; margin-top: 2px; }
-.book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 16px; padding: 6px; font-size: 10.5px; font-weight: 800; cursor: pointer; margin-top: 6px; }
+.book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 18px; padding: 6.5px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 8px; }
 
-.view { display: none; }
-.view.active { display: block; }
+/* Sub-page Header (< Back) */
+.sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.back-btn-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.back-arrow { font-size: 18px; font-weight: 800; color: #0F172A; }
+.sub-title { font-size: 17px; font-weight: 800; color: #0F172A; }
 
+/* Pill-Style Clean Form (Matching Screenshots 20, 21, 22) */
+.form-section-title { font-size: 13.5px; font-weight: 800; color: #0F172A; margin: 16px 0 8px; }
+.pill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.field-box { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 11px; font-weight: 700; color: #334155; }
+.pill-input { width: 100%; padding: 10px 14px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 12px; font-weight: 600; color: #1E293B; outline: none; transition: border 0.2s; }
+.pill-input:focus { border-color: #044E3B; }
+.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 12px; }
+.dial-prefix-wrap span { font-size: 11.5px; font-weight: 700; color: #475569; margin-right: 4px; }
+.dial-prefix-wrap input { flex: 1; border: none; outline: none; padding: 10px 8px; font-size: 12px; font-weight: 600; }
+
+/* Selectable Radio Chips (Suitable For & Amenities) */
+.select-chips-col { display: flex; flex-direction: column; gap: 8px; }
+.radio-chip { display: flex; align-items: center; gap: 8px; background: #F1F5F3; border: 1px solid transparent; border-radius: 24px; padding: 7px 12px; font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; user-select: none; }
+.radio-chip.selected { background: #E6F3ED; border-color: #044E3B; }
+.circle-indicator { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #044E3B; display: flex; align-items: center; justify-content: center; }
+.radio-chip.selected .circle-indicator::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #044E3B; }
+
+/* Map Location Pill Button */
+.map-lock-btn { width: 100%; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; padding: 12px; font-size: 12px; font-weight: 800; color: #1E293B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0; }
+.map-lock-btn.locked { border-color: #10B981; color: #044E3B; background: #ECFDF5; }
+
+/* Photo Upload Box (Screenshot 22) */
+.photo-upload-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.photo-add-box { width: 85px; height: 85px; border-radius: 16px; border: 1px dashed #CBD5E1; background: #F1F5F3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; color: #044E3B; cursor: pointer; }
+.photo-thumb-preview { width: 85px; height: 85px; border-radius: 16px; object-fit: cover; border: 1px solid #E2E8F0; position: relative; }
+.photo-preview-item { position: relative; }
+.photo-del-btn { position: absolute; top: -5px; right: -5px; background: #EF4444; color: #fff; border-radius: 50%; width: 18px; height: 18px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
+
+/* Big Green Action Button */
+.big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 14px; font-size: 13.5px; font-weight: 800; cursor: pointer; margin-top: 14px; box-shadow: 0 4px 10px rgba(4,78,59,0.2); }
+
+/* Owner Dashboard & Bookings Sub-Tabs (Screenshots 15, 18) */
+.sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 4px; gap: 4px; margin-bottom: 14px; }
+.sub-tab-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 7px; font-size: 11.5px; font-weight: 700; color: #64748B; cursor: pointer; text-align: center; }
+.sub-tab-btn.active { background: #044E3B; color: #fff; }
+
+/* Summary Stat Cards (Screenshot 18) */
+.owner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.stat-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.stat-num { font-size: 18px; font-weight: 900; color: #044E3B; }
+.stat-label { font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 2px; }
+
+/* Detailed Card (My Bookings & Owner Rooms) */
+.detailed-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; overflow: hidden; margin-bottom: 12px; }
+.detailed-card-img { width: 100%; height: 160px; object-fit: cover; }
+.detailed-card-body { padding: 12px; }
+.status-pill { font-size: 9.5px; font-weight: 800; padding: 3px 8px; border-radius: 12px; }
+.status-confirmed { background: #DCFCE7; color: #15803D; }
+.status-cancelled { background: #FEE2E2; color: #B91C1C; }
+.status-booked { background: #FFE4E6; color: #BE123C; }
+.action-pills-row { display: flex; gap: 6px; margin-top: 10px; }
+.action-pill-btn { flex: 1; padding: 7px; border: 1px solid #E2E8F0; background: #fff; border-radius: 20px; font-size: 10.5px; font-weight: 700; color: #334155; cursor: pointer; text-align: center; }
+.action-pill-btn.danger { color: #DC2626; border-color: #FCA5A5; }
+.action-pill-btn.primary { background: #044E3B; color: #fff; border-color: #044E3B; }
+
+/* Bottom Nav Bar */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 3px; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9.5px; font-weight: 800; gap: 3px; }
 .nav-item.active { color: #044E3B; }
-.nav-item span { font-size: 16px; }
+.nav-item span { font-size: 17px; }
 
-.form-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 12px; margin-bottom: 10px; }
-.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.input-group label { display: block; font-size: 10px; font-weight: 800; color: #475569; margin-bottom: 3px; }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 7px 10px; border-radius: 12px; border: 1px solid #CBD5E1; font-size: 11.5px; font-weight: 600; outline: none; background: #F8FAF9; }
-.submit-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+/* Dynamic Modal Backdrop */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
+.modal-box { background: #fff; border-radius: 20px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 16px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px; }
+.barcode-strip { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 32px; margin: 10px 0; border-radius: 4px; }
 
-.barcode { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 30px; margin: 10px 0; }
+@media print {
+  body * { visibility: hidden; }
+  #printableSlip, #printableSlip * { visibility: visible; }
+  #printableSlip { position: absolute; inset: 0; margin: 0; padding: 10px; }
+}
 </style>
 </head>
 <body>
 
+<!-- TOP HEADER -->
 <header class="top-header">
-  <div class="brand" onclick="goView('home')">
+  <div class="brand" ondblclick="checkAdminAccess()" onclick="goView('home')">
     <div class="logo-icon">⌂</div>
     <div class="brand-text">
       <h1>REHZO</h1>
@@ -73,36 +148,37 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   </div>
   <div class="header-actions">
     <button class="icon-btn" onclick="goView('notifications')">🔔</button>
-    <button class="icon-btn" onclick="goView('admin')">👤</button>
   </div>
 </header>
 
 <div class="main-wrapper">
 
+  <!-- ================= 1. HOME VIEW ================= -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
       <p>Find, book & settle in your verified space.</p>
       <div class="search-bar">
-        <input id="searchInput" placeholder="Search city, house or 12-digit TRL No…" oninput="handleSearch(this.value)">
-        <button onclick="handleSearch(document.getElementById('searchInput').value)">Go</button>
+        <input id="homeSearchInput" placeholder="Search city, house or 12-digit TRL No…" oninput="handleSearch(this.value)">
+        <button onclick="handleSearch(document.getElementById('homeSearchInput').value)">Go</button>
       </div>
     </div>
 
-    <div id="trlAlert" style="display:none; margin-top:8px; padding:10px; background:#ECFDF5; border:1px solid #10B981; border-radius:12px; font-size:11px;">
-      <b>✓ Authentic REHZO Booking Found!</b>
+    <!-- TRL Search Alert -->
+    <div id="trlAlertBox" style="display:none; margin-top:10px; padding:10px; background:#ECFDF5; border:1px solid #10B981; border-radius:14px; font-size:11px;">
+      <b>✓ Authentic REHZO Record Found!</b>
       <div id="trlAlertDetails" style="margin-top:2px; color:#065F46;"></div>
-      <button onclick="openSlip('BK-1')" style="margin-top:5px; padding:3px 8px; background:#044E3B; color:#fff; border:none; border-radius:8px; font-size:10px; font-weight:bold; cursor:pointer;">View Official Slip</button>
+      <button onclick="openSlipModal(matchedBookingId)" style="margin-top:6px; padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">View Official TRL Slip</button>
     </div>
 
     <div class="filter-row">
-      <select id="countryFilter" class="select-box" onchange="applyFilters()">
+      <select id="countryFilter" class="pill-select" onchange="applyFilters()">
         <option value="">All Countries</option>
         <option value="IN">🇮🇳 India</option>
         <option value="US">🇺🇸 USA</option>
         <option value="GB">🇬🇧 UK</option>
       </select>
-      <select id="typeFilter" class="select-box" onchange="applyFilters()">
+      <select id="typeFilter" class="pill-select" onchange="applyFilters()">
         <option value="">All Room Types</option>
         <option value="Single Room">Single Room</option>
         <option value="1 RK">1 RK</option>
@@ -115,191 +191,286 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 
     <div class="chip-row">
       <button class="chip active" onclick="filterChip('all', this)">All Rooms</button>
-      <button class="chip" onclick="filterChip('Students', this)">For Students</button>
+      <button class="chip" onclick="filterChip('Student', this)">For Students</button>
       <button class="chip" onclick="filterChip('Family', this)">For Families</button>
       <button class="chip" onclick="filterChip('Worker', this)">For Workers</button>
     </div>
 
     <div class="section-title">
       <h3>Available Rooms</h3>
-      <span onclick="resetAll()">Reset & View All</span>
+      <span onclick="resetAllFilters()">Reset & View All</span>
     </div>
 
-    <div class="room-grid" id="roomsContainer"></div>
+    <div class="room-grid" id="homeRoomsGrid"></div>
   </section>
 
+  <!-- ================= 2. SEARCH VIEW ================= -->
   <section id="view-search" class="view">
-    <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;">Search Stays</h3>
-    <p style="font-size:11px; color:#64748B; margin-bottom:10px;">Filter and explore verified properties</p>
-    <div class="form-card" style="padding:6px 10px; border-radius:30px;">
+    <div class="sub-header">
+      <h3 class="sub-title">Search Stays</h3>
+    </div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 12px; margin-bottom:12px;">
       <input id="searchScreenInput" placeholder="Type city, landmark, area…" oninput="handleSearch(this.value)" style="width:100%; border:none; outline:none; font-size:12px; font-weight:600;">
     </div>
-    <div class="room-grid" id="searchRoomsContainer"></div>
+    <div class="room-grid" id="searchRoomsGrid"></div>
   </section>
 
+  <!-- ================= 3. NEAR ME VIEW (Screenshot 14) ================= -->
   <section id="view-near" class="view">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <h3 style="font-size:16px; font-weight:800;">Near Me 📍</h3>
-        <p style="font-size:11px; color:#044E3B; font-weight:700;">Within strict 10 km radius</p>
+    <div class="sub-header">
+      <div class="back-btn-row" onclick="goView('home')">
+        <span class="back-arrow">‹</span>
+        <h3 class="sub-title">Near Me</h3>
       </div>
-      <button onclick="detectGPS()" style="padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:15px; font-size:10px; font-weight:bold; cursor:pointer;">Refresh GPS</button>
     </div>
-    <div id="gpsStatus" style="font-size:10.5px; color:#64748B; margin:8px 0; background:#fff; padding:6px 10px; border-radius:10px; border:1px solid #E2E8F0;">
-      📍 Central Location: Delhi Connaught Place
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:12px; margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+      <div style="width:34px; height:34px; border-radius:50%; background:#ECFDF5; color:#044E3B; display:flex; align-items:center; justify-content:center; font-size:16px;">📍</div>
+      <div style="flex:1;">
+        <div id="nearStatusText" style="font-size:12px; font-weight:800; color:#0F172A;">Detecting your location…</div>
+        <div style="font-size:10px; color:#64748B; margin-top:2px;">Available rooms within 10 km of you.</div>
+      </div>
+      <button onclick="detectGPS()" style="padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:16px; font-size:10px; font-weight:bold; cursor:pointer;">Refresh</button>
     </div>
-    <div class="room-grid" id="nearRoomsContainer"></div>
+    <div class="room-grid" id="nearRoomsGrid"></div>
   </section>
 
+  <!-- ================= 4. MY BOOKINGS VIEW (Screenshots 15, 16, 17) ================= -->
   <section id="view-bookings" class="view">
-    <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">My Bookings</h3>
-    <div id="myBookingsContainer"></div>
+    <div class="sub-header">
+      <h3 class="sub-title">My Bookings</h3>
+    </div>
+    <!-- Sub-tabs: Current, History, Cancelled -->
+    <div class="sub-tabs-row">
+      <button class="sub-tab-btn active" id="tabBookingsCurrent" onclick="switchBookingsTab('current')">Current</button>
+      <button class="sub-tab-btn" id="tabBookingsHistory" onclick="switchBookingsTab('history')">History</button>
+      <button class="sub-tab-btn" id="tabBookingsCancelled" onclick="switchBookingsTab('cancelled')">Cancelled</button>
+    </div>
+    <div id="bookingsListContainer"></div>
   </section>
 
+  <!-- ================= 5. OWNER VIEW (Screenshots 18, 19, 20, 21, 22) ================= -->
   <section id="view-owner" class="view">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="font-size:16px; font-weight:800;">List Your Property</h3>
-      <span id="ownerListCount" onclick="toggleOwnerListings()" style="font-size:11px; font-weight:700; color:#044E3B; cursor:pointer;">My Listings (0)</span>
+    <!-- Owner Dashboard Mode -->
+    <div id="ownerDashboardWrap">
+      <div class="sub-header">
+        <h3 class="sub-title">Owner Dashboard</h3>
+        <button onclick="toggleOwnerForm(true)" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; cursor:pointer;">+ Add</button>
+      </div>
+
+      <!-- 3 Stat Cards (Active, Requests, Expired) -->
+      <div class="owner-stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statActiveCount">1</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statRequestsCount">0</div>
+          <div class="stat-label">Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statExpiredCount">0</div>
+          <div class="stat-label">Expired</div>
+        </div>
+      </div>
+
+      <!-- Sub Tabs: My Rooms, Requests, Expired -->
+      <div class="sub-tabs-row">
+        <button class="sub-tab-btn active" id="tabOwnerRooms" onclick="switchOwnerTab('rooms')">My Rooms</button>
+        <button class="sub-tab-btn" id="tabOwnerRequests" onclick="switchOwnerTab('requests')">Requests</button>
+        <button class="sub-tab-btn" id="tabOwnerExpired" onclick="switchOwnerTab('expired')">Expired</button>
+      </div>
+
+      <div id="ownerContentContainer"></div>
     </div>
 
-    <div id="ownerListingsBox" style="display:none; margin-bottom:12px;"></div>
-
-    <form class="form-card" onsubmit="handlePublish(event)">
-      <div class="input-row">
-        <div class="input-group">
-          <label>Country *</label>
-          <select id="oCountry" onchange="updateCountryPrefix(this.value)">
-            <option value="IN">🇮🇳 India (+91 / ₹)</option>
-            <option value="US">🇺🇸 USA (+1 / $)</option>
-            <option value="GB">🇬🇧 UK (+44 / £)</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label>Owner Name *</label>
-          <input id="oName" placeholder="Full Name" required>
+    <!-- Owner List Form Mode (Screenshots 20, 21, 22) -->
+    <div id="ownerFormWrap" style="display:none;">
+      <div class="sub-header">
+        <div class="back-btn-row" onclick="toggleOwnerForm(false)">
+          <span class="back-arrow">‹</span>
+          <h3 class="sub-title">List Your Property</h3>
         </div>
       </div>
 
-      <div class="input-row">
-        <div class="input-group">
-          <label>Phone No *</label>
-          <div style="display:flex;">
-            <span id="oDial" style="padding:7px; background:#E2E8F0; font-size:11px; font-weight:bold; border-radius:12px 0 0 12px;">+91</span>
-            <input id="oPhone" placeholder="Mobile No" style="border-radius:0 12px 12px 0;" required>
+      <form onsubmit="handlePublishProperty(event)">
+        <!-- 1. Country & Name -->
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Select Country *</label>
+            <select id="opCountry" class="pill-input" onchange="updateDialPrefix(this.value)">
+              <option value="IN">🇮🇳 India (+91 / ₹)</option>
+              <option value="US">🇺🇸 USA (+1 / $)</option>
+              <option value="GB">🇬🇧 UK (+44 / £)</option>
+            </select>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Your Name *</label>
+            <input id="opName" class="pill-input" placeholder="Owner Full Name" required>
           </div>
         </div>
-        <div class="input-group">
-          <label>Gmail (optional)</label>
-          <input id="oGmail" placeholder="you@gmail.com">
-        </div>
-      </div>
 
-      <div class="input-row">
-        <div class="input-group">
-          <label>House Name *</label>
-          <input id="oHouse" placeholder="e.g. Sharma Villa" required>
-        </div>
-        <div class="input-group">
-          <label>State (optional)</label>
-          <input id="oState" placeholder="State">
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>City *</label>
-          <input id="oCity" placeholder="City" required>
-        </div>
-        <div class="input-group">
-          <label>Area Code *</label>
-          <input id="oPin" placeholder="Pin code" required>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Full Address *</label>
-          <input id="oAddr" placeholder="House No, Street" required>
-        </div>
-        <div class="input-group">
-          <label>Room Type *</label>
-          <select id="oType">
-            <option>1 RK</option>
-            <option>Single Room</option>
-            <option>2 BHK</option>
-            <option>3 BHK</option>
-            <option>PG</option>
-            <option>Hostel</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Amenities</label>
-          <input id="oAmenities" placeholder="WiFi, AC, Food">
-        </div>
-        <div class="input-group">
-          <label>Suitable For</label>
-          <select id="oSuitable">
-            <option>Anyone</option>
-            <option>Students</option>
-            <option>Family</option>
-            <option>Worker</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <label>Monthly Rent *</label>
-          <div style="display:flex;">
-            <span id="oSym1" style="padding:7px; background:#E2E8F0; font-size:11px; font-weight:bold; border-radius:12px 0 0 12px;">₹</span>
-            <input id="oRent" type="number" placeholder="Rent" style="border-radius:0 12px 12px 0;" required>
+        <!-- 2. Phone & Gmail -->
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Contact No. *</label>
+            <div class="dial-prefix-wrap">
+              <span id="opDialPrefix">+91</span>
+              <input id="opPhone" placeholder="Mobile Number" required>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Gmail *</label>
+            <input id="opGmail" class="pill-input" type="email" placeholder="owner@gmail.com" required>
           </div>
         </div>
-        <div class="input-group">
-          <label>Security Deposit (optional)</label>
-          <div style="display:flex;">
-            <span id="oSym2" style="padding:7px; background:#E2E8F0; font-size:11px; font-weight:bold; border-radius:12px 0 0 12px;">₹</span>
-            <input id="oDep" type="number" placeholder="Deposit" style="border-radius:0 12px 12px 0;">
+
+        <!-- 3. Room Details -->
+        <div class="form-section-title">Room Details</div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Your House Name *</label>
+            <input id="opHouse" class="pill-input" placeholder="e.g. Patel Bhawan" required>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Room Type *</label>
+            <select id="opRoomType" class="pill-input">
+              <option>Single Room</option>
+              <option>1 RK</option>
+              <option>2 BHK</option>
+              <option>3 BHK</option>
+              <option>PG</option>
+              <option>Hostel</option>
+            </select>
           </div>
         </div>
-      </div>
 
-      <div style="text-align:center; margin:8px 0;">
-        <button type="button" id="mapLockBtn" onclick="lockMapLocation()" style="width:100%; padding:9px; border:1px solid #CBD5E1; border-radius:20px; background:#fff; font-size:11px; font-weight:bold; cursor:pointer;">
-          📍 <span id="mapLockText">Use Exact Map Location *</span>
+        <!-- 4. Suitable For & Amenities Chips -->
+        <div class="pill-grid" style="align-items:start;">
+          <div class="field-box">
+            <label class="field-label">Suitable For</label>
+            <div class="select-chips-col">
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'suitable', 'Family')"><div class="circle-indicator"></div> Family</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'suitable', 'Student')"><div class="circle-indicator"></div> Student</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'suitable', 'Worker')"><div class="circle-indicator"></div> Worker</div>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Amenities</label>
+            <div class="select-chips-col">
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'amenity', 'Wi-Fi')"><div class="circle-indicator"></div> Wi-Fi</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'amenity', 'AC')"><div class="circle-indicator"></div> AC</div>
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'amenity', 'Parking')"><div class="circle-indicator"></div> Parking</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Rent & Deposit (Screenshot 21) -->
+        <div class="form-section-title">7. Rent & Deposit</div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Monthly Rent *</label>
+            <div class="dial-prefix-wrap">
+              <span id="opRentSym">₹</span>
+              <input id="opRent" type="number" placeholder="Rent" required>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Security Deposit (optional)</label>
+            <div class="dial-prefix-wrap">
+              <span id="opDepSym">₹</span>
+              <input id="opDeposit" type="number" placeholder="Deposit">
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Location (Screenshot 21) -->
+        <div class="form-section-title">8. Location</div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">State (optional)</label>
+            <input id="opState" class="pill-input" placeholder="State">
+          </div>
+          <div class="field-box">
+            <label class="field-label">City *</label>
+            <input id="opCity" class="pill-input" placeholder="City" required>
+          </div>
+        </div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Area Code *</label>
+            <input id="opPin" class="pill-input" placeholder="Pin code" required>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Full Address *</label>
+            <input id="opAddr" class="pill-input" placeholder="House No, Landmark" required>
+          </div>
+        </div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Nearby Metro (optional)</label>
+            <input id="opMetro" class="pill-input" placeholder="Station name">
+          </div>
+          <div class="field-box">
+            <label class="field-label">Nearby Bus Stand (optional)</label>
+            <input id="opBus" class="pill-input" placeholder="Bus stop name">
+          </div>
+        </div>
+
+        <button type="button" class="map-lock-btn" id="opMapLockBtn" onclick="lockExactMapLocation()">
+          <span>📍</span> <span id="opMapLockText">Use Exact Map Location *</span>
         </button>
-      </div>
 
-      <div class="input-group" style="margin-bottom:8px;">
-        <label>Owner Conditions & Rules *</label>
-        <textarea id="oRules" rows="2" placeholder="e.g. Gate closes 10 PM, No smoking" required></textarea>
-      </div>
+        <!-- 7. Room Photos & Conditions (Screenshot 22) -->
+        <div class="pill-grid" style="align-items:start;">
+          <div class="field-box">
+            <label class="field-label">Room Photos * (max 3)</label>
+            <div class="photo-upload-row" id="photoPreviewContainer"></div>
+            <input type="file" id="photoFileInput" accept="image/*" multiple onchange="handlePhotoPick(event)" style="display:none;">
+            <div class="photo-add-box" onclick="document.getElementById('photoFileInput').click()">
+              <span style="font-size:16px;">⇪</span>
+              <span>Add Photo</span>
+              <span id="photoCountText">(0/3)</span>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Owner Conditions & Rules</label>
+            <div class="select-chips-col" id="rulesChipsBox">
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'rule', 'No Smoking')"><div class="circle-indicator"></div> No Smoking</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'No Pets')"><div class="circle-indicator"></div> No Pets</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'No Loud Music')"><div class="circle-indicator"></div> No Loud Music</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'ID Proof Required')"><div class="circle-indicator"></div> ID Proof Required</div>
+            </div>
+          </div>
+        </div>
 
-      <button type="submit" class="submit-btn">Publish Listing • 90 Days Free</button>
-    </form>
+        <button type="submit" class="big-action-btn">Publish Listing</button>
+      </form>
+    </div>
   </section>
 
-  <section id="view-admin" class="view">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="font-size:16px; font-weight:800;">Admin Full Control 🔐</h3>
-      <button onclick="goView('home')" style="font-size:11px; padding:3px 8px; border:1px solid #CBD5E1; border-radius:8px; background:#fff; cursor:pointer;">Close</button>
-    </div>
-    <div class="form-card">
-      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">Live Listings Moderation</h4>
-      <div id="adminListings"></div>
-    </div>
-  </section>
-
+  <!-- ================= 6. NOTIFICATIONS VIEW ================= -->
   <section id="view-notifications" class="view">
-    <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">Notifications</h3>
-    <div class="form-card" style="text-align:center; font-size:11px; color:#64748B;">No unread notifications</div>
+    <div class="sub-header">
+      <h3 class="sub-title">Notifications</h3>
+    </div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:20px; text-align:center; font-size:11px; color:#64748B;">No unread notifications</div>
+  </section>
+
+  <!-- ================= 7. PRIVATE ADMIN PANEL (Not Public) ================= -->
+  <section id="view-admin" class="view">
+    <div class="sub-header">
+      <h3 class="sub-title">Admin Moderation 🔐</h3>
+      <button onclick="goView('home')" style="padding:4px 10px; border:1px solid #E2E8F0; border-radius:14px; background:#fff; font-size:11px; cursor:pointer;">Exit</button>
+    </div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">Live Platform Listings</h4>
+      <div id="adminListingsControl"></div>
+    </div>
   </section>
 
 </div>
 
+<!-- BOTTOM NAVIGATION (Fixed) -->
 <nav class="bottom-nav">
   <button class="nav-item active" data-view="home" onclick="goView('home')">
     <span>⌂</span>Home
@@ -314,29 +485,116 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     <span>📅</span>My Bookings
   </button>
   <button class="nav-item" data-view="owner" onclick="goView('owner')">
-    <span>👤</span>Owner
+    <span>🏢</span>Owner
   </button>
 </nav>
 
+<!-- DYNAMIC MODAL SLOT (Clean, Zero Touch Freezing) -->
 <div id="modalSlot"></div>
 
 <script>
+// ================= STATE & SEED DATA =================
 var DB = {
   listings: [
-    { id:'L1', houseName:'Sunny 1 RK near Andheri', roomType:'1 RK', suitableFor:'Worker', rent:14500, deposit:25000, country:'IN', city:'Mumbai', address:'Andheri West', lat:28.62, lng:77.21, ownerName:'Sunita Mehra', phone:'9820012345', gmail:'sunita@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500' },
-    { id:'L2', houseName:'Green Park Student PG', roomType:'PG', suitableFor:'Students', rent:6500, deposit:6500, country:'IN', city:'Delhi', address:'Green Park', lat:28.64, lng:77.22, ownerName:'Rajesh Verma', phone:'9811054321', gmail:'rajesh@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=500' },
-    { id:'L3', houseName:'Backpacker Youth Hostel', roomType:'Hostel', suitableFor:'Students', rent:4200, deposit:2000, country:'IN', city:'Delhi', address:'Pahar Ganj', lat:28.63, lng:77.21, ownerName:'Vikram Joshi', phone:'9899123456', gmail:'vikram@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=500' },
-    { id:'L4', houseName:'Comfort 2 BHK Family Flat', roomType:'2 BHK', suitableFor:'Family', rent:22000, deposit:44000, country:'IN', city:'Delhi', address:'Dwarka Sector 10', lat:28.58, lng:77.05, ownerName:'Amit Saxena', phone:'9819999999', gmail:'amit@gmail.com', status:'available', photo:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500' }
+    {
+      id: 'L-101',
+      houseName: 'Patel Bhawan',
+      roomType: 'Single Room',
+      suitableFor: ['Student', 'Worker'],
+      amenities: ['Wi-Fi', 'Parking'],
+      rent: 2500,
+      deposit: 2500,
+      country: 'IN',
+      city: 'Sasaram',
+      state: 'Bihar',
+      pin: '821115',
+      address: 'Near Old Bus Stand, Sasaram',
+      lat: 24.95,
+      lng: 84.03,
+      ownerName: 'Awakash Kumar Patel',
+      phone: '+91 7707064294',
+      gmail: 'awakashkumarpatel@gmail.com',
+      status: 'available',
+      photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'],
+      daysLeft: 86
+    },
+    {
+      id: 'L-102',
+      houseName: 'Sunny 1 RK near Andheri Metro',
+      roomType: '1 RK',
+      suitableFor: ['Worker'],
+      amenities: ['Wi-Fi', 'AC'],
+      rent: 14500,
+      deposit: 25000,
+      country: 'IN',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pin: '400053',
+      address: 'Andheri West, Mumbai',
+      lat: 28.62,
+      lng: 77.21,
+      ownerName: 'Sunita Mehra',
+      phone: '+91 9820012345',
+      gmail: 'sunita@gmail.com',
+      status: 'available',
+      photos: ['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600'],
+      daysLeft: 90
+    }
   ],
   bookings: [
-    { id:'BK-1', trl:'839472615028', houseName:'Sunny 1 RK near Andheri', roomType:'1 RK', rent:14500, duration:6, date:'28 Sep 2026', ownerName:'Sunita Mehra', ownerPhone:'+91 9820012345', ownerAddress:'Andheri West, Mumbai', status:'confirmed' }
+    {
+      id: 'BK-1',
+      trl: '897421990915',
+      listingId: 'L-101',
+      houseName: 'Patel Bhawan',
+      roomType: 'Single Room',
+      rent: 2500,
+      duration: 3,
+      date: '24/9/2026',
+      people: 1,
+      userName: 'Rahul Kumar',
+      userPhone: '+91 8210746212',
+      userGmail: 'rahulpatel5@gmail.com',
+      userOldAddress: 'Pratapganj rajpur rohtas bihar 802219',
+      ownerName: 'Awakash Kumar Patel',
+      ownerPhone: '+91 7707064294',
+      ownerAddress: 'Near Old Bus Stand, Sasaram, Bihar',
+      status: 'confirmed'
+    },
+    {
+      id: 'BK-2',
+      trl: '614132916238',
+      listingId: 'L-101',
+      houseName: 'Patel Bhawan',
+      roomType: 'Single Room',
+      rent: 2500,
+      duration: 1,
+      date: '24/9/2026',
+      people: 1,
+      userName: 'Rahul',
+      userPhone: '+91 7707064295',
+      userGmail: 'awakashkumarpatel@gmail.com',
+      userOldAddress: 'Dehri on Sone',
+      ownerName: 'Awakash Kumar Patel',
+      ownerPhone: '+91 7707064294',
+      ownerAddress: 'Near Old Bus Stand, Sasaram, Bihar',
+      status: 'cancelled'
+    }
   ]
 };
 
-var activeBookingListing = null;
-var userGeo = { lat: 28.6139, lng: 77.2090 };
-var lockedCoord = { lat: 28.6139, lng: 77.2090 };
+var userGeo = { lat: 24.95, lng: 84.03 };
+var lockedMapCoord = { lat: 24.95, lng: 84.03 };
+var currentBookingsTab = 'current';
+var currentOwnerTab = 'rooms';
+var uploadedPhotos = [];
+var selectedSuitable = ['Family'];
+var selectedAmenities = ['Wi-Fi', 'Parking'];
+var selectedRules = ['No Smoking'];
+var activeBookingRoom = null;
+var matchedBookingId = null;
 
+// ================= VIEW NAVIGATION =================
 function goView(viewId) {
   var views = document.querySelectorAll('.view');
   for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
@@ -349,50 +607,70 @@ function goView(viewId) {
     else navBtns[j].classList.remove('active');
   }
 
-  if (viewId === 'home') renderRooms();
-  if (viewId === 'search') renderSearchRooms();
-  if (viewId === 'near') renderNearRooms();
-  if (viewId === 'bookings') renderMyBookings();
-  if (viewId === 'owner') updateOwnerCount();
-  if (viewId === 'admin') renderAdminListings();
+  if (viewId === 'home') renderHomeGrid();
+  if (viewId === 'search') renderSearchGrid();
+  if (viewId === 'near') renderNearGrid();
+  if (viewId === 'bookings') renderBookingsView();
+  if (viewId === 'owner') renderOwnerView();
+  if (viewId === 'admin') renderAdminModeration();
   window.scrollTo(0, 0);
 }
 
-function renderRooms(list) {
-  var items = list || DB.listings.filter(function(x){ return x.status === 'available'; });
-  var container = document.getElementById('roomsContainer');
-  if (!items.length) {
-    container.innerHTML = '<div style="grid-column: span 2; text-align:center; padding:20px; font-size:11px; color:#64748B;">No available rooms match your criteria.</div>';
-    return;
+// Private Admin Access via Secret
+function checkAdminAccess() {
+  var pass = prompt("Enter Admin Passcode:");
+  if (pass === 'rehzo123') {
+    goView('admin');
+  } else if (pass !== null) {
+    alert("Incorrect passcode.");
   }
-  var html = '';
-  for (var i = 0; i < items.length; i++) {
-    var r = items[i];
-    html += '<div class="room-card">' +
-      '<img src="' + r.photo + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500\'">' +
-      '<div class="room-details">' +
-        '<div class="room-title">' + r.houseName + '</div>' +
-        '<div class="room-rent">₹' + r.rent.toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
-        '<div class="room-city">📍 ' + r.city + ' • ' + r.roomType + '</div>' +
-        '<button class="book-btn" onclick="startBooking(\'' + r.id + '\')">Book Now</button>' +
-      '</div>' +
-    '</div>';
-  }
-  container.innerHTML = html;
 }
 
+// Check URL param ?admin=rehzo123
+if (window.location.search.indexOf('admin=rehzo123') !== -1) {
+  setTimeout(function() { goView('admin'); }, 200);
+}
+
+// ================= HOME ROOMS GRID =================
+function renderHomeGrid(items) {
+  var list = items || DB.listings.filter(function(x){ return x.status === 'available'; });
+  var container = document.getElementById('homeRoomsGrid');
+  if (!list.length) {
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:24px; font-size:11px; color:#64748B;">No available rooms match your search.</div>';
+    return;
+  }
+  container.innerHTML = list.map(function(r) {
+    return '<div class="room-card">' +
+      '<div class="room-thumb-wrap">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+        '<span class="avail-badge">Available</span>' +
+      '</div>' +
+      '<div class="room-details">' +
+        '<div class="room-title">' + r.houseName + '</div>' +
+        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
+        '<div class="room-city">📍 ' + r.city + ' • ' + r.roomType + '</div>' +
+        '<button class="book-btn" onclick="openBookingPillModal(\'' + r.id + '\')">Book Now</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Live Search & TRL Verification
 function handleSearch(val) {
   var q = val.trim();
-  var trlBox = document.getElementById('trlAlert');
+  var alertBox = document.getElementById('trlAlertBox');
+
   if (q.length === 12 && /^\d+$/.test(q)) {
-    var match = DB.bookings.find(function(b){ return b.trl === q; });
-    if (match) {
-      trlBox.style.display = 'block';
-      document.getElementById('trlAlertDetails').innerHTML = match.houseName + ' (Confirmed)';
+    var b = DB.bookings.find(function(x){ return x.trl === q; });
+    if (b) {
+      matchedBookingId = b.id;
+      alertBox.style.display = 'block';
+      document.getElementById('trlAlertDetails').innerText = b.houseName + ' • ' + b.userName + ' (' + b.status.toUpperCase() + ')';
       return;
     }
   }
-  trlBox.style.display = 'none';
+  alertBox.style.display = 'none';
+
   var sLow = q.toLowerCase();
   var filtered = DB.listings.filter(function(l) {
     return l.status === 'available' && (
@@ -401,7 +679,7 @@ function handleSearch(val) {
       l.roomType.toLowerCase().indexOf(sLow) !== -1
     );
   });
-  renderRooms(filtered);
+  renderHomeGrid(filtered);
 }
 
 function applyFilters() {
@@ -410,27 +688,30 @@ function applyFilters() {
   var filtered = DB.listings.filter(function(l) {
     return l.status === 'available' && (!c || l.country === c) && (!t || l.roomType === t);
   });
-  renderRooms(filtered);
+  renderHomeGrid(filtered);
 }
 
 function filterChip(cat, el) {
   var chips = document.querySelectorAll('.chip');
   for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
   el.classList.add('active');
-  if (cat === 'all') renderRooms();
+  if (cat === 'all') renderHomeGrid();
   else {
-    var filtered = DB.listings.filter(function(l){ return l.status === 'available' && l.suitableFor === cat; });
-    renderRooms(filtered);
+    var filtered = DB.listings.filter(function(l){
+      return l.status === 'available' && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
+    });
+    renderHomeGrid(filtered);
   }
 }
 
-function resetAll() {
+function resetAllFilters() {
   document.getElementById('countryFilter').value = '';
   document.getElementById('typeFilter').value = '';
-  document.getElementById('searchInput').value = '';
-  renderRooms();
+  document.getElementById('homeSearchInput').value = '';
+  renderHomeGrid();
 }
 
+// ================= NEAR ME (10 KM STRICT) =================
 function getDist(lat1, lon1, lat2, lon2) {
   var R = 6371;
   var dLat = (lat2 - lat1) * Math.PI / 180;
@@ -439,7 +720,7 @@ function getDist(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function renderNearRooms() {
+function renderNearGrid() {
   var near = [];
   for (var i = 0; i < DB.listings.length; i++) {
     var l = DB.listings[i];
@@ -448,294 +729,447 @@ function renderNearRooms() {
       if (d <= 10) near.push(l);
     }
   }
-  var container = document.getElementById('nearRoomsContainer');
+  var container = document.getElementById('nearRoomsGrid');
   if (!near.length) {
-    container.innerHTML = '<div style="grid-column: span 2; text-align:center; padding:20px; font-size:11px; color:#64748B;">No rooms available within 10 km.</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:30px; font-size:11.5px; color:#64748B;">No available rooms within 10 km.</div>';
     return;
   }
-  var html = '';
-  for (var j = 0; j < near.length; j++) {
-    var r = near[j];
-    html += '<div class="room-card">' +
-      '<img src="' + r.photo + '" class="room-thumb">' +
+  container.innerHTML = near.map(function(r) {
+    return '<div class="room-card">' +
+      '<div class="room-thumb-wrap">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb">' +
+        '<span class="avail-badge">Available</span>' +
+      '</div>' +
       '<div class="room-details">' +
         '<div class="room-title">' + r.houseName + '</div>' +
-        '<div class="room-rent">₹' + r.rent.toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="startBooking(\'' + r.id + '\')">Book Now</button>' +
+        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
+        '<button class="book-btn" onclick="openBookingPillModal(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
-  }
-  container.innerHTML = html;
+  }).join('');
 }
 
 function detectGPS() {
   if (navigator.geolocation) {
-    document.getElementById('gpsStatus').innerText = 'Detecting GPS coordinates…';
+    document.getElementById('nearStatusText').innerText = 'Scanning your GPS location…';
     navigator.geolocation.getCurrentPosition(function(pos) {
       userGeo.lat = pos.coords.latitude;
       userGeo.lng = pos.coords.longitude;
-      document.getElementById('gpsStatus').innerText = '📍 Locked GPS: ' + userGeo.lat.toFixed(3) + ', ' + userGeo.lng.toFixed(3);
-      renderNearRooms();
+      document.getElementById('nearStatusText').innerText = 'Location Locked: ' + userGeo.lat.toFixed(3) + ', ' + userGeo.lng.toFixed(3);
+      renderNearGrid();
     }, function() {
-      document.getElementById('gpsStatus').innerText = '📍 Default Central: Delhi Connaught Place';
-      renderNearRooms();
+      document.getElementById('nearStatusText').innerText = 'Using default Sasaram location';
+      renderNearGrid();
     });
   }
 }
 
-function renderSearchRooms() {
-  var container = document.getElementById('searchRoomsContainer');
-  var items = DB.listings.filter(function(x){ return x.status === 'available'; });
-  var html = '';
-  for (var i = 0; i < items.length; i++) {
-    var r = items[i];
-    html += '<div class="room-card">' +
-      '<img src="' + r.photo + '" class="room-thumb">' +
+function renderSearchGrid() {
+  var container = document.getElementById('searchRoomsGrid');
+  var list = DB.listings.filter(function(x){ return x.status === 'available'; });
+  container.innerHTML = list.map(function(r) {
+    return '<div class="room-card">' +
+      '<div class="room-thumb-wrap">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb">' +
+        '<span class="avail-badge">Available</span>' +
+      '</div>' +
       '<div class="room-details">' +
         '<div class="room-title">' + r.houseName + '</div>' +
-        '<div class="room-rent">₹' + r.rent.toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="startBooking(\'' + r.id + '\')">Book Now</button>' +
+        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
+        '<button class="book-btn" onclick="openBookingPillModal(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
-  }
-  container.innerHTML = html;
+  }).join('');
 }
 
-function startBooking(id) {
+// ================= MY BOOKINGS (Screenshots 15, 16, 17) =================
+function switchBookingsTab(tab) {
+  currentBookingsTab = tab;
+  document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
+  document.getElementById('tabBookingsHistory').className = 'sub-tab-btn ' + (tab==='history'?'active':'');
+  document.getElementById('tabBookingsCancelled').className = 'sub-tab-btn ' + (tab==='cancelled'?'active':'');
+  renderBookingsView();
+}
+
+function renderBookingsView() {
+  var container = document.getElementById('bookingsListContainer');
+  var list = [];
+  if (currentBookingsTab === 'current') {
+    list = DB.bookings.filter(function(b){ return b.status === 'confirmed' || b.status === 'requested'; });
+  } else if (currentBookingsTab === 'cancelled') {
+    list = DB.bookings.filter(function(b){ return b.status === 'cancelled'; });
+  } else {
+    list = DB.bookings;
+  }
+
+  if (!list.length) {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:24px; text-align:center; font-size:11.5px; color:#64748B;">No ' + currentBookingsTab + ' bookings found.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function(b) {
+    var l = DB.listings.find(function(x){ return x.id === b.listingId; }) || DB.listings[0];
+    var isConfirmed = b.status === 'confirmed';
+    var isCancelled = b.status === 'cancelled';
+
+    return '<div class="detailed-card">' +
+      '<img src="' + l.photos[0] + '" class="detailed-card-img">' +
+      '<div class="detailed-card-body">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+          '<b style="font-size:14px; color:#0F172A;">' + b.houseName + '</b>' +
+          '<span class="status-pill ' + (isConfirmed ? 'status-confirmed' : isCancelled ? 'status-cancelled' : 'status-booked') + '">● ' + b.status.charAt(0).toUpperCase() + b.status.slice(1) + '</span>' +
+        '</div>' +
+        '<div style="font-size:13px; font-weight:800; color:#044E3B; margin-top:3px;">₹' + Number(b.rent).toLocaleString() + ' <span style="font-size:9.5px; color:#64748B; font-weight:normal;">/month</span></div>' +
+        '<div style="font-size:10.5px; color:#64748B; margin-top:2px;">1 people • ' + b.duration + ' month(s) • requested ' + b.date + '</div>' +
+        '<div style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:#334155; margin-top:5px;">' +
+          'TRL No: ' + (b.trl || 'Pending') +
+          (b.trl ? '<span onclick="navigator.clipboard.writeText(\'' + b.trl + '\');alert(\'TRL Copied!\')" style="cursor:pointer; font-size:12px;">📋</span>' : '') +
+        '</div>' +
+
+        '<div class="action-pills-row">' +
+          (isConfirmed ? '<button class="action-pill-btn" onclick="openSlipModal(\'' + b.id + '\')">📄 Confirmation PDF</button>' : '') +
+          (!isCancelled ? '<button class="action-pill-btn danger" onclick="cancelUserBooking(\'' + b.id + '\')">Cancel Request</button>' : '') +
+          '<button class="action-pill-btn" onclick="alert(\'Owner: ' + b.ownerName + '\\nPhone: ' + b.ownerPhone + '\\nAddress: ' + b.ownerAddress + '\')">View Details</button>' +
+        '</div>' +
+
+        (isConfirmed ? (
+          '<div style="margin-top:10px; padding:8px 10px; background:#F1F8F5; border-radius:12px; font-size:10.5px;">' +
+            '<div style="font-weight:700; color:#044E3B;">Your rating for the owner</div>' +
+            '<div style="font-size:14px; color:#F59E0B; margin-top:2px;">★ ☆ ☆ ☆ ☆</div>' +
+          '</div>'
+        ) : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function cancelUserBooking(id) {
+  if (confirm("Are you sure you want to cancel this booking?")) {
+    var b = DB.bookings.find(function(x){ return x.id === id; });
+    if (b) {
+      b.status = 'cancelled';
+      renderBookingsView();
+    }
+  }
+}
+
+// ================= OWNER VIEW (Screenshots 18, 19) =================
+function toggleOwnerForm(show) {
+  document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
+  document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
+  if (show) renderPhotoPreviewList();
+}
+
+function switchOwnerTab(tab) {
+  currentOwnerTab = tab;
+  document.getElementById('tabOwnerRooms').className = 'sub-tab-btn ' + (tab==='rooms'?'active':'');
+  document.getElementById('tabOwnerRequests').className = 'sub-tab-btn ' + (tab==='requests'?'active':'');
+  document.getElementById('tabOwnerExpired').className = 'sub-tab-btn ' + (tab==='expired'?'active':'');
+  renderOwnerView();
+}
+
+function renderOwnerView() {
+  document.getElementById('statActiveCount').innerText = DB.listings.length;
+  document.getElementById('statRequestsCount').innerText = DB.bookings.filter(function(b){ return b.status==='requested'||b.status==='confirmed'; }).length;
+  document.getElementById('statExpiredCount').innerText = 0;
+
+  var container = document.getElementById('ownerContentContainer');
+
+  if (currentOwnerTab === 'rooms') {
+    container.innerHTML = DB.listings.map(function(r) {
+      return '<div class="detailed-card">' +
+        '<img src="' + r.photos[0] + '" class="detailed-card-img">' +
+        '<div class="detailed-card-body">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+            '<b style="font-size:14px;">' + r.houseName + '</b>' +
+            '<span class="status-pill status-booked">● Booked</span>' +
+          '</div>' +
+          '<div style="font-size:13px; font-weight:800; color:#044E3B; margin-top:3px;">₹' + Number(r.rent).toLocaleString() + ' <span style="font-size:9.5px; color:#64748B;">/month</span></div>' +
+          '<div style="font-size:10px; color:#64748B; margin-top:2px;">' + r.city + ', ' + r.country + ' • ' + (r.daysLeft||90) + ' days left</div>' +
+          '<div class="action-pills-row">' +
+            '<button class="action-pill-btn" onclick="alert(\'Editing ' + r.houseName + '\')">✏️ Edit</button>' +
+            '<button class="action-pill-btn" onclick="alert(\'Address: ' + r.address + '\')">View</button>' +
+            '<button class="action-pill-btn danger" onclick="deleteOwnerRoom(\'' + r.id + '\')">🗑 Delete</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else if (currentOwnerTab === 'requests') {
+    // Screenshot 19 Layout
+    container.innerHTML = DB.bookings.map(function(b) {
+      return '<div class="detailed-card" style="padding:12px;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+          '<b style="font-size:14px;">' + b.houseName + '</b>' +
+          '<span class="status-pill ' + (b.status==='confirmed'?'status-confirmed':'status-cancelled') + '">● ' + b.status.charAt(0).toUpperCase() + b.status.slice(1) + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px; color:#334155; margin-top:4px;">' +
+          '<div><b>Guest:</b> ' + b.userName + ' (1 people • ' + b.duration + ' month)</div>' +
+          '<div>📞 ' + b.userPhone + ' • ' + b.userGmail + '</div>' +
+          '<div>📍 ' + b.userOldAddress + '</div>' +
+          '<div style="font-weight:700; margin-top:2px;">TRL No: ' + (b.trl || 'Pending') + '</div>' +
+        '</div>' +
+        '<div class="action-pills-row" style="margin-top:8px;">' +
+          (b.status==='confirmed' ? '<button class="action-pill-btn" onclick="openSlipModal(\'' + b.id + '\')">Confirmation PDF</button>' : '') +
+          (b.status==='confirmed' ? '<button class="action-pill-btn danger" onclick="cancelUserBooking(\'' + b.id + '\')">Cancel Booking</button>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:20px; text-align:center; font-size:11px; color:#64748B;">No expired listings.</div>';
+  }
+}
+
+function deleteOwnerRoom(id) {
+  if (confirm("Delete this room listing?")) {
+    DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
+    renderOwnerView();
+    renderHomeGrid();
+  }
+}
+
+// ================= LISTING PROPERTY FORM LOGIC =================
+function updateDialPrefix(code) {
+  var dial = code === 'IN' ? '+91' : (code === 'US' ? '+1' : '+44');
+  var sym = code === 'IN' ? '₹' : (code === 'US' ? '$' : '£');
+  document.getElementById('opDialPrefix').innerText = dial;
+  document.getElementById('opRentSym').innerText = sym;
+  document.getElementById('opDepSym').innerText = sym;
+}
+
+function toggleSelectChip(el, group, val) {
+  el.classList.toggle('selected');
+  var isSel = el.classList.contains('selected');
+  if (group === 'suitable') {
+    if (isSel) selectedSuitable.push(val);
+    else selectedSuitable = selectedSuitable.filter(function(x){ return x !== val; });
+  } else if (group === 'amenity') {
+    if (isSel) selectedAmenities.push(val);
+    else selectedAmenities = selectedAmenities.filter(function(x){ return x !== val; });
+  } else if (group === 'rule') {
+    if (isSel) selectedRules.push(val);
+    else selectedRules = selectedRules.filter(function(x){ return x !== val; });
+  }
+}
+
+function lockExactMapLocation() {
+  lockedMapCoord = { lat: 24.95, lng: 84.03 };
+  var btn = document.getElementById('opMapLockBtn');
+  btn.classList.add('locked');
+  document.getElementById('opMapLockText').innerText = '✓ Exact Map Location Locked (GPS Coordinates)';
+}
+
+function handlePhotoPick(event) {
+  var files = Array.prototype.slice.call(event.target.files, 0, 3 - uploadedPhotos.length);
+  files.forEach(function(f) {
+    if (!f.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (uploadedPhotos.length < 3) {
+        uploadedPhotos.push(e.target.result);
+        renderPhotoPreviewList();
+      }
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function renderPhotoPreviewList() {
+  var container = document.getElementById('photoPreviewContainer');
+  document.getElementById('photoCountText').innerText = '(' + uploadedPhotos.length + '/3)';
+  container.innerHTML = uploadedPhotos.map(function(src, i) {
+    return '<div class="photo-preview-item">' +
+      '<img src="' + src + '" class="photo-thumb-preview">' +
+      '<button type="button" class="photo-del-btn" onclick="uploadedPhotos.splice(' + i + ',1);renderPhotoPreviewList();">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function handlePublishProperty(e) {
+  e.preventDefault();
+  var house = document.getElementById('opHouse').value.trim();
+  var rent = parseFloat(document.getElementById('opRent').value) || 2500;
+
+  var newRoom = {
+    id: 'L-' + Date.now(),
+    houseName: house,
+    roomType: document.getElementById('opRoomType').value,
+    suitableFor: selectedSuitable.length ? selectedSuitable : ['Family'],
+    amenities: selectedAmenities.length ? selectedAmenities : ['Wi-Fi'],
+    rent: rent,
+    deposit: parseFloat(document.getElementById('opDeposit').value) || 0,
+    country: document.getElementById('opCountry').value,
+    city: document.getElementById('opCity').value.trim(),
+    state: document.getElementById('opState').value.trim(),
+    pin: document.getElementById('opPin').value.trim(),
+    address: document.getElementById('opAddr').value.trim(),
+    lat: lockedMapCoord.lat,
+    lng: lockedMapCoord.lng,
+    ownerName: document.getElementById('opName').value.trim(),
+    phone: document.getElementById('opPhone').value.trim(),
+    gmail: document.getElementById('opGmail').value.trim(),
+    status: 'available',
+    photos: uploadedPhotos.length ? uploadedPhotos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'],
+    daysLeft: 90
+  };
+
+  DB.listings.unshift(newRoom);
+  e.target.reset();
+  uploadedPhotos = [];
+  alert("Room published for 90 Days!");
+  toggleOwnerForm(false);
+  goView('owner');
+}
+
+// ================= BOOKING MODAL (Same Pill Layout) =================
+function openBookingPillModal(id) {
   var l = DB.listings.find(function(x){ return x.id === id; });
   if (!l) return;
-  activeBookingListing = l;
+  activeBookingRoom = l;
   var today = new Date().toISOString().slice(0, 10);
-  
-  document.getElementById('modalSlot').innerHTML = '<div style="position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:50; display:flex; align-items:center; justify-content:center; padding:14px;">' +
-    '<div style="background:#fff; border-radius:18px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; padding:14px;">' +
-      '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #E2E8F0; padding-bottom:8px; margin-bottom:10px;">' +
-        '<h3 style="font-size:14px; font-weight:800;">Request Room Booking</h3>' +
-        '<span onclick="closeModal()" style="cursor:pointer; font-size:14px; font-weight:bold;">✕</span>' +
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Request Room Booking</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
-      '<div class="input-row">' +
-        '<div class="input-group"><label>Your Name *</label><input id="bName" placeholder="Full Name"></div>' +
-        '<div class="input-group"><label>Phone No *</label><input id="bPhone" placeholder="Mobile"></div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" placeholder="Full Name"></div>' +
+        '<div class="field-box"><label class="field-label">Phone No *</label><input id="bpPhone" class="pill-input" placeholder="Mobile"></div>' +
       '</div>' +
-      '<div class="input-group" style="margin-bottom:8px;"><label>Gmail (optional)</label><input id="bGmail" placeholder="you@gmail.com"></div>' +
-      '<div class="input-group" style="margin-bottom:8px;"><label>Your Old Address *</label><input id="bOldAddr" placeholder="Permanent address"></div>' +
-      '<div class="input-row">' +
-        '<div class="input-group"><label>Check-in Date *</label><input id="bDate" type="date" value="' + today + '"></div>' +
-        '<div class="input-group"><label>Kitne month k liy *</label><select id="bMonths" onchange="calculateRent()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
+      '<div class="field-box" style="margin-bottom:10px;"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" placeholder="you@gmail.com"></div>' +
+      '<div class="field-box" style="margin-bottom:10px;"><label class="field-label">Your Old/Permanent Address *</label><input id="bpOldAddr" class="pill-input" placeholder="House No, City, State, Pin"></div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Check-in Date *</label><input id="bpDate" type="date" value="' + today + '" class="pill-input"></div>' +
+        '<div class="field-box"><label class="field-label">Kitne month k liy *</label><select id="bpMonths" class="pill-input" onchange="calculateBookingRent()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
       '</div>' +
-      '<div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:8px; font-size:11px; margin-bottom:10px;">' +
-        '<div style="display:flex; justify-content:space-between;"><span>Monthly Rent:</span> <b id="calcRent">₹' + l.rent.toLocaleString() + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; margin-top:2px;"><span>Deposit:</span> <b id="calcDeposit">₹' + (l.deposit || 0).toLocaleString() + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #6EE7B7; padding-top:4px; font-size:12px; font-weight:800; color:#044E3B;"><span>Total Payable:</span> <span id="calcTotal">₹' + (l.rent + (l.deposit || 0)).toLocaleString() + '</span></div>' +
+      '<div style="background:#F1F8F5; border:1px solid #A7F3D0; border-radius:16px; padding:10px; font-size:11px; margin:10px 0;">' +
+        '<div style="display:flex; justify-content:space-between;"><span>Monthly Rent:</span> <b id="calcRentPill">₹' + l.rent.toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; margin-top:2px;"><span>Deposit:</span> <b id="calcDepositPill">₹' + (l.deposit||0).toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #6EE7B7; padding-top:4px; font-size:12px; font-weight:800; color:#044E3B;"><span>Total Payable:</span> <span id="calcTotalPill">₹' + (l.rent + (l.deposit||0)).toLocaleString() + '</span></div>' +
       '</div>' +
-      '<button class="submit-btn" onclick="submitBooking()">Send Booking Request →</button>' +
+      '<button class="big-action-btn" onclick="submitBookingRequest()">Send Booking Request →</button>' +
     '</div>' +
   '</div>';
 }
 
-function calculateRent() {
-  if (!activeBookingListing) return;
-  var m = parseInt(document.getElementById('bMonths').value) || 1;
-  var rent = activeBookingListing.rent;
-  var dep = activeBookingListing.deposit || 0;
-  document.getElementById('calcRent').innerText = '₹' + rent.toLocaleString();
-  document.getElementById('calcDeposit').innerText = dep ? '₹' + dep.toLocaleString() : 'None';
-  document.getElementById('calcTotal').innerText = '₹' + ((rent * m) + dep).toLocaleString();
+function calculateBookingRent() {
+  if (!activeBookingRoom) return;
+  var m = parseInt(document.getElementById('bpMonths').value) || 1;
+  var rent = activeBookingRoom.rent;
+  var dep = activeBookingRoom.deposit || 0;
+  document.getElementById('calcRentPill').innerText = '₹' + rent.toLocaleString();
+  document.getElementById('calcDepositPill').innerText = dep ? '₹' + dep.toLocaleString() : 'None';
+  document.getElementById('calcTotalPill').innerText = '₹' + ((rent * m) + dep).toLocaleString();
 }
 
-function closeModal() {
-  document.getElementById('modalSlot').innerHTML = '';
-}
-
-function submitBooking() {
-  var name = document.getElementById('bName').value.trim();
-  var phone = document.getElementById('bPhone').value.trim();
-  var addr = document.getElementById('bOldAddr').value.trim();
-  var date = document.getElementById('bDate').value;
-  var months = parseInt(document.getElementById('bMonths').value) || 1;
+function submitBookingRequest() {
+  var name = document.getElementById('bpName').value.trim();
+  var phone = document.getElementById('bpPhone').value.trim();
+  var addr = document.getElementById('bpOldAddr').value.trim();
+  var date = document.getElementById('bpDate').value;
+  var months = parseInt(document.getElementById('bpMonths').value) || 1;
 
   if (!name || !phone || !addr || !date) {
     alert("Please fill all required booking fields.");
     return;
   }
 
-  var bk = {
+  var trl = '';
+  for (var i = 0; i < 12; i++) trl += Math.floor(Math.random() * 10);
+
+  var newBk = {
     id: 'BK-' + Date.now(),
-    houseName: activeBookingListing.houseName,
-    roomType: activeBookingListing.roomType,
-    rent: activeBookingListing.rent,
+    trl: trl,
+    listingId: activeBookingRoom.id,
+    houseName: activeBookingRoom.houseName,
+    roomType: activeBookingRoom.roomType,
+    rent: activeBookingRoom.rent,
     duration: months,
     date: date,
-    ownerName: activeBookingListing.ownerName,
-    ownerPhone: activeBookingListing.phone,
-    ownerAddress: activeBookingListing.address,
-    status: 'requested',
-    trl: null
+    people: 1,
+    userName: name,
+    userPhone: phone,
+    userGmail: document.getElementById('bpGmail').value.trim() || 'N/A',
+    userOldAddress: addr,
+    ownerName: activeBookingRoom.ownerName,
+    ownerPhone: activeBookingRoom.phone,
+    ownerAddress: activeBookingRoom.address,
+    status: 'confirmed'
   };
 
-  DB.bookings.unshift(bk);
+  DB.bookings.unshift(newBk);
   closeModal();
-  alert("Booking Request Sent to Owner!");
+  alert("Booking Confirmed! 12-Digit TRL Generated.");
   goView('bookings');
+  openSlipModal(newBk.id);
 }
 
-function renderMyBookings() {
-  var container = document.getElementById('myBookingsContainer');
-  if (!DB.bookings.length) {
-    container.innerHTML = '<div class="form-card" style="text-align:center; font-size:11px; color:#64748B;">No bookings placed yet.</div>';
-    return;
-  }
-  var html = '';
-  for (var i = 0; i < DB.bookings.length; i++) {
-    var b = DB.bookings[i];
-    var isConfirmed = b.status === 'confirmed';
-    html += '<div class="form-card" style="margin-bottom:8px;">' +
-      '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-        '<b style="font-size:13px;">' + b.houseName + '</b>' +
-        '<span style="font-size:9px; font-weight:800; padding:2px 6px; border-radius:8px; background:' + (isConfirmed ? '#DCFCE7; color:#15803D;' : '#FEF3C7; color:#B45309;') + '">' + b.status.toUpperCase() + '</span>' +
-      '</div>' +
-      '<div style="font-size:10.5px; color:#64748B; margin-top:3px;">Check-in: ' + b.date + ' • ' + b.duration + ' Month(s)</div>' +
-      '<div style="font-size:10px; margin-top:6px; padding:6px; border-radius:8px; background:#F1F5F9;">' +
-        (isConfirmed ? 
-          ('<b>✓ Owner Unlocked:</b> ' + b.ownerName + '<br>📞 ' + b.ownerPhone + '<br>📍 ' + b.ownerAddress) :
-          '🔒 Owner Contact Hidden until Accepted') +
-      '</div>' +
-      '<div style="margin-top:6px; display:flex; gap:6px;">' +
-        (!isConfirmed ? 
-          '<button onclick="confirmBooking(\'' + b.id + '\')" style="flex:1; padding:5px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:bold; cursor:pointer;">Accept & Issue TRL</button>' :
-          '<button onclick="openSlip(\'' + b.id + '\')" style="flex:1; padding:5px; background:#0F172A; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:bold; cursor:pointer;">📄 View Official 12-Digit Slip</button>'
-        ) +
-      '</div>' +
-    '</div>';
-  }
-  container.innerHTML = html;
-}
-
-function confirmBooking(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
-  if (b) {
-    b.status = 'confirmed';
-    var trl = '';
-    for (var i = 0; i < 12; i++) trl += Math.floor(Math.random() * 10);
-    b.trl = trl;
-    renderMyBookings();
-    openSlip(id);
-  }
-}
-
-function openSlip(id) {
-  var b = DB.bookings.find(function(x){ return x.id === id; });
+// ================= OFFICIAL COMPLETE TRL SLIP MODAL =================
+function openSlipModal(bkId) {
+  var b = DB.bookings.find(function(x){ return x.id === bkId; });
   if (!b) return;
 
-  document.getElementById('modalSlot').innerHTML = '<div style="position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:50; display:flex; align-items:center; justify-content:center; padding:14px;">' +
-    '<div style="background:#fff; border-radius:18px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; padding:14px;" id="pdfPrintWrapper">' +
-      '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #E2E8F0; padding-bottom:8px; margin-bottom:10px;">' +
-        '<div style="display:flex; align-items:center; gap:6px;"><span style="background:#044E3B; color:#fff; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:bold;">⌂</span><b style="font-size:14px;">Rehzo</b></div>' +
-        '<div style="display:flex; gap:6px; align-items:center;"><button onclick="window.print()" style="padding:2px 8px; background:#044E3B; color:#fff; border:none; border-radius:10px; font-size:10px; font-weight:bold; cursor:pointer;">🖨 Print</button><span onclick="closeModal()" style="cursor:pointer; font-size:14px; font-weight:bold;">✕</span></div>' +
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box" id="printableSlip">' +
+      '<div class="modal-header">' +
+        '<div style="display:flex; align-items:center; gap:6px;">' +
+          '<div style="width:24px; height:24px; border-radius:6px; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;">⌂</div>' +
+          '<b style="font-size:14px; color:#0F172A;">Rehzo Official TRL Slip</b>' +
+        '</div>' +
+        '<div style="display:flex; gap:6px; align-items:center;">' +
+          '<button onclick="window.print()" style="padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">🖨 Print / PDF</button>' +
+          '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+        '</div>' +
       '</div>' +
-      '<div style="text-align:center; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:12px; padding:8px;">' +
-        '<p style="font-size:8px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">OFFICIAL 12-DIGIT TRL NUMBER</p>' +
-        '<h2 style="font-size:18px; font-weight:900; letter-spacing:1px; margin:2px 0;">' + (b.trl || '839472615028') + '</h2>' +
-        '<p style="font-size:7.5px; color:#64748B;">🔒 Private & Permanent Non-Reusable Record</p>' +
+
+      '<div style="text-align:center; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:10px;">' +
+        '<div style="font-size:8px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">OFFICIAL 12-DIGIT TRL NUMBER</div>' +
+        '<div style="font-size:20px; font-weight:900; letter-spacing:1.5px; color:#0F172A; margin:2px 0;">' + b.trl + '</div>' +
+        '<div style="font-size:8px; color:#64748B;">🔒 Permanent Non-Reusable Record</div>' +
       '</div>' +
-      '<div class="barcode"></div>' +
-      '<div style="font-size:10.5px; line-height:1.6;">' +
-        '<p style="font-weight:800; color:#044E3B; margin-bottom:2px;">🏠 1. ROOM & PROPERTY DETAILS</p>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Property:</span> <b style="color:#1E293B;">' + b.houseName + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#1E293B;">₹' + b.rent + ' / month</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#1E293B;">' + b.date + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Duration:</span> <b style="color:#1E293B;">' + b.duration + ' Months</b></div>' +
-        '<p style="font-weight:800; color:#044E3B; margin-top:8px; margin-bottom:2px;">👤 2. PROPERTY OWNER DETAILS</p>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#1E293B;">' + b.ownerName + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Phone:</span> <b style="color:#1E293B;">' + b.ownerPhone + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Address:</span> <b style="color:#1E293B;">' + b.ownerAddress + '</b></div>' +
+
+      '<div class="barcode-strip"></div>' +
+
+      '<div style="font-size:11px; line-height:1.7;">' +
+        '<div style="font-weight:800; color:#044E3B; margin-bottom:2px;">🏠 1. ROOM & PROPERTY DETAILS</div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Property Name:</span> <b style="color:#0F172A;">' + b.houseName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + b.roomType + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">₹' + Number(b.rent).toLocaleString() + ' / month</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + b.date + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Duration:</span> <b style="color:#0F172A;">' + b.duration + ' Month(s)</b></div>' +
+
+        '<div style="font-weight:800; color:#044E3B; margin-top:8px; margin-bottom:2px;">👤 2. TENANT DETAILS (किरायेदार)</div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Tenant Name:</span> <b style="color:#0F172A;">' + b.userName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Tenant Phone:</span> <b style="color:#0F172A;">' + b.userPhone + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Tenant Address:</span> <b style="color:#0F172A; text-align:right; max-width:200px;">' + b.userOldAddress + '</b></div>' +
+
+        '<div style="font-weight:800; color:#044E3B; margin-top:8px; margin-bottom:2px;">🏢 3. PROPERTY OWNER DETAILS (मकान मालिक)</div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + b.ownerName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Phone:</span> <b style="color:#0F172A;">' + b.ownerPhone + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Property Address:</span> <b style="color:#0F172A; text-align:right; max-width:200px;">' + b.ownerAddress + '</b></div>' +
       '</div>' +
     '</div>' +
   '</div>';
 }
 
-function updateCountryPrefix(code) {
-  var dial = code === 'IN' ? '+91' : (code === 'US' ? '+1' : '+44');
-  var sym = code === 'IN' ? '₹' : (code === 'US' ? '$' : '£');
-  document.getElementById('oDial').innerText = dial;
-  document.getElementById('oSym1').innerText = sym;
-  document.getElementById('oSym2').innerText = sym;
+function closeModal() {
+  document.getElementById('modalSlot').innerHTML = '';
 }
 
-function lockMapLocation() {
-  lockedCoord = { lat: 28.6139, lng: 77.2090 };
-  document.getElementById('mapLockText').innerText = "✓ Exact Map Location Locked";
-  document.getElementById('mapLockBtn').style.borderColor = "#10B981";
-  document.getElementById('mapLockBtn').style.color = "#044E3B";
-}
-
-function handlePublish(e) {
-  e.preventDefault();
-  var newRoom = {
-    id: 'L-' + Date.now(),
-    houseName: document.getElementById('oHouse').value.trim(),
-    roomType: document.getElementById('oType').value,
-    suitableFor: document.getElementById('oSuitable').value,
-    rent: parseFloat(document.getElementById('oRent').value) || 5000,
-    deposit: parseFloat(document.getElementById('oDep').value) || 0,
-    country: document.getElementById('oCountry').value,
-    city: document.getElementById('oCity').value.trim(),
-    address: document.getElementById('oAddr').value.trim(),
-    lat: lockedCoord.lat,
-    lng: lockedCoord.lng,
-    ownerName: document.getElementById('oName').value.trim(),
-    phone: document.getElementById('oPhone').value.trim(),
-    gmail: document.getElementById('oGmail').value.trim(),
-    status: 'available',
-    photo: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500'
-  };
-  DB.listings.unshift(newRoom);
-  e.target.reset();
-  alert("Room Published for 90 Days!");
-  goView('home');
-}
-
-function updateOwnerCount() {
-  document.getElementById('ownerListCount').innerText = 'My Listings (' + DB.listings.length + ')';
-}
-
-function toggleOwnerListings() {
-  var box = document.getElementById('ownerListingsBox');
-  if (box.style.display === 'block') { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  var html = '';
-  for (var i = 0; i < DB.listings.length; i++) {
-    var l = DB.listings[i];
-    html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px; background:#fff; border:1px solid #E2E8F0; border-radius:10px; margin-bottom:4px; font-size:10.5px;">' +
-      '<b>' + l.houseName + ' (₹' + l.rent + ')</b>' +
-      '<button onclick="deleteListing(\'' + l.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:2px 6px; font-size:9px; cursor:pointer;">Delete</button>' +
+// ================= PRIVATE ADMIN MODERATION =================
+function renderAdminModeration() {
+  var container = document.getElementById('adminListingsControl');
+  container.innerHTML = DB.listings.map(function(r) {
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
+      '<div><b>' + r.houseName + '</b> (' + r.city + ') - ₹' + r.rent + '</div>' +
+      '<button onclick="deleteOwnerRoom(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
-  }
-  box.innerHTML = html;
+  }).join('');
 }
 
-function deleteListing(id) {
-  if (confirm("Delete this listing?")) {
-    DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
-    toggleOwnerListings();
-    renderRooms();
-  }
-}
-
-function renderAdminListings() {
-  var container = document.getElementById('adminListings');
-  var html = '';
-  for (var i = 0; i < DB.listings.length; i++) {
-    var l = DB.listings[i];
-    html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
-      '<div><b>' + l.houseName + '</b> (' + l.city + ')</div>' +
-      '<button onclick="deleteListing(\'' + l.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:2px 6px; font-size:9px; cursor:pointer;">Delete</button>' +
-    '</div>';
-  }
-  container.innerHTML = html;
-}
-
-renderRooms();
+// Launch
+renderHomeGrid();
 </script>
 </body>
 </html>
