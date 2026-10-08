@@ -8,7 +8,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 75px; }
 
-/* Header */
 .top-header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
@@ -17,10 +16,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .header-actions { display: flex; gap: 8px; }
 .icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
-/* Container */
 .main-wrapper { max-width: 500px; margin: 0 auto; padding: 10px 12px; }
 
-/* Banner */
 .banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; }
 .banner h2 { font-size: 17px; font-weight: 800; line-height: 1.2; }
 .banner p { font-size: 10.5px; opacity: 0.85; margin-top: 3px; }
@@ -28,7 +25,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .search-bar input { flex: 1; border: none; outline: none; font-size: 12px; font-weight: 600; color: #1E293B; }
 .search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6px 12px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
 
-/* Filters */
 .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 .select-box { width: 100%; border: 1px solid #CBD5E1; border-radius: 20px; background: #fff; padding: 6px 10px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
 .chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 4px; }
@@ -36,7 +32,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .chip { border: 1px solid #CBD5E1; border-radius: 20px; background: #fff; padding: 5px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
 .chip.active { background: #044E3B; color: #fff; border-color: #044E3B; }
 
-/* 2x2 Rooms Grid */
 .section-title { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 8px; }
 .section-title h3 { font-size: 14px; font-weight: 800; }
 .section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
@@ -49,30 +44,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .room-city { font-size: 9.5px; color: #64748B; margin-top: 2px; }
 .book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 16px; padding: 6px; font-size: 10.5px; font-weight: 800; cursor: pointer; margin-top: 6px; }
 
-/* Views */
 .view { display: none; }
 .view.active { display: block; }
 
-/* Bottom Nav */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
 .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 3px; }
 .nav-item.active { color: #044E3B; }
 .nav-item span { font-size: 16px; }
 
-/* Forms */
 .form-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 12px; margin-bottom: 10px; }
 .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .input-group label { display: block; font-size: 10px; font-weight: 800; color: #475569; margin-bottom: 3px; }
 .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 7px 10px; border-radius: 12px; border: 1px solid #CBD5E1; font-size: 11.5px; font-weight: 600; outline: none; background: #F8FAF9; }
 .submit-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
 
-/* Barcode */
 .barcode { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 30px; margin: 10px 0; }
 </style>
 </head>
 <body>
 
-<!-- TOP HEADER -->
 <header class="top-header">
   <div class="brand" onclick="goView('home')">
     <div class="logo-icon">⌂</div>
@@ -89,7 +79,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 
 <div class="main-wrapper">
 
-  <!-- VIEW 1: HOME -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
@@ -139,7 +128,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     <div class="room-grid" id="roomsContainer"></div>
   </section>
 
-  <!-- VIEW 2: SEARCH -->
   <section id="view-search" class="view">
     <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;">Search Stays</h3>
     <p style="font-size:11px; color:#64748B; margin-bottom:10px;">Filter and explore verified properties</p>
@@ -149,7 +137,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     <div class="room-grid" id="searchRoomsContainer"></div>
   </section>
 
-  <!-- VIEW 3: NEAR ME (10 KM STRICT) -->
   <section id="view-near" class="view">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <div>
@@ -164,13 +151,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     <div class="room-grid" id="nearRoomsContainer"></div>
   </section>
 
-  <!-- VIEW 4: MY BOOKINGS -->
   <section id="view-bookings" class="view">
     <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">My Bookings</h3>
     <div id="myBookingsContainer"></div>
   </section>
 
-  <!-- VIEW 5: OWNER HUB -->
   <section id="view-owner" class="view">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
       <h3 style="font-size:16px; font-weight:800;">List Your Property</h3>
@@ -297,7 +282,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     </form>
   </section>
 
-  <!-- VIEW 6: ADMIN -->
   <section id="view-admin" class="view">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
       <h3 style="font-size:16px; font-weight:800;">Admin Full Control 🔐</h3>
@@ -309,7 +293,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     </div>
   </section>
 
-  <!-- VIEW 7: NOTIFICATIONS -->
   <section id="view-notifications" class="view">
     <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">Notifications</h3>
     <div class="form-card" style="text-align:center; font-size:11px; color:#64748B;">No unread notifications</div>
@@ -317,7 +300,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 
 </div>
 
-<!-- BOTTOM NAVIGATION -->
 <nav class="bottom-nav">
   <button class="nav-item active" data-view="home" onclick="goView('home')">
     <span>⌂</span>Home
@@ -336,7 +318,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   </button>
 </nav>
 
-<!-- DYNAMIC MODAL CONTAINER (Screen freeze completely fixed) -->
 <div id="modalSlot"></div>
 
 <script>
@@ -754,7 +735,6 @@ function renderAdminListings() {
   container.innerHTML = html;
 }
 
-// Start
 renderRooms();
 </script>
 </body>
