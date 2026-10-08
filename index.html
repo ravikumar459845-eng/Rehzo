@@ -103,6 +103,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .map-lock-btn { width: 100%; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; padding: 11px; font-size: 11.5px; font-weight: 800; color: #1E293B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0; }
 .map-lock-btn.locked { border-color: #10B981; color: #044E3B; background: #ECFDF5; }
 .big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 10px rgba(4,78,59,0.2); }
+.google-auth-btn { width: 100%; background: #fff; color: #1E293B; border: 1px solid #CBD5E1; border-radius: 30px; padding: 11px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
 /* Sub Tabs & Stat Cards */
 .sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
@@ -199,7 +200,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       <button onclick="openSlipModal(matchedBookingId)" style="margin-top:6px; padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">View Official TRL Slip</button>
     </div>
 
-    <!-- Complete Worldwide Countries Dropdown -->
+    <!-- Country & Room Type Filters -->
     <div class="filter-row">
       <select id="countryFilter" class="pill-select" onchange="applyFilters()">
         <option value="">All Countries</option>
@@ -241,7 +242,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="room-grid" id="searchRoomsGrid"></div>
   </section>
 
-  <!-- ================= 3. NEAR ME VIEW (10 KM Strict GPS) ================= -->
+  <!-- ================= 3. NEAR ME VIEW (10 KM Strict Real GPS) ================= -->
   <section id="view-near" class="view">
     <div class="sub-header">
       <div class="back-btn-row" onclick="goView('home')">
@@ -590,9 +591,12 @@ function populateCountryDropdowns() {
   });
 }
 
-// ================= PERMANENT STORAGE SYNC =================
+// ================= STORAGE & REHZO UNIFIED AUTH STATE =================
 var SEED_DATA = {
-  currentUser: null, // { uid, name, phone, gmail }
+  currentUser: null, // { uid, name, phone, gmail, password }
+  registeredUsers: [
+    { uid: 'rehzo_owner', name: 'Awakash Kumar Patel', phone: '+91 7707064294', gmail: 'awakashkumarpatel@gmail.com', password: 'password123' }
+  ],
   listings: [
     {
       id: 'L-101',
@@ -610,7 +614,7 @@ var SEED_DATA = {
       address: 'Near Old Bus Stand, Sasaram',
       lat: 24.9536,
       lng: 84.0321,
-      ownerUid: 'UID-OWNER1',
+      ownerUid: 'rehzo_owner',
       ownerName: 'Awakash Kumar Patel',
       phone: '+91 7707064294',
       gmail: 'awakashkumarpatel@gmail.com',
@@ -625,7 +629,7 @@ var SEED_DATA = {
 
 function loadStorage() {
   try {
-    var raw = localStorage.getItem('REHZO_STATE_V3');
+    var raw = localStorage.getItem('REHZO_STATE_V4');
     if (raw) return JSON.parse(raw);
   } catch (e) {}
   return JSON.parse(JSON.stringify(SEED_DATA));
@@ -633,7 +637,7 @@ function loadStorage() {
 
 function saveStorage() {
   try {
-    localStorage.setItem('REHZO_STATE_V3', JSON.stringify(DB));
+    localStorage.setItem('REHZO_STATE_V4', JSON.stringify(DB));
   } catch (e) {}
 }
 
@@ -644,6 +648,7 @@ var lockedMapCoord = { lat: 24.9536, lng: 84.0321 };
 var currentBookingsTab = 'current';
 var currentOwnerTab = 'rooms';
 var uploadedPhotos = [];
+var editRoomUploadedPhotos = [];
 var selectedSuitable = ['Family'];
 var selectedAmenities = ['Wi-Fi', 'Parking'];
 var selectedRules = ['No Smoking'];
@@ -666,107 +671,253 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 1200);
 });
 
-// ================= USER AUTHENTICATION & UNIQUE PROFILE =================
+// ================= REHZO UNIFIED LOGIN & PROFILE SYSTEM =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
     if (DB.currentUser) {
       chip.innerText = '👤 ' + DB.currentUser.name.split(' ')[0] + ' (' + DB.currentUser.uid + ')';
     } else {
-      chip.innerText = '👤 Login / Sign Up';
+      chip.innerText = '👤 Login';
     }
   }
 }
 
+// Main Login Modal (Google or User ID + Password)
 function openProfileModal(callbackAction) {
   if (DB.currentUser) {
-    // Show logged-in profile details
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
       '<div class="modal-box">' +
         '<div class="modal-header">' +
-          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your Unique Profile</h3>' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
         '</div>' +
         '<div style="text-align:center; padding:10px 0;">' +
           '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
           '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + DB.currentUser.name + '</h2>' +
-          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">Unique ID: ' + DB.currentUser.uid + '</div>' +
+          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + DB.currentUser.uid + '</div>' +
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
           '<div>📞 <b>Phone:</b> ' + DB.currentUser.phone + '</div>' +
-          '<div>✉️ <b>Gmail:</b> ' + (DB.currentUser.gmail || 'None') + '</div>' +
-          '<div>🔒 <b>Status:</b> Verified Active Member</div>' +
+          '<div>✉️ <b>Recovery Gmail:</b> ' + (DB.currentUser.gmail || 'None') + '</div>' +
+          '<div>✨ <b>Account Type:</b> Unified (Search, Book & List Properties)</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
       '</div>' +
     '</div>';
   } else {
-    // Show Registration / Login Modal
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
       '<div class="modal-box">' +
         '<div class="modal-header">' +
-          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Login or Create Account</h3>' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Sign in to REHZO</h3>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
         '</div>' +
-        '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Please enter your details to generate your verified profile ID for room booking and listings.</p>' +
+
+        '<!-- Option 1: Continue with Google -->' +
+        '<button class="google-auth-btn" onclick="startGoogleAuth(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+          '<span>Continue with Google</span>' +
+        '</button>' +
+
+        '<div style="text-align:center; font-size:11px; color:#94A3B8; margin:10px 0; position:relative;">' +
+          '<span style="background:#fff; padding:0 8px; position:relative; z-index:1;">or with User ID</span>' +
+          '<div style="position:absolute; top:50%; left:0; right:0; height:1px; background:#E2E8F0; z-index:0;"></div>' +
+        '</div>' +
+
+        '<!-- Option 2: User ID + Password -->' +
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Full Name *</label>' +
-          '<input id="authName" class="pill-input" placeholder="Your full name">' +
+          '<label class="field-label">User ID *</label>' +
+          '<input id="loginUid" class="pill-input" placeholder="e.g. rahul123">' +
         '</div>' +
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Real Mobile Number *</label>' +
-          '<input id="authPhone" type="tel" class="pill-input" placeholder="e.g. +91 9876543210">' +
+          '<label class="field-label">Password *</label>' +
+          '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password">' +
         '</div>' +
-        '<div class="field-box" style="margin-bottom:12px;">' +
-          '<label class="field-label">Gmail (optional, must be valid)</label>' +
-          '<input id="authGmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+
+        '<div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:10.5px; font-weight:700;">' +
+          '<span style="color:#044E3B; cursor:pointer;" onclick="openForgotUserIdModal()">Forgot User ID?</span>' +
+          '<span style="color:#044E3B; cursor:pointer;" onclick="openForgotPasswordModal()">Forgot Password?</span>' +
         '</div>' +
-        '<button class="big-action-btn" onclick="submitUserAuth(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Continue to REHZO →</button>' +
+
+        '<button class="big-action-btn" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Sign In with Password →</button>' +
       '</div>' +
     '</div>';
   }
 }
 
-function submitUserAuth(callbackAction) {
-  var name = document.getElementById('authName').value.trim();
-  var phone = document.getElementById('authPhone').value.trim();
-  var gmail = document.getElementById('authGmail').value.trim();
+// Google Login Simulation & New User Onboarding
+function startGoogleAuth(callbackAction) {
+  var googleEmail = prompt("Simulating Google OAuth:\nEnter your Google Email to continue:", DB.currentUser ? DB.currentUser.gmail : "user@gmail.com");
+  if (!googleEmail || !googleEmail.trim()) return;
 
-  if (!name || name.length < 2) {
-    alert("Please provide a valid full name.");
-    return;
+  var existing = DB.registeredUsers.find(function(u){ return u.gmail.toLowerCase() === googleEmail.toLowerCase(); });
+  if (existing) {
+    // Existing user logs in immediately
+    DB.currentUser = existing;
+    saveStorage();
+    updateUserHeaderChip();
+    closeModal();
+    alert("Welcome back, " + existing.name + "!");
+    resumePendingAction(callbackAction);
+  } else {
+    // First Time Login via Google -> Prompt Create User ID & Password
+    openGoogleOnboardingModal(googleEmail.trim(), callbackAction);
   }
-  // Real Phone Number Check (min 7 digits)
+}
+
+function openGoogleOnboardingModal(gmail, callbackAction) {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Complete Profile Setup</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Connected via Google: <b>' + gmail + '</b>. Setup your User ID and Password for permanent multi-option login.</p>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Full Name *</label>' +
+        '<input id="onboardName" class="pill-input" placeholder="Your full name">' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Mobile Number *</label>' +
+        '<input id="onboardPhone" type="tel" class="pill-input" placeholder="e.g. +91 9876543210">' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Create User ID *</label>' +
+        '<input id="onboardUid" class="pill-input" placeholder="e.g. rahul_rehzo">' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box">' +
+          '<label class="field-label">Create Password *</label>' +
+          '<input id="onboardPwd" type="password" class="pill-input" placeholder="Password">' +
+        '</div>' +
+        '<div class="field-box">' +
+          '<label class="field-label">Confirm Password *</label>' +
+          '<input id="onboardConfPwd" type="password" class="pill-input" placeholder="Confirm">' +
+        '</div>' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitGoogleOnboarding(\'' + gmail + '\', ' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Create Profile & Finish →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function submitGoogleOnboarding(gmail, callbackAction) {
+  var name = document.getElementById('onboardName').value.trim();
+  var phone = document.getElementById('onboardPhone').value.trim();
+  var uid = document.getElementById('onboardUid').value.trim().toLowerCase();
+  var pwd = document.getElementById('onboardPwd').value;
+  var confPwd = document.getElementById('onboardConfPwd').value;
+
+  if (!name || name.length < 2) { alert("Please enter your full name."); return; }
   var cleanPhone = phone.replace(/[^0-9]/g, '');
-  if (!phone || cleanPhone.length < 7 || cleanPhone.length > 15) {
-    alert("Please provide a valid and real mobile number.");
-    return;
+  if (cleanPhone.length < 7) { alert("Please enter a valid mobile number."); return; }
+  if (!uid || uid.length < 3) { alert("User ID must be at least 3 characters."); return; }
+  if (DB.registeredUsers.some(function(u){ return u.uid === uid; })) {
+    alert("User ID already taken! Please choose another one."); return;
   }
-  // Real Gmail Check (if provided)
-  if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
-    alert("Please provide a real valid Gmail/email address.");
-    return;
-  }
+  if (!pwd || pwd.length < 4) { alert("Password must be at least 4 characters."); return; }
+  if (pwd !== confPwd) { alert("Passwords do not match!"); return; }
 
-  // Generate Unique Profile ID
-  var uid = 'UID-' + Math.floor(100000 + Math.random() * 900000);
-  DB.currentUser = {
+  var newUser = {
     uid: uid,
     name: name,
     phone: phone,
-    gmail: gmail || 'N/A'
+    gmail: gmail,
+    password: pwd
   };
 
+  DB.registeredUsers.push(newUser);
+  DB.currentUser = newUser;
   saveStorage();
   updateUserHeaderChip();
   closeModal();
-  alert("Welcome " + name + "!\nYour Unique Profile ID is: " + uid);
+  alert("Account created successfully!\nUser ID: " + uid);
+  resumePendingAction(callbackAction);
+}
 
-  if (callbackAction === 'openOwnerForm') {
-    toggleOwnerForm(true);
-  } else if (callbackAction && callbackAction.indexOf('bookRoom:') === 0) {
-    var rId = callbackAction.split(':')[1];
-    openBookingPillModal(rId);
+// Credentials Login (User ID + Password)
+function submitCredentialsLogin(callbackAction) {
+  var uid = document.getElementById('loginUid').value.trim().toLowerCase();
+  var pwd = document.getElementById('loginPwd').value;
+
+  if (!uid || !pwd) { alert("Please enter both User ID and Password."); return; }
+
+  var user = DB.registeredUsers.find(function(u){ return u.uid.toLowerCase() === uid && u.password === pwd; });
+  if (user) {
+    DB.currentUser = user;
+    saveStorage();
+    updateUserHeaderChip();
+    closeModal();
+    alert("Logged in successfully as " + user.name + "!");
+    resumePendingAction(callbackAction);
+  } else {
+    alert("Invalid User ID or Password. Please try again or use Forgot options.");
+  }
+}
+
+// Recovery Option 1: Forgot User ID
+function openForgotUserIdModal() {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Recover User ID</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Enter your registered recovery Gmail to find your User ID.</p>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">Registered Gmail *</label>' +
+        '<input id="recovEmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitForgotUserId()">Find My User ID →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function submitForgotUserId() {
+  var email = document.getElementById('recovEmail').value.trim().toLowerCase();
+  var match = DB.registeredUsers.find(function(u){ return u.gmail.toLowerCase() === email; });
+  if (match) {
+    alert("Account Found!\nYour registered User ID is: " + match.uid);
+    openProfileModal();
+  } else {
+    alert("No registered account found with this Gmail address.");
+  }
+}
+
+// Recovery Option 2: Forgot Password
+function openForgotPasswordModal() {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Reset Password</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Enter your registered Gmail and set your new password.</p>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Registered Gmail *</label>' +
+        '<input id="pwdRecovEmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">New Password *</label>' +
+        '<input id="newPwdInput" type="password" class="pill-input" placeholder="Enter new password">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitForgotPassword()">Update Password →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function submitForgotPassword() {
+  var email = document.getElementById('pwdRecovEmail').value.trim().toLowerCase();
+  var newPwd = document.getElementById('newPwdInput').value;
+  if (!email || !newPwd || newPwd.length < 4) { alert("Please provide a valid Gmail and password (min 4 characters)."); return; }
+
+  var match = DB.registeredUsers.find(function(u){ return u.gmail.toLowerCase() === email; });
+  if (match) {
+    match.password = newPwd;
+    saveStorage();
+    alert("Password updated successfully! You can now log in with your new password.");
+    openProfileModal();
+  } else {
+    alert("No account found matching this Gmail.");
   }
 }
 
@@ -780,9 +931,18 @@ function logoutUser() {
   }
 }
 
+function resumePendingAction(callbackAction) {
+  if (callbackAction === 'openOwnerForm') {
+    toggleOwnerForm(true);
+  } else if (callbackAction && callbackAction.indexOf('bookRoom:') === 0) {
+    var rId = callbackAction.split(':')[1];
+    openBookingPillModal(rId);
+  }
+}
+
 function checkOwnerAddAction() {
   if (!DB.currentUser) {
-    alert("Please login or create your profile to list a property.");
+    alert("Please sign in or create an account to list your property.");
     openProfileModal('openOwnerForm');
   } else {
     toggleOwnerForm(true);
@@ -875,13 +1035,12 @@ function renderHomeGrid(items) {
   }).join('');
 }
 
-// Check Login & Block Self-Booking Before Modal Opens
 function triggerBookRoomFlow(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
 
   if (!DB.currentUser) {
-    alert("Please login or create your profile to proceed with room booking.");
+    alert("Please sign in or create an account to book this room.");
     openProfileModal('bookRoom:' + roomId);
     return;
   }
@@ -1181,7 +1340,7 @@ function acceptCancelBooking(id) {
   }
 }
 
-// ================= OWNER VIEW (FULL EDIT & VIEW) =================
+// ================= OWNER VIEW (FULL EDIT INCLUDING PHOTOS) =================
 function toggleOwnerForm(show) {
   document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
   document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
@@ -1274,10 +1433,12 @@ function renderOwnerView() {
   }
 }
 
-// OWNER COMPLETE FULL EDIT MODAL
+// OWNER COMPLETE FULL EDIT MODAL (EVERYTHING INCLUDING PHOTOS)
 function openOwnerFullEditModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
+
+  editRoomUploadedPhotos = (r.photos && r.photos.length) ? r.photos.slice() : [];
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
@@ -1285,6 +1446,19 @@ function openOwnerFullEditModal(roomId) {
         '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Full Edit Room Details</h3>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
+
+      '<!-- Photo Edit Section -->' +
+      '<div class="field-box" style="margin-bottom:10px;">' +
+        '<label class="field-label">Room Photos (max 3)</label>' +
+        '<div class="photo-upload-row" id="editPhotoPreviewContainer"></div>' +
+        '<input type="file" id="editPhotoFileInput" accept="image/*" multiple onchange="handleEditPhotoPick(event)" style="display:none;">' +
+        '<div class="photo-add-box" onclick="document.getElementById(\'editPhotoFileInput\').click()">' +
+          '<span style="font-size:16px;">⇪</span>' +
+          '<span>Add / Replace</span>' +
+          '<span id="editPhotoCountText">(' + editRoomUploadedPhotos.length + '/3)</span>' +
+        '</div>' +
+      '</div>' +
+
       '<div class="pill-grid">' +
         '<div class="field-box"><label class="field-label">House Name *</label><input id="editHouse" class="pill-input" value="' + r.houseName + '"></div>' +
         '<div class="field-box"><label class="field-label">Room Type *</label><input id="editType" class="pill-input" value="' + r.roomType + '"></div>' +
@@ -1302,8 +1476,8 @@ function openOwnerFullEditModal(roomId) {
         '<input id="editAddr" class="pill-input" value="' + r.address + '">' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Suitable For</label><input id="editSuitable" class="pill-input" value="' + (r.suitableFor ? r.suitableFor.join(', ') : '') + '"></div>' +
-        '<div class="field-box"><label class="field-label">Amenities</label><input id="editAmenities" class="pill-input" value="' + (r.amenities ? r.amenities.join(', ') : '') + '"></div>' +
+        '<div class="field-box"><label class="field-label">Suitable For (comma separated)</label><input id="editSuitable" class="pill-input" value="' + (r.suitableFor ? r.suitableFor.join(', ') : '') + '"></div>' +
+        '<div class="field-box"><label class="field-label">Amenities (comma separated)</label><input id="editAmenities" class="pill-input" value="' + (r.amenities ? r.amenities.join(', ') : '') + '"></div>' +
       '</div>' +
       '<div class="field-box" style="margin-bottom:12px;">' +
         '<label class="field-label">Conditions & Rules</label>' +
@@ -1312,6 +1486,35 @@ function openOwnerFullEditModal(roomId) {
       '<button class="big-action-btn" onclick="saveOwnerFullEdit(\'' + r.id + '\')">Save & Update Room</button>' +
     '</div>' +
   '</div>';
+
+  renderEditPhotoPreviewList();
+}
+
+function handleEditPhotoPick(event) {
+  var files = Array.prototype.slice.call(event.target.files, 0, 3 - editRoomUploadedPhotos.length);
+  files.forEach(function(f) {
+    if (!f.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (editRoomUploadedPhotos.length < 3) {
+        editRoomUploadedPhotos.push(e.target.result);
+        renderEditPhotoPreviewList();
+      }
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function renderEditPhotoPreviewList() {
+  var container = document.getElementById('editPhotoPreviewContainer');
+  if (!container) return;
+  document.getElementById('editPhotoCountText').innerText = '(' + editRoomUploadedPhotos.length + '/3)';
+  container.innerHTML = editRoomUploadedPhotos.map(function(src, i) {
+    return '<div class="photo-preview-item">' +
+      '<img src="' + src + '" class="photo-thumb-preview">' +
+      '<button type="button" class="photo-del-btn" onclick="editRoomUploadedPhotos.splice(' + i + ',1);renderEditPhotoPreviewList();">✕</button>' +
+    '</div>';
+  }).join('');
 }
 
 function saveOwnerFullEdit(roomId) {
@@ -1326,6 +1529,10 @@ function saveOwnerFullEdit(roomId) {
   r.pin = document.getElementById('editPin').value.trim() || r.pin;
   r.address = document.getElementById('editAddr').value.trim() || r.address;
 
+  if (editRoomUploadedPhotos.length > 0) {
+    r.photos = editRoomUploadedPhotos.slice();
+  }
+
   var sStr = document.getElementById('editSuitable').value.trim();
   if (sStr) r.suitableFor = sStr.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
 
@@ -1337,7 +1544,7 @@ function saveOwnerFullEdit(roomId) {
 
   saveStorage();
   closeModal();
-  alert("Room details fully updated successfully!");
+  alert("Room details and photos successfully updated!");
   renderOwnerView();
   renderHomeGrid();
 }
@@ -1503,14 +1710,12 @@ function handlePublishProperty(e) {
   var phone = document.getElementById('opPhone').value.trim();
   var gmail = document.getElementById('opGmail').value.trim();
 
-  // Validate Real Phone
   var cleanPhone = phone.replace(/[^0-9]/g, '');
   if (!phone || cleanPhone.length < 7 || cleanPhone.length > 15) {
     alert("Please provide a valid and real contact phone number.");
     return;
   }
 
-  // Validate Real Gmail if provided
   if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
     alert("Please enter a valid real Gmail address or leave it empty.");
     return;
@@ -1535,7 +1740,7 @@ function handlePublishProperty(e) {
     address: document.getElementById('opAddr').value.trim(),
     lat: lockedMapCoord.lat,
     lng: lockedMapCoord.lng,
-    ownerUid: DB.currentUser ? DB.currentUser.uid : ('UID-' + Math.floor(100000 + Math.random() * 900000)),
+    ownerUid: DB.currentUser ? DB.currentUser.uid : 'rehzo_owner',
     ownerName: name,
     phone: phone,
     gmail: gmail || 'N/A',
@@ -1630,14 +1835,12 @@ function submitBookingRequest() {
     return;
   }
 
-  // Validate Real Phone
   var cleanPhone = phone.replace(/[^0-9]/g, '');
   if (cleanPhone.length < 7 || cleanPhone.length > 15) {
     alert("Please enter a valid real mobile number.");
     return;
   }
 
-  // Validate Real Gmail if provided
   if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
     alert("Please enter a real valid Gmail address or leave it empty.");
     return;
