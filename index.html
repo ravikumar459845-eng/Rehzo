@@ -1,966 +1,1973 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REHZO - Smart Global Rental Platform</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>REHZO — Find Your Perfect Room</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Leaflet Map CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Supabase JS Client v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+/* Splash Screen */
+#splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; }
+.splash-logo { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 12px; animation: pulse 1.4s infinite alternate; }
+.splash-title { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
+.splash-sub { font-size: 12px; opacity: 0.85; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .glassmorphism {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-    #mapPicker, #mapView {
-      height: 320px;
-      width: 100%;
-      border-radius: 1rem;
-      z-index: 10;
-    }
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-  </style>
+@keyframes pulse {
+  0% { transform: scale(0.96); opacity: 0.9; }
+  100% { transform: scale(1.04); opacity: 1; }
+}
+
+/* Header */
+.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
+.brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
+.brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.user-chip { background: #ECFDF5; border: 1px solid #A7F3D0; color: #044E3B; border-radius: 20px; padding: 4px 10px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; position: relative; }
+.notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #EF4444; display: none; }
+
+/* Main Wrapper */
+.main-wrapper { max-width: 500px; margin: 0 auto; padding: 12px 14px; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* Banner */
+.banner { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 15px; color: #fff; box-shadow: 0 4px 12px rgba(4,78,59,0.15); }
+.banner h2 { font-size: 17.5px; font-weight: 800; line-height: 1.2; }
+.banner p { font-size: 10.5px; opacity: 0.88; margin-top: 3px; }
+.search-bar { display: flex; background: #fff; border-radius: 30px; padding: 4px 6px 4px 14px; margin-top: 10px; align-items: center; }
+.search-bar input { flex: 1; border: none; outline: none; font-size: 12px; font-weight: 600; color: #1E293B; }
+.search-bar button { background: #044E3B; color: #fff; border: none; border-radius: 20px; padding: 6.5px 14px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
+
+/* Filters & Chips */
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.pill-select { width: 100%; border: 1px solid #E2E8F0; border-radius: 30px; background: #fff; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #334155; outline: none; }
+.chip-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 4px; }
+.chip-row::-webkit-scrollbar { display: none; }
+.chip { border: 1px solid #E2E8F0; border-radius: 20px; background: #fff; padding: 6px 14px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #475569; cursor: pointer; }
+.chip.active { background: #044E3B; color: #fff; border-color: #044E3B; }
+
+/* 2x2 Rooms Grid */
+.section-title { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px; }
+.section-title h3 { font-size: 14px; font-weight: 800; color: #0F172A; }
+.section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
+.room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+.room-thumb-wrap { position: relative; width: 100%; height: 110px; cursor: pointer; }
+.room-thumb { width: 100%; height: 100%; object-fit: cover; }
+.avail-badge { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
+.avail-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
+.room-details { padding: 8px; }
+.room-title { font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0F172A; cursor: pointer; }
+.room-rent { font-size: 12.5px; font-weight: 800; color: #044E3B; margin-top: 1px; }
+.room-city { font-size: 9.5px; color: #64748B; margin-top: 2px; }
+.book-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 18px; padding: 6.5px; font-size: 10.5px; font-weight: 800; cursor: pointer; margin-top: 6px; }
+
+/* Sub Navigation */
+.sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.back-btn-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.back-arrow { font-size: 18px; font-weight: 800; color: #0F172A; }
+.sub-title { font-size: 16.5px; font-weight: 800; color: #0F172A; }
+
+/* Balanced Pill Form Fields */
+.form-section-title { font-size: 12.5px; font-weight: 800; color: #0F172A; margin: 12px 0 6px; border-top: 1px solid #F1F5F9; padding-top: 10px; }
+.pill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 8px; }
+.field-box { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field-label { font-size: 10.5px; font-weight: 700; color: #334155; }
+.pill-input { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11.5px; font-weight: 600; color: #1E293B; outline: none; }
+.pill-input:focus { border-color: #044E3B; }
+.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 10px; width: 100%; }
+.dial-prefix-wrap span { font-size: 11px; font-weight: 700; color: #475569; margin-right: 3px; white-space: nowrap; }
+.dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
+
+/* Drawers */
+.collapsible-trigger { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11px; font-weight: 700; color: #334155; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.collapsible-drawer { display: none; margin-top: 6px; padding: 8px; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; flex-direction: column; gap: 6px; }
+.collapsible-drawer.open { display: flex; }
+.radio-chip { display: flex; align-items: center; gap: 8px; background: #F1F5F3; border: 1px solid transparent; border-radius: 24px; padding: 6px 12px; font-size: 10.5px; font-weight: 700; color: #044E3B; cursor: pointer; }
+.radio-chip.selected { background: #E6F3ED; border-color: #044E3B; }
+.circle-indicator { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #044E3B; display: flex; align-items: center; justify-content: center; }
+.radio-chip.selected .circle-indicator::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #044E3B; }
+
+/* Photos Upload & Map */
+.photo-upload-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.photo-add-box { width: 75px; height: 75px; border-radius: 14px; border: 1px dashed #CBD5E1; background: #F1F5F3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 9px; font-weight: 700; color: #044E3B; cursor: pointer; }
+.photo-thumb-preview { width: 75px; height: 75px; border-radius: 14px; object-fit: cover; border: 1px solid #E2E8F0; }
+.photo-preview-item { position: relative; }
+.photo-del-btn { position: absolute; top: -5px; right: -5px; background: #EF4444; color: #fff; border-radius: 50%; width: 18px; height: 18px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
+
+.map-lock-btn { width: 100%; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; padding: 11px; font-size: 11.5px; font-weight: 800; color: #1E293B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0; }
+.map-lock-btn.locked { border-color: #10B981; color: #044E3B; background: #ECFDF5; }
+.big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 10px rgba(4,78,59,0.2); }
+.google-auth-btn { width: 100%; background: #fff; color: #1E293B; border: 1px solid #CBD5E1; border-radius: 30px; padding: 11px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+/* Sub Tabs & Stat Cards */
+.sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
+.sub-tab-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 7px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; text-align: center; }
+.sub-tab-btn.active { background: #044E3B; color: #fff; }
+.owner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.stat-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 8px; text-align: center; }
+.stat-num { font-size: 17px; font-weight: 900; color: #044E3B; }
+.stat-label { font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 2px; }
+
+/* Compact Horizontal Cards */
+.compact-h-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; margin-bottom: 8px; display: flex; gap: 10px; padding: 8px; align-items: center; }
+.compact-h-img { width: 78px; height: 78px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+.compact-h-content { flex: 1; min-width: 0; }
+.compact-h-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
+.compact-h-title { font-size: 12px; font-weight: 800; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.compact-h-rent { font-size: 11.5px; font-weight: 800; color: #044E3B; margin-top: 1px; }
+.compact-h-sub { font-size: 9px; color: #64748B; margin-top: 2px; }
+.status-pill { font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+.status-confirmed { background: #DCFCE7; color: #15803D; }
+.status-pending { background: #FEF3C7; color: #B45309; }
+.status-cancelled { background: #FEE2E2; color: #B91C1C; }
+.status-cancel-pending { background: #FEF3C7; color: #B45309; }
+
+.action-row-mini { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.btn-mini { padding: 4px 8px; border: 1px solid #E2E8F0; background: #fff; border-radius: 14px; font-size: 9.5px; font-weight: 700; color: #334155; cursor: pointer; text-align: center; }
+.btn-mini.danger { color: #DC2626; border-color: #FCA5A5; }
+.btn-mini.success { background: #044E3B; color: #fff; border-color: #044E3B; }
+.btn-mini.disabled { opacity: 0.5; cursor: not-allowed; background: #F1F5F9; }
+
+/* Bottom Nav Bar */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 2px; }
+.nav-item.active { color: #044E3B; }
+.nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Modals */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
+.modal-box { background: #fff; border-radius: 20px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px; }
+.barcode-strip { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 32px; margin: 10px 0; border-radius: 4px; }
+
+@media print {
+  body * { visibility: hidden; }
+  #printableSlip, #printableSlip * { visibility: visible; }
+  #printableSlip { position: absolute; inset: 0; margin: 0; padding: 10px; }
+}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+<body>
 
-  <!-- ================= TOP NAVIGATION ================= -->
-  <header class="sticky top-0 z-50 glassmorphism border-b border-slate-200/80 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
-      
-      <!-- Brand Logo (Double Click for Admin) -->
-      <div class="flex items-center space-x-3 cursor-pointer select-none group" id="brandLogo" title="REHZO Global | Double click for Admin Command">
-        <div class="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-indigo-200 group-hover:scale-105 transition transform">
-          R
-        </div>
-        <div>
-          <span class="text-2xl font-black tracking-tight text-slate-900 block leading-none">REHZO</span>
-          <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Global Verified Rentals</span>
-        </div>
-      </div>
+<!-- APP SPLASH / WELCOME SCREEN -->
+<div id="splashOverlay">
+  <div class="splash-logo">⌂</div>
+  <div class="splash-title">REHZO</div>
+  <div class="splash-sub">Find Your Perfect Room</div>
+</div>
 
-      <!-- Navigation Tabs -->
-      <nav class="flex items-center space-x-1 sm:space-x-3">
-        <button id="navBtnExplore" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-indigo-600 bg-indigo-50/70 hover:bg-indigo-100 transition flex items-center gap-1.5">
-          <i data-lucide="compass" class="w-4 h-4"></i> Explore
-        </button>
-        <button id="navBtnPostRoom" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> List Property
-        </button>
-        <button id="navBtnMyBookings" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-          <i data-lucide="file-check-2" class="w-4 h-4"></i> My TRL Passes
-        </button>
-
-        <div id="authSlot" class="pl-2 border-l border-slate-200">
-          <!-- Injected via JavaScript -->
-        </div>
-      </nav>
-    </div>
-  </header>
-
-  <!-- ================= NOTIFICATION TOAST ================= -->
-  <div id="toast" class="fixed top-20 right-4 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 pointer-events-none max-w-sm bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
-    <div id="toastIcon"></div>
-    <p id="toastMsg" class="text-xs font-semibold"></p>
-  </div>
-
-  <!-- ================= MAIN CONTENT CONTAINER ================= -->
-  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-8">
-
-    <!-- VIEW 1: EXPLORE & SEARCH -->
-    <section id="viewExplore" class="space-y-6">
-      
-      <!-- Search Banner & Filter Panel -->
-      <div class="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-        <div class="flex flex-col md:flex-row gap-3">
-          <div class="flex-1 relative">
-            <i data-lucide="map-pin" class="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400"></i>
-            <input type="text" id="searchCity" placeholder="City, locality, or landmark (e.g. Bandra, Indiranagar, South Ex)..." class="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-          </div>
-          <div class="w-full md:w-56">
-            <select id="searchType" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-              <option value="">All Categories</option>
-              <option value="Single Private Room">Single Private Room</option>
-              <option value="Shared Sharing Room">Shared / Bed Space</option>
-              <option value="1 RK / 1 BHK Flat">1 RK / 1 BHK Flat</option>
-              <option value="2 BHK Apartment">2 BHK Apartment</option>
-              <option value="Luxury Studio">Luxury Studio</option>
-            </select>
-          </div>
-          <button id="btnFilterTrigger" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm transition flex items-center justify-center gap-2 shadow-md shadow-indigo-100">
-            <i data-lucide="search" class="w-4 h-4"></i> Find Rooms
-          </button>
-        </div>
-
-        <!-- Filter Tags -->
-        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
-          <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Suitable For:</span>
-          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Students">🎓 Students</button>
-          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Working Professionals">💼 Working Professionals</button>
-          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Families">👨‍👩‍👧 Families</button>
-          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Girls Only">🌸 Girls Only</button>
-          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Boys Only">⚡ Boys Only</button>
-        </div>
-      </div>
-
-      <!-- Listings Grid Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-black text-slate-900 tracking-tight">Cloud Verified Properties</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Direct verified rental nodes with permanent 90-day retention</p>
-        </div>
-        <span id="badgeAvailableTotal" class="text-xs font-bold px-3 py-1 bg-slate-200/80 rounded-full text-slate-700">Connecting...</span>
-      </div>
-
-      <!-- Room Cards Stream -->
-      <div id="gridRoomStream" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Rendered dynamically -->
-      </div>
-    </section>
-
-    <!-- VIEW 2: MULTI-STEP PROPERTY POSTING -->
-    <section id="viewPostRoom" class="hidden max-w-4xl mx-auto space-y-6">
-      <div class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <div>
-          <span class="text-[11px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Owner Node Creation</span>
-          <h2 class="text-2xl font-black text-slate-900 mt-2">Publish Real Estate Rental Node</h2>
-          <p class="text-xs text-slate-500 mt-1">Uploaded listings are stored in Supabase with high-resolution image hosting.</p>
-        </div>
-
-        <form id="formNewProperty" class="space-y-6">
-          
-          <!-- Section 1: Basic Information -->
-          <div class="space-y-4">
-            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">1. Property Essentials</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Property / House Name</label>
-                <input type="text" id="inHouseName" required placeholder="e.g. Palm Grove Residency" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Room Category</label>
-                <select id="inRoomType" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                  <option value="Single Private Room">Single Private Room</option>
-                  <option value="Shared Sharing Room">Shared / Bed Space</option>
-                  <option value="1 RK / 1 BHK Flat">1 RK / 1 BHK Flat</option>
-                  <option value="2 BHK Apartment">2 BHK Apartment</option>
-                  <option value="Luxury Studio">Luxury Studio</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Monthly Rent (₹)</label>
-                <input type="number" id="inRent" required placeholder="e.g. 8500" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Security Deposit (₹)</label>
-                <input type="number" id="inDeposit" placeholder="e.g. 10000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 2: Location & Address -->
-          <div class="space-y-4 pt-4 border-t border-slate-100">
-            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">2. Geo-Location & Physical Address</h3>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">City</label>
-                <input type="text" id="inCity" required placeholder="e.g. Mumbai" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">State</label>
-                <input type="text" id="inState" placeholder="e.g. Maharashtra" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">PIN Code</label>
-                <input type="text" id="inPin" placeholder="e.g. 400050" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Complete Address Line</label>
-              <textarea id="inAddress" rows="2" required placeholder="Building No, Flat No, Street, Landmark..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Pinpoint On Interactive Map (Click to place marker)</label>
-              <div id="mapPicker"></div>
-              <input type="hidden" id="inLat">
-              <input type="hidden" id="inLng">
-            </div>
-          </div>
-
-          <!-- Section 3: Details & Amenities -->
-          <div class="space-y-4 pt-4 border-t border-slate-100">
-            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">3. Amenities & Target Tenant</h3>
-            
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Suitable For (Select Multiples)</label>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Students"> Students</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Working Professionals"> Working Pros</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Families"> Families</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Girls Only"> Girls Only</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Boys Only"> Boys Only</label>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Amenities Included</label>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="WiFi"> WiFi</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="AC"> Air Conditioner</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="Attached Bath"> Attached Bath</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="Geyser"> Geyser</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="RO Water"> RO Water</label>
-                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="Parking"> Bike/Car Parking</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 4: Cloud Media Storage -->
-          <div class="space-y-4 pt-4 border-t border-slate-100">
-            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">4. High Resolution Photos</h3>
-            <div>
-              <input type="file" id="inPhotos" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-dashed border-slate-300 rounded-2xl p-3">
-              <p class="text-[11px] text-slate-400 mt-1.5">Directly pushed to Supabase Storage bucket: <code>room-photos</code></p>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <div class="pt-4">
-            <button type="submit" id="btnPublishRoom" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-2xl text-base transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
-              <i data-lucide="cloud-upload" class="w-5 h-5"></i> Publish Node to REHZO Cloud
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- VIEW 3: USER TRL PASSES & BOOKINGS -->
-    <section id="viewMyBookings" class="hidden space-y-6">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <span class="text-[11px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Verified Passes</span>
-          <h2 class="text-2xl font-black text-slate-900 mt-2">Active Rental TRL Passes</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Official 12-Digit Transaction Reference for Owner-Tenant Legal Transparency</p>
-        </div>
-      </div>
-
-      <!-- TRL Cards Container -->
-      <div id="bookingCardsContainer" class="space-y-6">
-        <!-- Rendered dynamically -->
-      </div>
-    </section>
-
-    <!-- VIEW 4: HIDDEN ADMIN PANEL -->
-    <section id="viewAdmin" class="hidden space-y-6">
-      <div class="bg-amber-500/10 border-2 border-amber-300 p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-4">
-          <div class="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center">
-            <i data-lucide="shield-check" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-black text-amber-950">REHZO Administrative Control Tower</h3>
-            <p class="text-xs font-semibold text-amber-800">Master database access & listing moderation authority</p>
-          </div>
-        </div>
-        <button id="btnExitAdmin" class="px-4 py-2 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-xl text-xs transition">
-          Exit Admin Mode
-        </button>
-      </div>
-
-      <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-4">
-        <div class="flex items-center justify-between">
-          <h4 class="font-black text-slate-900 text-base">All Active Cloud Listings (Moderation)</h4>
-          <span id="adminTotalBadge" class="text-xs font-bold text-slate-500">0 items</span>
-        </div>
-        <div id="adminListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Admin items -->
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ================= AUTHENTICATION MODAL ================= -->
-  <div id="modalAuth" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 space-y-6 animate-in fade-in zoom-in-95 duration-200">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 id="authTitle" class="text-xl font-black text-slate-900">Sign In to REHZO</h3>
-          <p id="authSub" class="text-xs text-slate-500 mt-1">Book verified rooms or list your property</p>
-        </div>
-        <button id="btnCloseAuth" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
-      </div>
-
-      <form id="formAuth" class="space-y-4">
-        <div id="fieldAuthName" class="hidden">
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Legal Name</label>
-          <input type="text" id="inAuthName" placeholder="Ravi Kumar" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (REHZO ID)</label>
-          <input type="tel" id="inAuthPhone" required placeholder="9876543210" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Account Password</label>
-          <input type="password" id="inAuthPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-        </div>
-
-        <button type="submit" id="btnSubmitAuth" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-md shadow-indigo-100">
-          Enter REHZO Cloud
-        </button>
-      </form>
-
-      <div class="text-center pt-2 border-t border-slate-100">
-        <button id="btnSwitchAuthMode" class="text-xs font-bold text-indigo-600 hover:underline">
-          Don't have an account? Create an ID
-        </button>
-      </div>
+<!-- TOP HEADER -->
+<header class="top-header">
+  <div class="brand" ondblclick="checkAdminAccess()" onclick="goView('home')">
+    <div class="logo-icon">⌂</div>
+    <div class="brand-text">
+      <h1>REHZO</h1>
+      <p>Find Your Perfect Room</p>
     </div>
   </div>
+  <div class="header-actions">
+    <div class="user-chip" id="userHeaderChip" onclick="openProfileModal()">👤 Login</div>
+    <button class="icon-btn" onclick="goView('notifications')">
+      🔔
+      <span class="notif-dot" id="headerNotifDot"></span>
+    </button>
+  </div>
+</header>
 
-  <!-- ================= BOOKING CONFIRMATION MODAL ================= -->
-  <div id="modalBooking" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-      <div class="flex justify-between items-center">
-        <div>
-          <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Permanent Pass Request</span>
-          <h3 class="text-lg font-black text-slate-900 mt-1">Book Room & Issue TRL</h3>
+<div class="main-wrapper">
+
+  <!-- ================= 1. HOME VIEW ================= -->
+  <section id="view-home" class="view active">
+    <div class="banner">
+      <h2>Better Rooms, Brighter Days</h2>
+      <p>Find, book & settle in your verified space.</p>
+      <div class="search-bar">
+        <input id="homeSearchInput" placeholder="Search city, house or 12-digit TRL No…" oninput="handleSearch(this.value)">
+        <button onclick="handleSearch(document.getElementById('homeSearchInput').value)">Go</button>
+      </div>
+    </div>
+
+    <!-- TRL Search Alert -->
+    <div id="trlAlertBox" style="display:none; margin-top:10px; padding:10px; background:#ECFDF5; border:1px solid #10B981; border-radius:14px; font-size:11px;">
+      <b>✓ Authentic REHZO Record Found!</b>
+      <div id="trlAlertDetails" style="margin-top:2px; color:#065F46;"></div>
+      <button onclick="openSlipModal(matchedBookingId)" style="margin-top:6px; padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">View Official TRL Slip</button>
+    </div>
+
+    <!-- Country & Room Type Filters -->
+    <div class="filter-row">
+      <select id="countryFilter" class="pill-select" onchange="applyFilters()">
+        <option value="">All Countries</option>
+      </select>
+      <select id="typeFilter" class="pill-select" onchange="applyFilters()">
+        <option value="">All Room Types</option>
+        <option value="Single Room">Single Room</option>
+        <option value="1 RK">1 RK</option>
+        <option value="2 BHK">2 BHK</option>
+        <option value="3 BHK">3 BHK</option>
+        <option value="PG">PG</option>
+        <option value="Hostel">Hostel</option>
+      </select>
+    </div>
+
+    <div class="chip-row">
+      <button class="chip active" onclick="filterChip('all', this)">All Rooms</button>
+      <button class="chip" onclick="filterChip('Student', this)">For Students</button>
+      <button class="chip" onclick="filterChip('Family', this)">For Families</button>
+      <button class="chip" onclick="filterChip('Worker', this)">For Workers</button>
+    </div>
+
+    <div class="section-title">
+      <h3>Available Rooms</h3>
+      <span onclick="resetAllFilters()">Reset & View All</span>
+    </div>
+
+    <div class="room-grid" id="homeRoomsGrid"></div>
+  </section>
+
+  <!-- ================= 2. SEARCH VIEW ================= -->
+  <section id="view-search" class="view">
+    <div class="sub-header">
+      <h3 class="sub-title">Search Stays</h3>
+    </div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 12px; margin-bottom:12px;">
+      <input id="searchScreenInput" placeholder="Type city, landmark, area…" oninput="handleSearch(this.value)" style="width:100%; border:none; outline:none; font-size:12px; font-weight:600;">
+    </div>
+    <div class="room-grid" id="searchRoomsGrid"></div>
+  </section>
+
+  <!-- ================= 3. NEAR ME VIEW (10 KM Strict Real GPS) ================= -->
+  <section id="view-near" class="view">
+    <div class="sub-header">
+      <div class="back-btn-row" onclick="goView('home')">
+        <span class="back-arrow">‹</span>
+        <h3 class="sub-title">Near Me</h3>
+      </div>
+    </div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:12px; margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+      <div style="width:34px; height:34px; border-radius:50%; background:#ECFDF5; color:#044E3B; display:flex; align-items:center; justify-content:center; font-size:16px;">📍</div>
+      <div style="flex:1;">
+        <div id="nearStatusText" style="font-size:12px; font-weight:800; color:#0F172A;">Detecting real live GPS…</div>
+        <div style="font-size:10px; color:#64748B; margin-top:2px;">Showing rooms strictly within 10 km of you.</div>
+      </div>
+      <button id="gpsRefreshBtn" onclick="detectGPS(true)" style="padding:6px 12px; background:#044E3B; color:#fff; border:none; border-radius:16px; font-size:10.5px; font-weight:bold; cursor:pointer;">Refresh</button>
+    </div>
+    <div class="room-grid" id="nearRoomsGrid"></div>
+  </section>
+
+  <!-- ================= 4. MY BOOKINGS VIEW ================= -->
+  <section id="view-bookings" class="view">
+    <div class="sub-header">
+      <h3 class="sub-title">My Bookings</h3>
+    </div>
+    <div class="sub-tabs-row">
+      <button class="sub-tab-btn active" id="tabBookingsCurrent" onclick="switchBookingsTab('current')">Current</button>
+      <button class="sub-tab-btn" id="tabBookingsHistory" onclick="switchBookingsTab('history')">History</button>
+      <button class="sub-tab-btn" id="tabBookingsCancelled" onclick="switchBookingsTab('cancelled')">Cancelled</button>
+    </div>
+    <div id="bookingsListContainer"></div>
+  </section>
+
+  <!-- ================= 5. OWNER VIEW ================= -->
+  <section id="view-owner" class="view">
+    <div id="ownerDashboardWrap">
+      <div class="sub-header">
+        <h3 class="sub-title">Owner Dashboard</h3>
+        <button onclick="checkOwnerAddAction()" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; cursor:pointer;">+ Add</button>
+      </div>
+
+      <div class="owner-stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statActiveCount">0</div>
+          <div class="stat-label">Active</div>
         </div>
-        <button id="btnCloseBooking" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
+        <div class="stat-card">
+          <div class="stat-num" id="statRequestsCount">0</div>
+          <div class="stat-label">Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statExpiredCount">0</div>
+          <div class="stat-label">Expired</div>
+        </div>
       </div>
 
-      <div id="bookingRoomDetailsBrief" class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
-        <!-- Injected details -->
+      <div class="sub-tabs-row">
+        <button class="sub-tab-btn active" id="tabOwnerRooms" onclick="switchOwnerTab('rooms')">My Rooms</button>
+        <button class="sub-tab-btn" id="tabOwnerRequests" onclick="switchOwnerTab('requests')">Requests</button>
+        <button class="sub-tab-btn" id="tabOwnerExpired" onclick="switchOwnerTab('expired')">Expired</button>
       </div>
 
-      <form id="formConfirmBooking" class="space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Check-in Date</label>
-            <input type="date" id="inBookCheckin" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none">
+      <div id="ownerContentContainer"></div>
+    </div>
+
+    <!-- OWNER LIST PROPERTY FORM -->
+    <div id="ownerFormWrap" style="display:none;">
+      <div class="sub-header">
+        <div class="back-btn-row" onclick="toggleOwnerForm(false)">
+          <span class="back-arrow">‹</span>
+          <h3 class="sub-title">List Your Property</h3>
+        </div>
+      </div>
+
+      <form onsubmit="handlePublishProperty(event)">
+        <!-- 1. Country & Name -->
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Select Country *</label>
+            <select id="opCountry" class="pill-input" onchange="updateDialPrefix(this.value)"></select>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Stay Duration</label>
-            <select id="inBookDuration" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none bg-white">
-              <option value="1">1 Month</option>
-              <option value="3">3 Months</option>
-              <option value="6">6 Months</option>
-              <option value="11">11 Months (Agreement)</option>
+          <div class="field-box">
+            <label class="field-label">Your Name *</label>
+            <input id="opName" class="pill-input" placeholder="Owner Full Name" required>
+          </div>
+        </div>
+
+        <!-- 2. Contact No & Gmail (Optional) -->
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Contact No. *</label>
+            <div class="dial-prefix-wrap">
+              <span id="opDialPrefix">+91</span>
+              <input id="opPhone" type="tel" placeholder="Mobile Number" required>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Gmail (optional)</label>
+            <input id="opGmail" class="pill-input" type="email" placeholder="name@email.com">
+          </div>
+        </div>
+
+        <!-- 3. Room Details -->
+        <div class="form-section-title">Room Details</div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Your House Name *</label>
+            <input id="opHouse" class="pill-input" placeholder="House Name" required>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Room Type *</label>
+            <select id="opRoomType" class="pill-input">
+              <option>Single Room</option>
+              <option>1 RK</option>
+              <option>2 BHK</option>
+              <option>3 BHK</option>
+              <option>PG</option>
+              <option>Hostel</option>
             </select>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Permanent / Prior Address</label>
-          <textarea id="inBookOldAddress" required rows="2" placeholder="Required for owner verification and TRL document registry..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none"></textarea>
+        <!-- 4. Tap-to-Reveal Dropdowns -->
+        <div class="pill-grid" style="align-items:start;">
+          <div class="field-box">
+            <label class="field-label">Suitable For</label>
+            <div class="collapsible-trigger" onclick="toggleDrawer('suitableDrawer')">
+              <span id="suitableSelectedText">Select Suitable For</span>
+              <span>▾</span>
+            </div>
+            <div class="collapsible-drawer" id="suitableDrawer">
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'suitable', 'Family')"><div class="circle-indicator"></div> Family</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'suitable', 'Student')"><div class="circle-indicator"></div> Student</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'suitable', 'Worker')"><div class="circle-indicator"></div> Worker</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'suitable', 'Anyone')"><div class="circle-indicator"></div> Anyone</div>
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label class="field-label">Amenities</label>
+            <div class="collapsible-trigger" onclick="toggleDrawer('amenitiesDrawer')">
+              <span id="amenitiesSelectedText">Select Amenities</span>
+              <span>▾</span>
+            </div>
+            <div class="collapsible-drawer" id="amenitiesDrawer">
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'amenity', 'Wi-Fi')"><div class="circle-indicator"></div> Wi-Fi</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'amenity', 'AC')"><div class="circle-indicator"></div> AC</div>
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'amenity', 'Parking')"><div class="circle-indicator"></div> Parking</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'amenity', 'RO Water')"><div class="circle-indicator"></div> RO Water</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'amenity', 'Geyser')"><div class="circle-indicator"></div> Geyser</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'amenity', 'CCTV Security')"><div class="circle-indicator"></div> CCTV Security</div>
+            </div>
+          </div>
         </div>
 
-        <button type="submit" id="btnSubmitBookingFinal" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
-          <i data-lucide="check-circle" class="w-4 h-4"></i> Generate 12-Digit Authentic TRL
+        <!-- 5. Rent & Deposit -->
+        <div class="form-section-title">Rent & Deposit</div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Monthly Rent *</label>
+            <div class="dial-prefix-wrap">
+              <span id="opRentSym">₹</span>
+              <input id="opRent" type="number" placeholder="Rent" required>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Security Deposit (optional)</label>
+            <div class="dial-prefix-wrap">
+              <span id="opDepSym">₹</span>
+              <input id="opDeposit" type="number" placeholder="Deposit">
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Location -->
+        <div class="form-section-title">Location</div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">State (optional)</label>
+            <input id="opState" class="pill-input" placeholder="State">
+          </div>
+          <div class="field-box">
+            <label class="field-label">City *</label>
+            <input id="opCity" class="pill-input" placeholder="City" required>
+          </div>
+        </div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Area Code *</label>
+            <input id="opPin" class="pill-input" placeholder="Pin code" required>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Full Address *</label>
+            <input id="opAddr" class="pill-input" placeholder="House No, Landmark" required>
+          </div>
+        </div>
+        <div class="pill-grid">
+          <div class="field-box">
+            <label class="field-label">Nearby Metro (optional)</label>
+            <input id="opMetro" class="pill-input" placeholder="Station name">
+          </div>
+          <div class="field-box">
+            <label class="field-label">Nearby Bus Stand (optional)</label>
+            <input id="opBus" class="pill-input" placeholder="Bus stop name">
+          </div>
+        </div>
+
+        <button type="button" class="map-lock-btn" id="opMapLockBtn" onclick="saveExactMapLocation()">
+          <span>📍</span> <span id="opMapLockText">Use Exact Map Location *</span>
         </button>
+
+        <!-- 7. Photos & Conditions -->
+        <div class="form-section-title">Photos & Rules</div>
+        <div class="pill-grid" style="align-items:start;">
+          <div class="field-box">
+            <label class="field-label">Room Photos * (max 3)</label>
+            <div class="photo-upload-row" id="photoPreviewContainer"></div>
+            <input type="file" id="photoFileInput" accept="image/*" multiple onchange="handlePhotoPick(event)" style="display:none;">
+            <div class="photo-add-box" onclick="document.getElementById('photoFileInput').click()">
+              <span style="font-size:16px;">⇪</span>
+              <span>Add Photo</span>
+              <span id="photoCountText">(0/3)</span>
+            </div>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Owner Conditions & Rules</label>
+            <div class="collapsible-drawer open">
+              <div class="radio-chip selected" onclick="toggleSelectChip(this, 'rule', 'No Smoking')"><div class="circle-indicator"></div> No Smoking</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'No Pets')"><div class="circle-indicator"></div> No Pets</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'No Loud Music')"><div class="circle-indicator"></div> No Loud Music</div>
+              <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'ID Proof Required')"><div class="circle-indicator"></div> ID Proof Required</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="big-action-btn">Publish Listing</button>
       </form>
     </div>
-  </div>
+  </section>
 
-  <!-- ================= COMPREHENSIVE JAVASCRIPT SYSTEM ================= -->
-  <script>
-    // 1. SUPABASE CLIENT CONNECTIONS
-    const SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
-    const SUPABASE_ANON = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  <!-- ================= 6. NOTIFICATIONS ================= -->
+  <section id="view-notifications" class="view">
+    <div class="sub-header">
+      <h3 class="sub-title">Notifications</h3>
+    </div>
+    <div id="notificationsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+  </section>
 
-    // 2. STATE MANAGEMENT
-    let currentUser = JSON.parse(localStorage.getItem('rehzo_user_v2')) || null;
-    let authIsSignUp = false;
-    let selectedRoomForBooking = null;
-    let pickerMap = null;
-    let pickerMarker = null;
+  <!-- ================= 7. PRIVATE ADMIN ================= -->
+  <section id="view-admin" class="view">
+    <div class="sub-header">
+      <h3 class="sub-title">Admin Moderation 🔐</h3>
+      <button onclick="goView('home')" style="padding:4px 10px; border:1px solid #E2E8F0; border-radius:14px; background:#fff; font-size:11px; cursor:pointer;">Exit</button>
+    </div>
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">Live Platform Listings</h4>
+      <div id="adminListingsControl"></div>
+    </div>
+  </section>
 
-    // 3. TOAST MESSENGER
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const msg = document.getElementById('toastMsg');
-      const icon = document.getElementById('toastIcon');
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-view="home" onclick="goView('home')">
+    <svg class="nav-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-item" data-view="search" onclick="goView('search')">
+    <svg class="nav-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <span>Search</span>
+  </button>
+  <button class="nav-item" data-view="near" onclick="goView('near')">
+    <svg class="nav-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+    <span>Near</span>
+  </button>
+  <button class="nav-item" data-view="bookings" onclick="goView('bookings')">
+    <svg class="nav-svg" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><polyline points="9 14 11 16 15 11"></polyline></svg>
+    <span>My Bookings</span>
+  </button>
+  <button class="nav-item" data-view="owner" onclick="goView('owner')">
+    <svg class="nav-svg" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line></svg>
+    <span>Owner</span>
+  </button>
+</nav>
+
+<div id="modalSlot"></div>
+
+<script>
+// ================= EXTENSIVE WORLDWIDE COUNTRIES LIST =================
+var WORLD_COUNTRIES = [
+  { code: 'IN', name: 'India', dial: '+91', sym: '₹' },
+  { code: 'US', name: 'United States', dial: '+1', sym: '$' },
+  { code: 'GB', name: 'United Kingdom', dial: '+44', sym: '£' },
+  { code: 'AE', name: 'United Arab Emirates', dial: '+971', sym: 'AED' },
+  { code: 'CA', name: 'Canada', dial: '+1', sym: 'C$' },
+  { code: 'AU', name: 'Australia', dial: '+61', sym: 'A$' },
+  { code: 'DE', name: 'Germany', dial: '+49', sym: '€' },
+  { code: 'FR', name: 'France', dial: '+33', sym: '€' },
+  { code: 'SG', name: 'Singapore', dial: '+65', sym: 'S$' },
+  { code: 'SA', name: 'Saudi Arabia', dial: '+966', sym: 'SAR' },
+  { code: 'NP', name: 'Nepal', dial: '+977', sym: 'NPR' },
+  { code: 'BD', name: 'Bangladesh', dial: '+880', sym: 'BDT' },
+  { code: 'MY', name: 'Malaysia', dial: '+60', sym: 'RM' },
+  { code: 'NZ', name: 'New Zealand', dial: '+64', sym: 'NZ$' },
+  { code: 'ZA', name: 'South Africa', dial: '+27', sym: 'R' },
+  { code: 'JP', name: 'Japan', dial: '+81', sym: '¥' },
+  { code: 'CN', name: 'China', dial: '+86', sym: '¥' },
+  { code: 'KR', name: 'South Korea', dial: '+82', sym: '₩' },
+  { code: 'BR', name: 'Brazil', dial: '+55', sym: 'R$' },
+  { code: 'MX', name: 'Mexico', dial: '+52', sym: '$' },
+  { code: 'IT', name: 'Italy', dial: '+39', sym: '€' },
+  { code: 'ES', name: 'Spain', dial: '+34', sym: '€' },
+  { code: 'NL', name: 'Netherlands', dial: '+31', sym: '€' },
+  { code: 'SE', name: 'Sweden', dial: '+46', sym: 'kr' },
+  { code: 'CH', name: 'Switzerland', dial: '+41', sym: 'CHF' },
+  { code: 'RU', name: 'Russia', dial: '+7', sym: '₽' },
+  { code: 'TR', name: 'Turkey', dial: '+90', sym: '₺' },
+  { code: 'ID', name: 'Indonesia', dial: '+62', sym: 'Rp' },
+  { code: 'TH', name: 'Thailand', dial: '+66', sym: '฿' },
+  { code: 'VN', name: 'Vietnam', dial: '+84', sym: '₫' },
+  { code: 'PH', name: 'Philippines', dial: '+63', sym: '₱' },
+  { code: 'EG', name: 'Egypt', dial: '+20', sym: 'E£' },
+  { code: 'NG', name: 'Nigeria', dial: '+234', sym: '₦' },
+  { code: 'KE', name: 'Kenya', dial: '+254', sym: 'KSh' },
+  { code: 'PK', name: 'Pakistan', dial: '+92', sym: 'Rs' },
+  { code: 'LK', name: 'Sri Lanka', dial: '+94', sym: 'Rs' },
+  { code: 'QA', name: 'Qatar', dial: '+974', sym: 'QR' },
+  { code: 'KW', name: 'Kuwait', dial: '+965', sym: 'KD' },
+  { code: 'OM', name: 'Oman', dial: '+968', sym: 'OMR' },
+  { code: 'BH', name: 'Bahrain', dial: '+973', sym: 'BD' }
+];
+
+function populateCountryDropdowns() {
+  var cf = document.getElementById('countryFilter');
+  var op = document.getElementById('opCountry');
+
+  WORLD_COUNTRIES.forEach(function(c) {
+    var opt1 = document.createElement('option');
+    opt1.value = c.code;
+    opt1.textContent = c.name + ' (' + c.dial + ' / ' + c.sym + ')';
+    if (cf) cf.appendChild(opt1);
+
+    var opt2 = document.createElement('option');
+    opt2.value = c.code;
+    opt2.textContent = c.name + ' (' + c.dial + ' / ' + c.sym + ')';
+    if (op) op.appendChild(opt2);
+  });
+}
+
+// ================= STORAGE & REHZO UNIFIED AUTH STATE =================
+var SEED_DATA = {
+  currentUser: null, // { uid, name, phone, gmail, password }
+  registeredUsers: [
+    { uid: 'rehzo_owner', name: 'Awakash Kumar Patel', phone: '+91 7707064294', gmail: 'awakashkumarpatel@gmail.com', password: 'password123' }
+  ],
+  listings: [
+    {
+      id: 'L-101',
+      houseName: 'Patel Bhawan',
+      roomType: 'Single Room',
+      suitableFor: ['Student', 'Worker'],
+      amenities: ['Wi-Fi', 'Parking'],
+      rules: ['No Smoking', 'No Pets', 'ID Proof Required'],
+      rent: 2500,
+      deposit: 2500,
+      country: 'IN',
+      city: 'Sasaram',
+      state: 'Bihar',
+      pin: '821115',
+      address: 'Near Old Bus Stand, Sasaram',
+      lat: 24.9536,
+      lng: 84.0321,
+      ownerUid: 'rehzo_owner',
+      ownerName: 'Awakash Kumar Patel',
+      phone: '+91 7707064294',
+      gmail: 'awakashkumarpatel@gmail.com',
+      status: 'available',
+      photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'],
+      daysLeft: 90
+    }
+  ],
+  bookings: [],
+  notifications: []
+};
+
+function loadStorage() {
+  try {
+    var raw = localStorage.getItem('REHZO_STATE_V4');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(SEED_DATA));
+}
+
+function saveStorage() {
+  try {
+    localStorage.setItem('REHZO_STATE_V4', JSON.stringify(DB));
+  } catch (e) {}
+}
+
+var DB = loadStorage();
+
+var userGeo = { lat: 24.9536, lng: 84.0321 };
+var lockedMapCoord = { lat: 24.9536, lng: 84.0321 };
+var currentBookingsTab = 'current';
+var currentOwnerTab = 'rooms';
+var uploadedPhotos = [];
+var editRoomUploadedPhotos = [];
+var selectedSuitable = ['Family'];
+var selectedAmenities = ['Wi-Fi', 'Parking'];
+var selectedRules = ['No Smoking'];
+var activeBookingRoom = null;
+var matchedBookingId = null;
+
+// ================= SPLASH & AUTO INITIALIZATION =================
+window.addEventListener('DOMContentLoaded', function() {
+  populateCountryDropdowns();
+  detectUserCountry();
+  updateUserHeaderChip();
+  renderHomeGrid();
+
+  setTimeout(function() {
+    var splash = document.getElementById('splashOverlay');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(function() { splash.style.display = 'none'; }, 500);
+    }
+  }, 1200);
+});
+
+// ================= REHZO UNIFIED LOGIN & PROFILE SYSTEM =================
+function updateUserHeaderChip() {
+  var chip = document.getElementById('userHeaderChip');
+  if (chip) {
+    if (DB.currentUser) {
+      chip.innerText = '👤 ' + DB.currentUser.name.split(' ')[0] + ' (' + DB.currentUser.uid + ')';
+    } else {
+      chip.innerText = '👤 Login';
+    }
+  }
+}
+
+// Main Login Modal (Google or User ID + Password)
+function openProfileModal(callbackAction) {
+  if (DB.currentUser) {
+    document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+      '<div class="modal-box">' +
+        '<div class="modal-header">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
+          '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+        '</div>' +
+        '<div style="text-align:center; padding:10px 0;">' +
+          '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
+          '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + DB.currentUser.name + '</h2>' +
+          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + DB.currentUser.uid + '</div>' +
+        '</div>' +
+        '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
+          '<div>📞 <b>Phone:</b> ' + DB.currentUser.phone + '</div>' +
+          '<div>✉️ <b>Recovery Gmail:</b> ' + (DB.currentUser.gmail || 'None') + '</div>' +
+          '<div>✨ <b>Account Type:</b> Unified (Search, Book & List Properties)</div>' +
+        '</div>' +
+        '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
+      '</div>' +
+    '</div>';
+  } else {
+    document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+      '<div class="modal-box">' +
+        '<div class="modal-header">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Sign in to REHZO</h3>' +
+          '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+        '</div>' +
+
+        '<!-- Option 1: Continue with Google -->' +
+        '<button class="google-auth-btn" onclick="startGoogleAuth(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+          '<span>Continue with Google</span>' +
+        '</button>' +
+
+        '<div style="text-align:center; font-size:11px; color:#94A3B8; margin:10px 0; position:relative;">' +
+          '<span style="background:#fff; padding:0 8px; position:relative; z-index:1;">or with User ID</span>' +
+          '<div style="position:absolute; top:50%; left:0; right:0; height:1px; background:#E2E8F0; z-index:0;"></div>' +
+        '</div>' +
+
+        '<!-- Option 2: User ID + Password -->' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">User ID *</label>' +
+          '<input id="loginUid" class="pill-input" placeholder="e.g. rahul123">' +
+        '</div>' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Password *</label>' +
+          '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password">' +
+        '</div>' +
+
+        '<div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:10.5px; font-weight:700;">' +
+          '<span style="color:#044E3B; cursor:pointer;" onclick="openForgotUserIdModal()">Forgot User ID?</span>' +
+          '<span style="color:#044E3B; cursor:pointer;" onclick="openForgotPasswordModal()">Forgot Password?</span>' +
+        '</div>' +
+
+        '<button class="big-action-btn" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Sign In with Password →</button>' +
+      '</div>' +
+    '</div>';
+  }
+}
+
+// Google Login Simulation & New User Onboarding
+function startGoogleAuth(callbackAction) {
+  var googleEmail = prompt("Simulating Google OAuth:\nEnter your Google Email to continue:", DB.currentUser ? DB.currentUser.gmail : "user@gmail.com");
+  if (!googleEmail || !googleEmail.trim()) return;
+
+  var existing = DB.registeredUsers.find(function(u){ return u.gmail.toLowerCase() === googleEmail.toLowerCase(); });
+  if (existing) {
+    // Existing user logs in immediately
+    DB.currentUser = existing;
+    saveStorage();
+    updateUserHeaderChip();
+    closeModal();
+    alert("Welcome back, " + existing.name + "!");
+    resumePendingAction(callbackAction);
+  } else {
+    // First Time Login via Google -> Prompt Create User ID & Password
+    openGoogleOnboardingModal(googleEmail.trim(), callbackAction);
+  }
+}
+
+function openGoogleOnboardingModal(gmail, callbackAction) {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Complete Profile Setup</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Connected via Google: <b>' + gmail + '</b>. Setup your User ID and Password for permanent multi-option login.</p>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Full Name *</label>' +
+        '<input id="onboardName" class="pill-input" placeholder="Your full name">' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Mobile Number *</label>' +
+        '<input id="onboardPhone" type="tel" class="pill-input" placeholder="e.g. +91 9876543210">' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Create User ID *</label>' +
+        '<input id="onboardUid" class="pill-input" placeholder="e.g. rahul_rehzo">' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box">' +
+          '<label class="field-label">Create Password *</label>' +
+          '<input id="onboardPwd" type="password" class="pill-input" placeholder="Password">' +
+        '</div>' +
+        '<div class="field-box">' +
+          '<label class="field-label">Confirm Password *</label>' +
+          '<input id="onboardConfPwd" type="password" class="pill-input" placeholder="Confirm">' +
+        '</div>' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitGoogleOnboarding(\'' + gmail + '\', ' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Create Profile & Finish →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function submitGoogleOnboarding(gmail, callbackAction) {
+  var name = document.getElementById('onboardName').value.trim();
+  var phone = document.getElementById('onboardPhone').value.trim();
+  var uid = document.getElementById('onboardUid').value.trim().toLowerCase();
+  var pwd = document.getElementById('onboardPwd').value;
+  var confPwd = document.getElementById('onboardConfPwd').value;
+
+  if (!name || name.length < 2) { alert("Please enter your full name."); return; }
+  var cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (cleanPhone.length < 7) { alert("Please enter a valid mobile number."); return; }
+  if (!uid || uid.length < 3) { alert("User ID must be at least 3 characters."); return; }
+  if (DB.registeredUsers.some(function(u){ return u.uid === uid; })) {
+    alert("User ID already taken! Please choose another one."); return;
+  }
+  if (!pwd || pwd.length < 4) { alert("Password must be at least 4 characters."); return; }
+  if (pwd !== confPwd) { alert("Passwords do not match!"); return; }
+
+  var newUser = {
+    uid: uid,
+    name: name,
+    phone: phone,
+    gmail: gmail,
+    password: pwd
+  };
+
+  DB.registeredUsers.push(newUser);
+  DB.currentUser = newUser;
+  saveStorage();
+  updateUserHeaderChip();
+  closeModal();
+  alert("Account created successfully!\nUser ID: " + uid);
+  resumePendingAction(callbackAction);
+}
+
+// Credentials Login (User ID + Password)
+function submitCredentialsLogin(callbackAction) {
+  var uid = document.getElementById('loginUid').value.trim().toLowerCase();
+  var pwd = document.getElementById('loginPwd').value;
+
+  if (!uid || !pwd) { alert("Please enter both User ID and Password."); return; }
+
+  var user = DB.registeredUsers.find(function(u){ return u.uid.toLowerCase() === uid && u.password === pwd; });
+  if (user) {
+    DB.currentUser = user;
+    saveStorage();
+    updateUserHeaderChip();
+    closeModal();
+    alert("Logged in successfully as " + user.name + "!");
+    resumePendingAction(callbackAction);
+  } else {
+    alert("Invalid User ID or Password. Please try again or use Forgot options.");
+  }
+}
+
+// Recovery Option 1: Forgot User ID
+function openForgotUserIdModal() {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Recover User ID</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Enter your registered recovery Gmail to find your User ID.</p>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">Registered Gmail *</label>' +
+        '<input id="recovEmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitForgotUserId()">Find My User ID →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function submitForgotUserId() {
+  var email = document.getElementById('recovEmail').value.trim().toLowerCase();
+  var match = DB.registeredUsers.find(function(u){ return u.gmail.toLowerCase() === email; });
+  if (match) {
+    alert("Account Found!\nYour registered User ID is: " + match.uid);
+    openProfileModal();
+  } else {
+    alert("No registered account found with this Gmail address.");
+  }
+}
+
+// Recovery Option 2: Forgot Password
+function openForgotPasswordModal() {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Reset Password</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Enter your registered Gmail and set your new password.</p>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Registered Gmail *</label>' +
+        '<input id="pwdRecovEmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">New Password *</label>' +
+        '<input id="newPwdInput" type="password" class="pill-input" placeholder="Enter new password">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitForgotPassword()">Update Password →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function submitForgotPassword() {
+  var email = document.getElementById('pwdRecovEmail').value.trim().toLowerCase();
+  var newPwd = document.getElementById('newPwdInput').value;
+  if (!email || !newPwd || newPwd.length < 4) { alert("Please provide a valid Gmail and password (min 4 characters)."); return; }
+
+  var match = DB.registeredUsers.find(function(u){ return u.gmail.toLowerCase() === email; });
+  if (match) {
+    match.password = newPwd;
+    saveStorage();
+    alert("Password updated successfully! You can now log in with your new password.");
+    openProfileModal();
+  } else {
+    alert("No account found matching this Gmail.");
+  }
+}
+
+function logoutUser() {
+  if (confirm("Do you want to log out from this account?")) {
+    DB.currentUser = null;
+    saveStorage();
+    updateUserHeaderChip();
+    closeModal();
+    alert("Logged out successfully.");
+  }
+}
+
+function resumePendingAction(callbackAction) {
+  if (callbackAction === 'openOwnerForm') {
+    toggleOwnerForm(true);
+  } else if (callbackAction && callbackAction.indexOf('bookRoom:') === 0) {
+    var rId = callbackAction.split(':')[1];
+    openBookingPillModal(rId);
+  }
+}
+
+function checkOwnerAddAction() {
+  if (!DB.currentUser) {
+    alert("Please sign in or create an account to list your property.");
+    openProfileModal('openOwnerForm');
+  } else {
+    toggleOwnerForm(true);
+  }
+}
+
+// ================= AUTOMATIC COUNTRY DETECTION =================
+function detectUserCountry() {
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    var detected = 'IN';
+
+    if (tz.indexOf('Calcutta') !== -1 || tz.indexOf('Kolkata') !== -1) detected = 'IN';
+    else if (tz.indexOf('New_York') !== -1 || tz.indexOf('Los_Angeles') !== -1 || tz.indexOf('Chicago') !== -1) detected = 'US';
+    else if (tz.indexOf('London') !== -1) detected = 'GB';
+    else if (tz.indexOf('Dubai') !== -1) detected = 'AE';
+    else if (tz.indexOf('Toronto') !== -1 || tz.indexOf('Vancouver') !== -1) detected = 'CA';
+    else if (tz.indexOf('Sydney') !== -1 || tz.indexOf('Melbourne') !== -1) detected = 'AU';
+    else if (tz.indexOf('Berlin') !== -1) detected = 'DE';
+    else if (tz.indexOf('Paris') !== -1) detected = 'FR';
+    else if (tz.indexOf('Singapore') !== -1) detected = 'SG';
+    else if (tz.indexOf('Riyadh') !== -1) detected = 'SA';
+    else if (tz.indexOf('Kathmandu') !== -1) detected = 'NP';
+    else if (tz.indexOf('Dhaka') !== -1) detected = 'BD';
+
+    var cFilter = document.getElementById('countryFilter');
+    if (cFilter && !cFilter.value) cFilter.value = detected;
+    var opCountry = document.getElementById('opCountry');
+    if (opCountry) {
+      opCountry.value = detected;
+      updateDialPrefix(detected);
+    }
+  } catch (e) {}
+}
+
+// ================= NAVIGATION =================
+function goView(viewId) {
+  var views = document.querySelectorAll('.view');
+  for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
+  var target = document.getElementById('view-' + viewId);
+  if (target) target.classList.add('active');
+
+  var navBtns = document.querySelectorAll('.nav-item');
+  for (var j = 0; j < navBtns.length; j++) {
+    if (navBtns[j].getAttribute('data-view') === viewId) navBtns[j].classList.add('active');
+    else navBtns[j].classList.remove('active');
+  }
+
+  if (viewId === 'home') renderHomeGrid();
+  if (viewId === 'search') renderSearchGrid();
+  if (viewId === 'near') detectGPS(false);
+  if (viewId === 'bookings') renderBookingsView();
+  if (viewId === 'owner') renderOwnerView();
+  if (viewId === 'notifications') renderNotifications();
+  if (viewId === 'admin') renderAdminModeration();
+  window.scrollTo(0, 0);
+}
+
+function checkAdminAccess() {
+  var pass = prompt("Enter Admin Passcode:");
+  if (pass === 'rehzo123') goView('admin');
+  else if (pass !== null) alert("Incorrect passcode.");
+}
+
+if (window.location.search.indexOf('admin=rehzo123') !== -1) {
+  setTimeout(function() { goView('admin'); }, 200);
+}
+
+// ================= HOME ROOMS GRID =================
+function renderHomeGrid(items) {
+  var list = items || DB.listings.filter(function(x){ return x.status === 'available'; });
+  var container = document.getElementById('homeRoomsGrid');
+  if (!list.length) {
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:28px; font-size:11.5px; color:#64748B;">No available rooms matching filters.</div>';
+    return;
+  }
+  container.innerHTML = list.map(function(r) {
+    return '<div class="room-card">' +
+      '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+        '<span class="avail-badge">Available</span>' +
+      '</div>' +
+      '<div class="room-details">' +
+        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
+        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
+        '<div class="room-city">📍 ' + r.city + ' • ' + r.roomType + '</div>' +
+        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function triggerBookRoomFlow(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  if (!DB.currentUser) {
+    alert("Please sign in or create an account to book this room.");
+    openProfileModal('bookRoom:' + roomId);
+    return;
+  }
+
+  // SELF-BOOKING BLOCK RULE
+  if (DB.currentUser.uid === r.ownerUid || DB.currentUser.phone === r.phone) {
+    alert("Cannot book this room!\nYou are the registered owner of this property.");
+    return;
+  }
+
+  openBookingPillModal(roomId);
+}
+
+// ================= USER ROOM DETAILS MODAL =================
+function openRoomDetailsModal(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  var suitableBadges = (r.suitableFor && r.suitableFor.length)
+    ? r.suitableFor.map(function(s){ return '<span style="display:inline-block; padding:3px 9px; background:#E6F3ED; color:#044E3B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">• ' + s + '</span>'; }).join('')
+    : '<span style="font-size:10.5px; color:#64748B;">Anyone</span>';
+
+  var amenitiesBadges = (r.amenities && r.amenities.length)
+    ? r.amenities.map(function(a){ return '<span style="display:inline-block; padding:3px 9px; background:#F1F5F9; color:#334155; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">✓ ' + a + '</span>'; }).join('')
+    : '<span style="font-size:10.5px; color:#64748B;">Basic amenities</span>';
+
+  var rulesBadges = (r.rules && r.rules.length)
+    ? r.rules.map(function(ru){ return '<span style="display:inline-block; padding:3px 9px; background:#FEF2F2; color:#991B1B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">⚠️ ' + ru + '</span>'; }).join('')
+    : '<span style="font-size:10.5px; color:#64748B;">Standard house rules apply</span>';
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Property Overview</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<img src="' + r.photos[0] + '" style="width:100%; height:160px; border-radius:16px; object-fit:cover; margin-bottom:12px;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
+        '<h2 style="font-size:16px; font-weight:900; color:#0F172A;">' + r.houseName + '</h2>' +
+        '<span style="background:#ECFDF5; color:#044E3B; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:800;">' + r.roomType + '</span>' +
+      '</div>' +
+      '<div style="font-size:15px; font-weight:900; color:#044E3B; margin-bottom:8px;">₹' + Number(r.rent).toLocaleString() + ' <span style="font-size:10px; color:#64748B; font-weight:normal;">/ month</span></div>' +
       
-      msg.innerText = message;
-      icon.innerHTML = type === 'success' 
-        ? '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>' 
-        : '<i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>';
-      lucide.createIcons();
+      '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; margin-bottom:10px; line-height:1.6;">' +
+        '<div>📍 <b>Location & Address:</b> ' + r.address + ', ' + r.city + ' (' + (r.state||'') + ' - ' + r.pin + ')</div>' +
+        '<div style="margin-top:2px;">👤 <b>Host:</b> ' + r.ownerName + '</div>' +
+      '</div>' +
 
-      toast.classList.remove('translate-y-[-150%]', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+      '<div style="margin-bottom:8px;">' +
+        '<div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">👥 Suitable For:</div>' +
+        '<div>' + suitableBadges + '</div>' +
+      '</div>' +
 
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-[-150%]', 'opacity-0');
-      }, 3500);
+      '<div style="margin-bottom:8px;">' +
+        '<div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">✨ Amenities Included:</div>' +
+        '<div>' + amenitiesBadges + '</div>' +
+      '</div>' +
+
+      '<div style="margin-bottom:12px;">' +
+        '<div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">📋 Owner Conditions & Rules:</div>' +
+        '<div>' + rulesBadges + '</div>' +
+      '</div>' +
+
+      '<button class="big-action-btn" onclick="closeModal(); triggerBookRoomFlow(\'' + r.id + '\')">Book This Room Now →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function handleSearch(val) {
+  var q = val.trim();
+  var alertBox = document.getElementById('trlAlertBox');
+  if (q.length === 12 && /^\d+$/.test(q)) {
+    var b = DB.bookings.find(function(x){ return x.trl === q; });
+    if (b) {
+      matchedBookingId = b.id;
+      alertBox.style.display = 'block';
+      document.getElementById('trlAlertDetails').innerText = b.houseName + ' • ' + b.userName + ' (' + b.status.toUpperCase() + ')';
+      return;
     }
-
-    // 4. NAVIGATION ROUTER
-    function showView(viewId) {
-      ['viewExplore', 'viewPostRoom', 'viewMyBookings', 'viewAdmin'].forEach(v => {
-        document.getElementById(v).classList.add('hidden');
-      });
-      document.getElementById(viewId).classList.remove('hidden');
-
-      if (viewId === 'viewPostRoom') {
-        setTimeout(initMapPicker, 200);
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // 5. INTERACTIVE MAP PICKER
-    function initMapPicker() {
-      if (pickerMap) {
-        pickerMap.invalidateSize();
-        return;
-      }
-      // Center default to India (Mumbai)
-      pickerMap = L.map('mapPicker').setView([19.0760, 72.8777], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(pickerMap);
-
-      pickerMarker = L.marker([19.0760, 72.8777], { draggable: true }).addTo(pickerMap);
-
-      pickerMarker.on('dragend', function (e) {
-        const pos = e.target.getLatLng();
-        document.getElementById('inLat').value = pos.lat.toFixed(6);
-        document.getElementById('inLng').value = pos.lng.toFixed(6);
-      });
-
-      pickerMap.on('click', function(e) {
-        pickerMarker.setLatLng(e.latlng);
-        document.getElementById('inLat').value = e.latlng.lat.toFixed(6);
-        document.getElementById('inLng').value = e.latlng.lng.toFixed(6);
-      });
-    }
-
-    // 6. AUTHENTICATION CONTROLLER
-    function updateAuthStatus() {
-      const slot = document.getElementById('authSlot');
-      if (currentUser) {
-        slot.innerHTML = `
-          <div class="flex items-center space-x-2">
-            <div class="text-right hidden sm:block">
-              <span class="text-xs font-black text-slate-800 block leading-tight">${currentUser.name}</span>
-              <span class="text-[10px] font-semibold text-slate-400">ID: ${currentUser.uid}</span>
-            </div>
-            <button id="btnSignOut" class="w-9 h-9 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center transition" title="Log out">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
-            </button>
-          </div>
-        `;
-        document.getElementById('btnSignOut').onclick = () => {
-          localStorage.removeItem('rehzo_user_v2');
-          currentUser = null;
-          updateAuthStatus();
-          showToast('Signed out of session');
-          showView('viewExplore');
-        };
-      } else {
-        slot.innerHTML = `
-          <button id="btnOpenAuthModal" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-            <i data-lucide="user" class="w-3.5 h-3.5"></i> Sign In
-          </button>
-        `;
-        document.getElementById('btnOpenAuthModal').onclick = () => {
-          document.getElementById('modalAuth').classList.remove('hidden');
-        };
-      }
-      lucide.createIcons();
-    }
-
-    // 7. FETCH & STREAM LISTINGS
-    async function fetchListings(queryFilter = {}) {
-      const container = document.getElementById('gridRoomStream');
-      container.innerHTML = `
-        <div class="col-span-full py-20 text-center space-y-3">
-          <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Querying Supabase Cluster...</p>
-        </div>
-      `;
-
-      let query = supabase.from('listings').select('*').order('created_at', { ascending: false });
-
-      if (queryFilter.city) {
-        query = query.ilike('city', `%${queryFilter.city}%`);
-      }
-      if (queryFilter.type) {
-        query = query.eq('room_type', queryFilter.type);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        container.innerHTML = `<div class="col-span-full text-center py-10 text-rose-500 font-bold">Failed to connect: ${error.message}</div>`;
-        return;
-      }
-
-      document.getElementById('badgeAvailableTotal').innerText = `${data.length} Available`;
-
-      if (!data || data.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
-            <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-2"></i>
-            <h4 class="font-bold text-slate-800 text-base">No rooms found matching this search</h4>
-            <p class="text-xs text-slate-400 mt-1">Try searching another city or clear filters.</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      container.innerHTML = data.map(item => {
-        const photo = (item.photos && item.photos.length > 0) 
-          ? item.photos[0] 
-          : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800';
-
-        const amenitiesList = (item.amenities || []).slice(0, 3).map(a => `
-          <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">${a}</span>
-        `).join('');
-
-        return `
-          <div class="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-            <div>
-              <div class="h-52 w-full relative overflow-hidden bg-slate-100">
-                <img src="${photo}" alt="${item.house_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
-                <span class="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full text-slate-900 border border-slate-100 shadow-sm">
-                  ${item.room_type}
-                </span>
-                <span class="absolute bottom-3 left-3 text-white font-extrabold text-lg">
-                  ₹${item.rent}<span class="text-xs font-medium text-slate-200"> / month</span>
-                </span>
-              </div>
-
-              <div class="p-5 space-y-3">
-                <div>
-                  <h3 class="font-black text-slate-900 text-base leading-snug group-hover:text-indigo-600 transition">${item.house_name}</h3>
-                  <p class="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i> ${item.address}, ${item.city}
-                  </p>
-                </div>
-
-                <div class="flex flex-wrap gap-1.5">
-                  ${amenitiesList}
-                </div>
-
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                  <span class="flex items-center gap-1">👤 Host: <strong>${item.owner_name}</strong></span>
-                  <span class="font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Verified</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-5 pt-0">
-              <button onclick="requestBookingFlow('${item.id}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs transition shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5">
-                <i data-lucide="calendar-check" class="w-4 h-4"></i> Reserve Room & TRL
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    // 8. PROPERTY PUBLISHING WITH CLOUD STORAGE
-    document.getElementById('formNewProperty').onsubmit = async (e) => {
-      e.preventDefault();
-      if (!currentUser) {
-        showToast('Please sign in first to list your property');
-        document.getElementById('modalAuth').classList.remove('hidden');
-        return;
-      }
-
-      const btn = document.getElementById('btnPublishRoom');
-      btn.disabled = true;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Uploading Media to Cloud...`;
-
-      try {
-        const photoFiles = document.getElementById('inPhotos').files;
-        let photoUrls = [];
-
-        for (let i = 0; i < photoFiles.length; i++) {
-          const file = photoFiles[i];
-          const cleanName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('room-photos')
-            .upload(cleanName, file);
-
-          if (!uploadError) {
-            const { data: pubData } = supabase.storage
-              .from('room-photos')
-              .getPublicUrl(cleanName);
-            photoUrls.push(pubData.publicUrl);
-          }
-        }
-
-        const selectedPrefs = Array.from(document.querySelectorAll('input[name="pref"]:checked')).map(cb => cb.value);
-        const selectedAmenities = Array.from(document.querySelectorAll('input[name="amenity"]:checked')).map(cb => cb.value);
-
-        const newListing = {
-          house_name: document.getElementById('inHouseName').value,
-          room_type: document.getElementById('inRoomType').value,
-          rent: parseFloat(document.getElementById('inRent').value),
-          deposit: parseFloat(document.getElementById('inDeposit').value || 0),
-          country: 'India',
-          city: document.getElementById('inCity').value,
-          state: document.getElementById('inState').value,
-          pin: document.getElementById('inPin').value,
-          address: document.getElementById('inAddress').value,
-          lat: parseFloat(document.getElementById('inLat').value || 19.0760),
-          lng: parseFloat(document.getElementById('inLng').value || 72.8777),
-          suitable_for: selectedPrefs,
-          amenities: selectedAmenities,
-          owner_uid: currentUser.uid,
-          owner_name: currentUser.name,
-          owner_phone: currentUser.phone,
-          photos: photoUrls,
-          status: 'available'
-        };
-
-        const { error: dbError } = await supabase.from('listings').insert([newListing]);
-        if (dbError) throw dbError;
-
-        showToast('Property published successfully to REHZO Cloud!', 'success');
-        document.getElementById('formNewProperty').reset();
-        showView('viewExplore');
-        fetchListings();
-      } catch (err) {
-        showToast('Failed to list: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-5 h-5"></i> Publish Node to REHZO Cloud`;
-        lucide.createIcons();
-      }
-    };
-
-    // 9. 12-DIGIT TRL GENERATOR & BOOKING FLOW
-    window.requestBookingFlow = async (listingId) => {
-      if (!currentUser) {
-        showToast('Please sign in to proceed with booking');
-        document.getElementById('modalAuth').classList.remove('hidden');
-        return;
-      }
-
-      const { data: room, error } = await supabase.from('listings').select('*').eq('id', listingId).single();
-      if (error || !room) {
-        showToast('Could not fetch room details.');
-        return;
-      }
-
-      selectedRoomForBooking = room;
-      document.getElementById('bookingRoomDetailsBrief').innerHTML = `
-        <div class="flex justify-between font-bold text-slate-800">
-          <span>${room.house_name}</span>
-          <span>₹${room.rent}/month</span>
-        </div>
-        <p class="text-[11px] text-slate-500">📍 ${room.address}, ${room.city}</p>
-        <p class="text-[11px] text-slate-500">Host: ${room.owner_name} (${room.owner_phone})</p>
-      `;
-
-      // Set default checkin to tomorrow
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      document.getElementById('inBookCheckin').value = tomorrow.toISOString().split('T')[0];
-
-      document.getElementById('modalBooking').classList.remove('hidden');
-    };
-
-    function generateSecureTRL() {
-      // 12 Authentic Numerics
-      const part1 = Math.floor(1000 + Math.random() * 9000);
-      const part2 = Math.floor(1000 + Math.random() * 9000);
-      const part3 = Math.floor(1000 + Math.random() * 9000);
-      return `${part1}${part2}${part3}`;
-    }
-
-    document.getElementById('formConfirmBooking').onsubmit = async (e) => {
-      e.preventDefault();
-      if (!currentUser || !selectedRoomForBooking) return;
-
-      const btn = document.getElementById('btnSubmitBookingFinal');
-      btn.disabled = true;
-      btn.innerText = 'Creating 12-Digit Registry...';
-
-      const trlCode = generateSecureTRL();
-
-      const bookingRecord = {
-        trl: trlCode,
-        listing_id: selectedRoomForBooking.id,
-        house_name: selectedRoomForBooking.house_name,
-        room_type: selectedRoomForBooking.room_type,
-        rent: selectedRoomForBooking.rent,
-        duration: parseInt(document.getElementById('inBookDuration').value),
-        checkin_date: document.getElementById('inBookCheckin').value,
-        user_uid: currentUser.uid,
-        user_name: currentUser.name,
-        user_phone: currentUser.phone,
-        user_old_address: document.getElementById('inBookOldAddress').value,
-        owner_name: selectedRoomForBooking.owner_name,
-        owner_phone: selectedRoomForBooking.owner_phone,
-        room_exact_address: selectedRoomForBooking.address,
-        status: 'confirmed'
-      };
-
-      const { error } = await supabase.from('bookings').insert([bookingRecord]);
-
-      if (error) {
-        showToast('Booking failed: ' + error.message);
-        btn.disabled = false;
-        btn.innerText = 'Generate 12-Digit Authentic TRL';
-        return;
-      }
-
-      showToast(`Success! TRL Pass: ${trlCode}`, 'success');
-      document.getElementById('modalBooking').classList.add('hidden');
-      btn.disabled = false;
-      btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> Generate 12-Digit Authentic TRL`;
-      showView('viewMyBookings');
-      fetchMyBookings();
-    };
-
-    // 10. FETCH BOOKINGS (TRL DISPLAY PASSES)
-    async function fetchMyBookings() {
-      const container = document.getElementById('bookingCardsContainer');
-      if (!currentUser) {
-        container.innerHTML = `
-          <div class="text-center py-16 bg-white rounded-3xl border border-slate-200">
-            <p class="text-sm font-bold text-slate-500">Sign in to check your active rental passes.</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = `<div class="text-center py-16 text-xs text-slate-400 font-bold uppercase tracking-widest">Loading Digital TRL Passes...</div>`;
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .or(`user_uid.eq.${currentUser.uid},owner_phone.eq.${currentUser.phone}`)
-        .order('created_at', { ascending: false });
-
-      if (error || !data || data.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-2">
-            <i data-lucide="ticket" class="w-10 h-10 text-slate-300 mx-auto"></i>
-            <h4 class="font-bold text-slate-800 text-sm">No Active TRL Passes</h4>
-            <p class="text-xs text-slate-400">Reserve a room to receive your 12-digit permanent rental pass.</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      container.innerHTML = data.map(b => `
-        <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-          <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300 bg-white/10 px-2.5 py-1 rounded-md">12-Digit TRL Official ID</span>
-              <h3 class="text-2xl font-black tracking-widest text-white mt-1 font-mono">${b.trl}</h3>
-            </div>
-            <div class="text-right">
-              <span class="px-3 py-1 bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-bold uppercase tracking-wider">
-                ${b.status}
-              </span>
-              <p class="text-[11px] text-slate-400 mt-1">Issued: ${new Date(b.created_at).toLocaleDateString()}</p>
-            </div>
-          </div>
-
-          <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-            <div class="space-y-1">
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Reserved Property</p>
-              <h4 class="font-bold text-slate-900 text-sm">${b.house_name}</h4>
-              <p class="text-slate-600">${b.room_type}</p>
-              <p class="text-slate-500">${b.room_exact_address}</p>
-            </div>
-
-            <div class="space-y-1">
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Tenant Identity</p>
-              <h4 class="font-bold text-slate-900 text-sm">${b.user_name}</h4>
-              <p class="text-slate-600">Phone: ${b.user_phone}</p>
-              <p class="text-slate-500">Origin: ${b.user_old_address}</p>
-            </div>
-
-            <div class="space-y-1">
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Host & Terms</p>
-              <h4 class="font-bold text-slate-900 text-sm">${b.owner_name}</h4>
-              <p class="text-slate-600">Rent: ₹${b.rent} / month | Duration: ${b.duration} mo</p>
-              <p class="text-slate-500">Checkin: ${b.checkin_date}</p>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      lucide.createIcons();
-    }
-
-    // 11. ADMIN PANEL CONTROLLER
-    function checkAdminTrigger() {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('admin') === 'rehzo123') {
-        openAdminDashboard();
-      }
-    }
-
-    function openAdminDashboard() {
-      showView('viewAdmin');
-      loadAdminListings();
-    }
-
-    async function loadAdminListings() {
-      const container = document.getElementById('adminListingsGrid');
-      container.innerHTML = '<div class="col-span-full text-center py-6 text-xs text-slate-400">Reading Supabase records...</div>';
-
-      const { data, error } = await supabase.from('listings').select('*').order('created_at', { ascending: false });
-      if (error || !data) return;
-
-      document.getElementById('adminTotalBadge').innerText = `${data.length} listings`;
-
-      container.innerHTML = data.map(item => `
-        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between space-y-3">
-          <div>
-            <div class="flex justify-between items-start">
-              <h4 class="font-bold text-slate-900 text-sm">${item.house_name}</h4>
-              <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 rounded text-slate-700">${item.city}</span>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">₹${item.rent}/mo | ${item.room_type}</p>
-            <p class="text-[11px] text-slate-400 mt-0.5">Owner: ${item.owner_name} (${item.owner_phone})</p>
-          </div>
-          <button onclick="adminDelete('${item.id}')" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition">
-            Delete Listing Permanently
-          </button>
-        </div>
-      `).join('');
-    }
-
-    window.adminDelete = async (id) => {
-      if (!confirm('Are you sure you want to delete this listing from REHZO database?')) return;
-      const { error } = await supabase.from('listings').delete().eq('id', id);
-      if (error) {
-        showToast('Delete error: ' + error.message);
-      } else {
-        showToast('Listing removed successfully', 'success');
-        loadAdminListings();
-        fetchListings();
-      }
-    };
-
-    // 12. ATTACH GENERAL LISTENERS
-    function initListeners() {
-      document.getElementById('navBtnExplore').onclick = () => showView('viewExplore');
-      document.getElementById('navBtnPostRoom').onclick = () => showView('viewPostRoom');
-      document.getElementById('navBtnMyBookings').onclick = () => {
-        showView('viewMyBookings');
-        fetchMyBookings();
-      };
-      document.getElementById('btnExitAdmin').onclick = () => showView('viewExplore');
-
-      // Admin Secret Trigger (Double Tap Logo)
-      let logoClickTimer;
-      document.getElementById('brandLogo').addEventListener('click', () => {
-        if (logoClickTimer) {
-          clearTimeout(logoClickTimer);
-          logoClickTimer = null;
-          const pass = prompt('Enter REHZO Admin Passcode:');
-          if (pass === 'rehzo123') openAdminDashboard();
-        } else {
-          logoClickTimer = setTimeout(() => { logoClickTimer = null; }, 400);
-        }
-      });
-
-      // Modals
-      document.getElementById('btnCloseAuth').onclick = () => document.getElementById('modalAuth').classList.add('hidden');
-      document.getElementById('btnCloseBooking').onclick = () => document.getElementById('modalBooking').classList.add('hidden');
-
-      // Auth Mode Switch
-      document.getElementById('btnSwitchAuthMode').onclick = (e) => {
-        e.preventDefault();
-        authIsSignUp = !authIsSignUp;
-        document.getElementById('fieldAuthName').classList.toggle('hidden', !authIsSignUp);
-        document.getElementById('authTitle').innerText = authIsSignUp ? 'Create REHZO ID' : 'Sign In to REHZO';
-        document.getElementById('authSub').innerText = authIsSignUp ? 'Register your real estate profile' : 'Book verified rooms or list your property';
-        document.getElementById('btnSubmitAuth').innerText = authIsSignUp ? 'Register Account' : 'Enter REHZO Cloud';
-        e.target.innerText = authIsSignUp ? 'Already registered? Sign In' : "Don't have an account? Create an ID";
-      };
-
-      // Auth Submission
-      document.getElementById('formAuth').onsubmit = async (e) => {
-        e.preventDefault();
-        const phone = document.getElementById('inAuthPhone').value.trim();
-        const pwd = document.getElementById('inAuthPassword').value;
-
-        if (authIsSignUp) {
-          const name = document.getElementById('inAuthName').value.trim();
-          const uid = 'RZ-' + Math.floor(100000 + Math.random() * 900000);
-          const { data, error } = await supabase.from('profiles').insert([{ uid, name, phone, password: pwd }]).select().single();
-          if (error) {
-            showToast('Sign up error: ' + error.message);
-            return;
-          }
-          currentUser = data;
-        } else {
-          const { data, error } = await supabase.from('profiles').select('*').eq('phone', phone).eq('password', pwd).single();
-          if (error || !data) {
-            showToast('Invalid phone or password credentials');
-            return;
-          }
-          currentUser = data;
-        }
-
-        localStorage.setItem('rehzo_user_v2', JSON.stringify(currentUser));
-        updateAuthStatus();
-        document.getElementById('modalAuth').classList.add('hidden');
-        showToast(`Welcome, ${currentUser.name}!`, 'success');
-      };
-
-      // Search & Filters
-      document.getElementById('btnFilterTrigger').onclick = () => {
-        const city = document.getElementById('searchCity').value.trim();
-        const type = document.getElementById('searchType').value;
-        fetchListings({ city, type });
-      };
-
-      // Filter pills
-      document.querySelectorAll('.filter-pill').forEach(btn => {
-        btn.onclick = () => {
-          btn.classList.toggle('bg-indigo-600');
-          btn.classList.toggle('text-white');
-          btn.classList.toggle('border-indigo-600');
-        };
-      });
-    }
-
-    // 13. DOM READY BOOTSTRAP
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      updateAuthStatus();
-      initListeners();
-      fetchListings();
-      checkAdminTrigger();
+  }
+  alertBox.style.display = 'none';
+
+  var sLow = q.toLowerCase();
+  var filtered = DB.listings.filter(function(l) {
+    return l.status === 'available' && (
+      l.houseName.toLowerCase().indexOf(sLow) !== -1 ||
+      l.city.toLowerCase().indexOf(sLow) !== -1 ||
+      l.roomType.toLowerCase().indexOf(sLow) !== -1
+    );
+  });
+  renderHomeGrid(filtered);
+}
+
+function applyFilters() {
+  var c = document.getElementById('countryFilter').value;
+  var t = document.getElementById('typeFilter').value;
+  var filtered = DB.listings.filter(function(l) {
+    return l.status === 'available' && (!c || l.country === c) && (!t || l.roomType === t);
+  });
+  renderHomeGrid(filtered);
+}
+
+function filterChip(cat, el) {
+  var chips = document.querySelectorAll('.chip');
+  for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
+  el.classList.add('active');
+  if (cat === 'all') renderHomeGrid();
+  else {
+    var filtered = DB.listings.filter(function(l){
+      return l.status === 'available' && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
     });
-  </script>
+    renderHomeGrid(filtered);
+  }
+}
+
+function resetAllFilters() {
+  document.getElementById('countryFilter').value = '';
+  document.getElementById('typeFilter').value = '';
+  document.getElementById('homeSearchInput').value = '';
+  renderHomeGrid();
+}
+
+// ================= NEAR ME (STRICT 10 KM GPS & WORKING REFRESH) =================
+function getDistKm(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function renderNearGrid() {
+  var near = [];
+  for (var i = 0; i < DB.listings.length; i++) {
+    var l = DB.listings[i];
+    if (l.status === 'available' && l.lat && l.lng) {
+      var d = getDistKm(userGeo.lat, userGeo.lng, l.lat, l.lng);
+      if (d <= 10) {
+        near.push(Object.assign({}, l, { distKm: d.toFixed(1) }));
+      }
+    }
+  }
+  var container = document.getElementById('nearRoomsGrid');
+  if (!near.length) {
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No available rooms within 10 km radius of your location.</div>';
+    return;
+  }
+  container.innerHTML = near.map(function(r) {
+    return '<div class="room-card">' +
+      '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb">' +
+        '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
+      '</div>' +
+      '<div class="room-details">' +
+        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
+        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
+        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function detectGPS(isManual) {
+  var statusText = document.getElementById('nearStatusText');
+  var btn = document.getElementById('gpsRefreshBtn');
+  statusText.innerText = 'Detecting real live GPS…';
+  if (btn) btn.innerText = 'Scanning…';
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      userGeo.lat = pos.coords.latitude;
+      userGeo.lng = pos.coords.longitude;
+      statusText.innerText = '📍 Live GPS: ' + userGeo.lat.toFixed(4) + ', ' + userGeo.lng.toFixed(4);
+      if (btn) btn.innerText = 'Refresh';
+      renderNearGrid();
+      if (isManual) alert("Location successfully updated from Live GPS!");
+    }, function() {
+      statusText.innerText = '📍 Location: Sasaram Central (GPS Default)';
+      if (btn) btn.innerText = 'Refresh';
+      renderNearGrid();
+      if (isManual) alert("GPS permission timed out or denied. Using accurate location fallback.");
+    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+  } else {
+    statusText.innerText = '📍 Geolocation not supported on this device';
+    if (btn) btn.innerText = 'Refresh';
+    renderNearGrid();
+  }
+}
+
+function renderSearchGrid() {
+  var container = document.getElementById('searchRoomsGrid');
+  var list = DB.listings.filter(function(x){ return x.status === 'available'; });
+  container.innerHTML = list.map(function(r) {
+    return '<div class="room-card">' +
+      '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb">' +
+        '<span class="avail-badge">Available</span>' +
+      '</div>' +
+      '<div class="room-details">' +
+        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
+        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
+        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ================= MY BOOKINGS (MUTUAL CANCELLATION FLOW) =================
+function switchBookingsTab(tab) {
+  currentBookingsTab = tab;
+  document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
+  document.getElementById('tabBookingsHistory').className = 'sub-tab-btn ' + (tab==='history'?'active':'');
+  document.getElementById('tabBookingsCancelled').className = 'sub-tab-btn ' + (tab==='cancelled'?'active':'');
+  renderBookingsView();
+}
+
+function renderBookingsView() {
+  var container = document.getElementById('bookingsListContainer');
+  var list = [];
+  if (currentBookingsTab === 'current') {
+    list = DB.bookings.filter(function(b){ return b.status === 'confirmed' || b.status === 'pending' || b.status === 'cancel_pending'; });
+  } else if (currentBookingsTab === 'cancelled') {
+    list = DB.bookings.filter(function(b){ return b.status === 'cancelled' || b.status === 'rejected'; });
+  } else {
+    list = DB.bookings;
+  }
+
+  if (!list.length) {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11.5px; color:#64748B;">No ' + currentBookingsTab + ' bookings found.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function(b) {
+    var l = DB.listings.find(function(x){ return x.id === b.listingId; }) || DB.listings[0];
+    var isConfirmed = (b.status === 'confirmed');
+    var isPending = (b.status === 'pending');
+    var isCancelled = (b.status === 'cancelled' || b.status === 'rejected');
+    var isCancelPending = (b.status === 'cancel_pending');
+
+    return '<div class="compact-h-card">' +
+      '<img src="' + (l ? l.photos[0] : '') + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+      '<div class="compact-h-content">' +
+        '<div class="compact-h-header">' +
+          '<div class="compact-h-title">' + b.houseName + '</div>' +
+          '<span class="status-pill ' + (isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isCancelPending ? 'status-cancel-pending' : 'status-cancelled') + '">' +
+            '● ' + (isPending ? 'Waiting Owner Acceptance' : isCancelPending ? 'Cancel Pending' : b.status.toUpperCase()) +
+          '</span>' +
+        '</div>' +
+        '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo</div>' +
+        '<div class="compact-h-sub">' + b.people + ' guest • ' + b.duration + ' mo • Check-in: ' + b.date + '</div>' +
+        (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + b.trl + ' <span onclick="navigator.clipboard.writeText(\'' + b.trl + '\');alert(\'TRL Copied!\')" style="cursor:pointer;">📋</span></div>' : '') +
+
+        '<div class="action-row-mini">' +
+          (isConfirmed ? '<button class="btn-mini" onclick="openSlipModal(\'' + b.id + '\')">📄 PDF Slip</button>' : '') +
+          (isConfirmed ? '<button class="btn-mini danger" onclick="requestCancelBooking(\'' + b.id + '\', \'user\')">Request Cancel</button>' : '') +
+          (isCancelPending && b.cancelRequestedBy === 'owner' ? '<button class="btn-mini success" onclick="acceptCancelBooking(\'' + b.id + '\')">Accept Owner Cancel</button>' : '') +
+          (isCancelPending && b.cancelRequestedBy === 'user' ? '<span class="btn-mini disabled">Waiting Owner Approval</span>' : '') +
+          (isPending ? '<span class="btn-mini disabled">Awaiting Confirmation</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function requestCancelBooking(id, role) {
+  if (confirm("Send cancellation request to the other party?")) {
+    var b = DB.bookings.find(function(x){ return x.id === id; });
+    if (b) {
+      b.status = 'cancel_pending';
+      b.cancelRequestedBy = role;
+      saveStorage();
+      addNotification("Cancellation request sent for " + b.houseName);
+      alert("Cancellation request sent successfully!");
+      renderBookingsView();
+      renderOwnerView();
+    }
+  }
+}
+
+function acceptCancelBooking(id) {
+  if (confirm("Accept cancellation? This will cancel the booking and immediately make the room Live & Available again on Home Screen.")) {
+    var b = DB.bookings.find(function(x){ return x.id === id; });
+    if (b) {
+      b.status = 'cancelled';
+      b.cancelRequestedBy = null;
+      var l = DB.listings.find(function(x){ return x.id === b.listingId; });
+      if (l) {
+        l.status = 'available';
+      }
+      saveStorage();
+      addNotification("Booking for " + b.houseName + " was cancelled. Room is now Available on Home Screen.");
+      alert("Booking Cancelled! The room is now live again for new users to book.");
+      renderBookingsView();
+      renderOwnerView();
+      renderHomeGrid();
+    }
+  }
+}
+
+// ================= OWNER VIEW (FULL EDIT INCLUDING PHOTOS) =================
+function toggleOwnerForm(show) {
+  document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
+  document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
+  if (show) {
+    if (DB.currentUser) {
+      document.getElementById('opName').value = DB.currentUser.name;
+      document.getElementById('opPhone').value = DB.currentUser.phone;
+      if (DB.currentUser.gmail && DB.currentUser.gmail !== 'N/A') {
+        document.getElementById('opGmail').value = DB.currentUser.gmail;
+      }
+    }
+    renderPhotoPreviewList();
+  }
+}
+
+function switchOwnerTab(tab) {
+  currentOwnerTab = tab;
+  document.getElementById('tabOwnerRooms').className = 'sub-tab-btn ' + (tab==='rooms'?'active':'');
+  document.getElementById('tabOwnerRequests').className = 'sub-tab-btn ' + (tab==='requests'?'active':'');
+  document.getElementById('tabOwnerExpired').className = 'sub-tab-btn ' + (tab==='expired'?'active':'');
+  renderOwnerView();
+}
+
+function renderOwnerView() {
+  document.getElementById('statActiveCount').innerText = DB.listings.filter(function(l){ return l.daysLeft > 0; }).length;
+  document.getElementById('statRequestsCount').innerText = DB.bookings.filter(function(b){ return b.status==='pending' || b.status==='confirmed' || b.status==='cancel_pending'; }).length;
+  document.getElementById('statExpiredCount').innerText = DB.listings.filter(function(l){ return l.daysLeft <= 0; }).length;
+
+  var container = document.getElementById('ownerContentContainer');
+
+  if (currentOwnerTab === 'rooms') {
+    container.innerHTML = DB.listings.map(function(r) {
+      var isExpired = (r.daysLeft <= 0);
+      return '<div class="compact-h-card">' +
+        '<img src="' + r.photos[0] + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+        '<div class="compact-h-content">' +
+          '<div class="compact-h-header">' +
+            '<div class="compact-h-title">' + r.houseName + '</div>' +
+            '<span class="status-pill ' + (r.status==='available' ? 'status-confirmed' : 'status-pending') + '">● ' + r.status.toUpperCase() + '</span>' +
+          '</div>' +
+          '<div class="compact-h-rent">₹' + Number(r.rent).toLocaleString() + '/mo</div>' +
+          '<div class="compact-h-sub">' + r.city + ', ' + r.country + ' • ' + r.daysLeft + ' days left</div>' +
+          '<div class="action-row-mini">' +
+            '<button class="btn-mini" onclick="openOwnerFullEditModal(\'' + r.id + '\')">✏️ Edit</button>' +
+            '<button class="btn-mini" onclick="openOwnerViewRoomModal(\'' + r.id + '\')">View</button>' +
+            (isExpired ? 
+              '<button class="btn-mini danger" onclick="deleteExpiredRoom(\'' + r.id + '\')">Delete</button>' :
+              '<button class="btn-mini disabled" onclick="alert(\'Notice: Room cannot be deleted until 90-day expiry period ends.\')">🔒 Locked</button>'
+            ) +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else if (currentOwnerTab === 'requests') {
+    if (!DB.bookings.length) {
+      container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No booking requests received yet.</div>';
+      return;
+    }
+    container.innerHTML = DB.bookings.map(function(b) {
+      var isPending = (b.status === 'pending');
+      var isConfirmed = (b.status === 'confirmed');
+      var isCancelPending = (b.status === 'cancel_pending');
+
+      return '<div class="compact-h-card" style="align-items:flex-start;">' +
+        '<div class="compact-h-content">' +
+          '<div class="compact-h-header">' +
+            '<div class="compact-h-title">' + b.houseName + '</div>' +
+            '<span class="status-pill ' + (isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isCancelPending ? 'status-cancel-pending' : 'status-cancelled') + '">' +
+              '● ' + (isPending ? 'Action Needed' : b.status.toUpperCase()) +
+            '</span>' +
+          '</div>' +
+          '<div style="font-size:10.5px; color:#334155; margin-top:3px; line-height:1.4;">' +
+            '<div><b>Guest:</b> ' + b.userName + ' (' + b.duration + ' month)</div>' +
+            '<div>📞 ' + b.userPhone + ' • ' + b.userGmail + '</div>' +
+            '<div>📍 ' + b.userOldAddress + '</div>' +
+            (b.trl ? '<div style="font-weight:700; color:#044E3B; margin-top:2px;">TRL: ' + b.trl + '</div>' : '') +
+          '</div>' +
+          '<div class="action-row-mini" style="margin-top:8px;">' +
+            (isPending ? '<button class="btn-mini success" onclick="ownerAcceptRequest(\'' + b.id + '\')">✓ Accept Booking</button>' : '') +
+            (isPending ? '<button class="btn-mini danger" onclick="ownerRejectRequest(\'' + b.id + '\')">✕ Reject</button>' : '') +
+            (isConfirmed ? '<button class="btn-mini" onclick="openSlipModal(\'' + b.id + '\')">📄 PDF Slip</button>' : '') +
+            (isConfirmed ? '<button class="btn-mini danger" onclick="requestCancelBooking(\'' + b.id + '\', \'owner\')">Request Cancel</button>' : '') +
+            (isCancelPending && b.cancelRequestedBy === 'user' ? '<button class="btn-mini success" onclick="acceptCancelBooking(\'' + b.id + '\')">Accept Tenant Cancel</button>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No expired listings.</div>';
+  }
+}
+
+// OWNER COMPLETE FULL EDIT MODAL (EVERYTHING INCLUDING PHOTOS)
+function openOwnerFullEditModal(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  editRoomUploadedPhotos = (r.photos && r.photos.length) ? r.photos.slice() : [];
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Full Edit Room Details</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+
+      '<!-- Photo Edit Section -->' +
+      '<div class="field-box" style="margin-bottom:10px;">' +
+        '<label class="field-label">Room Photos (max 3)</label>' +
+        '<div class="photo-upload-row" id="editPhotoPreviewContainer"></div>' +
+        '<input type="file" id="editPhotoFileInput" accept="image/*" multiple onchange="handleEditPhotoPick(event)" style="display:none;">' +
+        '<div class="photo-add-box" onclick="document.getElementById(\'editPhotoFileInput\').click()">' +
+          '<span style="font-size:16px;">⇪</span>' +
+          '<span>Add / Replace</span>' +
+          '<span id="editPhotoCountText">(' + editRoomUploadedPhotos.length + '/3)</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">House Name *</label><input id="editHouse" class="pill-input" value="' + r.houseName + '"></div>' +
+        '<div class="field-box"><label class="field-label">Room Type *</label><input id="editType" class="pill-input" value="' + r.roomType + '"></div>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Monthly Rent (₹) *</label><input id="editRent" type="number" class="pill-input" value="' + r.rent + '"></div>' +
+        '<div class="field-box"><label class="field-label">Deposit (₹)</label><input id="editDeposit" type="number" class="pill-input" value="' + (r.deposit||0) + '"></div>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">City *</label><input id="editCity" class="pill-input" value="' + r.city + '"></div>' +
+        '<div class="field-box"><label class="field-label">Pin code</label><input id="editPin" class="pill-input" value="' + (r.pin||'') + '"></div>' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Full Address *</label>' +
+        '<input id="editAddr" class="pill-input" value="' + r.address + '">' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Suitable For (comma separated)</label><input id="editSuitable" class="pill-input" value="' + (r.suitableFor ? r.suitableFor.join(', ') : '') + '"></div>' +
+        '<div class="field-box"><label class="field-label">Amenities (comma separated)</label><input id="editAmenities" class="pill-input" value="' + (r.amenities ? r.amenities.join(', ') : '') + '"></div>' +
+      '</div>' +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">Conditions & Rules</label>' +
+        '<input id="editRules" class="pill-input" value="' + (r.rules ? r.rules.join(', ') : '') + '">' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="saveOwnerFullEdit(\'' + r.id + '\')">Save & Update Room</button>' +
+    '</div>' +
+  '</div>';
+
+  renderEditPhotoPreviewList();
+}
+
+function handleEditPhotoPick(event) {
+  var files = Array.prototype.slice.call(event.target.files, 0, 3 - editRoomUploadedPhotos.length);
+  files.forEach(function(f) {
+    if (!f.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (editRoomUploadedPhotos.length < 3) {
+        editRoomUploadedPhotos.push(e.target.result);
+        renderEditPhotoPreviewList();
+      }
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function renderEditPhotoPreviewList() {
+  var container = document.getElementById('editPhotoPreviewContainer');
+  if (!container) return;
+  document.getElementById('editPhotoCountText').innerText = '(' + editRoomUploadedPhotos.length + '/3)';
+  container.innerHTML = editRoomUploadedPhotos.map(function(src, i) {
+    return '<div class="photo-preview-item">' +
+      '<img src="' + src + '" class="photo-thumb-preview">' +
+      '<button type="button" class="photo-del-btn" onclick="editRoomUploadedPhotos.splice(' + i + ',1);renderEditPhotoPreviewList();">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function saveOwnerFullEdit(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  r.houseName = document.getElementById('editHouse').value.trim() || r.houseName;
+  r.roomType = document.getElementById('editType').value.trim() || r.roomType;
+  r.rent = parseFloat(document.getElementById('editRent').value) || r.rent;
+  r.deposit = parseFloat(document.getElementById('editDeposit').value) || 0;
+  r.city = document.getElementById('editCity').value.trim() || r.city;
+  r.pin = document.getElementById('editPin').value.trim() || r.pin;
+  r.address = document.getElementById('editAddr').value.trim() || r.address;
+
+  if (editRoomUploadedPhotos.length > 0) {
+    r.photos = editRoomUploadedPhotos.slice();
+  }
+
+  var sStr = document.getElementById('editSuitable').value.trim();
+  if (sStr) r.suitableFor = sStr.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+
+  var aStr = document.getElementById('editAmenities').value.trim();
+  if (aStr) r.amenities = aStr.split(',').map(function(a){ return a.trim(); }).filter(Boolean);
+
+  var ruStr = document.getElementById('editRules').value.trim();
+  if (ruStr) r.rules = ruStr.split(',').map(function(ru){ return ru.trim(); }).filter(Boolean);
+
+  saveStorage();
+  closeModal();
+  alert("Room details and photos successfully updated!");
+  renderOwnerView();
+  renderHomeGrid();
+}
+
+// OWNER VIEW ROOM OVERVIEW
+function openOwnerViewRoomModal(roomId) {
+  var r = DB.listings.find(function(x){ return x.id === roomId; });
+  if (!r) return;
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Room Overview</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<img src="' + r.photos[0] + '" style="width:100%; height:140px; border-radius:14px; object-fit:cover; margin-bottom:10px;">' +
+      '<div style="font-size:12px; line-height:1.7; color:#334155;">' +
+        '<div><b>Property:</b> ' + r.houseName + ' (' + r.roomType + ')</div>' +
+        '<div><b>Rent:</b> ₹' + r.rent + '/month • <b>Deposit:</b> ₹' + r.deposit + '</div>' +
+        '<div><b>Address:</b> ' + r.address + ', ' + r.city + '</div>' +
+        '<div><b>Suitable For:</b> ' + (r.suitableFor ? r.suitableFor.join(', ') : 'Anyone') + '</div>' +
+        '<div><b>Amenities:</b> ' + (r.amenities ? r.amenities.join(', ') : 'None') + '</div>' +
+        '<div><b>Conditions:</b> ' + (r.rules ? r.rules.join(', ') : 'Standard rules apply') + '</div>' +
+        '<div><b>Status:</b> ' + r.status.toUpperCase() + ' (' + r.daysLeft + ' days left)</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function ownerAcceptRequest(bookingId) {
+  var b = DB.bookings.find(function(x){ return x.id === bookingId; });
+  if (!b) return;
+
+  var trl = '';
+  for (var i = 0; i < 12; i++) trl += Math.floor(Math.random() * 10);
+  b.trl = trl;
+  b.status = 'confirmed';
+
+  var room = DB.listings.find(function(x){ return x.id === b.listingId; });
+  if (room) {
+    room.status = 'booked';
+  }
+
+  saveStorage();
+  addNotification("Your booking for " + b.houseName + " is CONFIRMED! TRL: " + b.trl);
+  alert("Booking Request ACCEPTED!\nTRL Generated: " + b.trl + "\nOfficial PDF Slip is ready.");
+
+  renderOwnerView();
+  renderBookingsView();
+  renderHomeGrid();
+  openSlipModal(b.id);
+}
+
+function ownerRejectRequest(bookingId) {
+  if (confirm("Reject this booking request?")) {
+    var b = DB.bookings.find(function(x){ return x.id === bookingId; });
+    if (b) {
+      b.status = 'rejected';
+      saveStorage();
+      addNotification("Booking request for " + b.houseName + " was declined by owner.");
+      alert("Booking request rejected.");
+      renderOwnerView();
+      renderBookingsView();
+    }
+  }
+}
+
+function deleteExpiredRoom(id) {
+  if (confirm("Delete this expired room?")) {
+    DB.listings = DB.listings.filter(function(x){ return x.id !== id; });
+    saveStorage();
+    renderOwnerView();
+    renderHomeGrid();
+  }
+}
+
+// ================= OWNER LISTING FORM HANDLERS =================
+function toggleDrawer(id) {
+  var d = document.getElementById(id);
+  d.classList.toggle('open');
+}
+
+function toggleSelectChip(el, group, val) {
+  el.classList.toggle('selected');
+  var isSel = el.classList.contains('selected');
+  if (group === 'suitable') {
+    if (isSel) selectedSuitable.push(val);
+    else selectedSuitable = selectedSuitable.filter(function(x){ return x !== val; });
+    document.getElementById('suitableSelectedText').innerText = selectedSuitable.length ? selectedSuitable.join(', ') : 'Select Suitable For';
+  } else if (group === 'amenity') {
+    if (isSel) selectedAmenities.push(val);
+    else selectedAmenities = selectedAmenities.filter(function(x){ return x !== val; });
+    document.getElementById('amenitiesSelectedText').innerText = selectedAmenities.length ? selectedAmenities.join(', ') : 'Select Amenities';
+  } else if (group === 'rule') {
+    if (isSel) selectedRules.push(val);
+    else selectedRules = selectedRules.filter(function(x){ return x !== val; });
+  }
+}
+
+function updateDialPrefix(code) {
+  var c = WORLD_COUNTRIES.find(function(item){ return item.code === code; });
+  if (c) {
+    document.getElementById('opDialPrefix').innerText = c.dial;
+    document.getElementById('opRentSym').innerText = c.sym;
+    document.getElementById('opDepSym').innerText = c.sym;
+  }
+}
+
+function saveExactMapLocation() {
+  var btn = document.getElementById('opMapLockBtn');
+  var txt = document.getElementById('opMapLockText');
+  txt.innerText = 'Locking coordinates…';
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      lockedMapCoord = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      btn.classList.add('locked');
+      txt.innerText = '✓ Live GPS Location Saved (' + pos.coords.latitude.toFixed(4) + ')';
+      alert("Exact Map Coordinates Saved to Listing!");
+    }, function() {
+      lockedMapCoord = { lat: userGeo.lat, lng: userGeo.lng };
+      btn.classList.add('locked');
+      txt.innerText = '✓ Exact Map Location Saved (' + userGeo.lat.toFixed(4) + ')';
+      alert("Exact Location Saved to Listing!");
+    }, { enableHighAccuracy: true });
+  } else {
+    lockedMapCoord = { lat: userGeo.lat, lng: userGeo.lng };
+    btn.classList.add('locked');
+    txt.innerText = '✓ Exact Map Location Saved';
+  }
+}
+
+function handlePhotoPick(event) {
+  var files = Array.prototype.slice.call(event.target.files, 0, 3 - uploadedPhotos.length);
+  files.forEach(function(f) {
+    if (!f.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (uploadedPhotos.length < 3) {
+        uploadedPhotos.push(e.target.result);
+        renderPhotoPreviewList();
+      }
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function renderPhotoPreviewList() {
+  var container = document.getElementById('photoPreviewContainer');
+  document.getElementById('photoCountText').innerText = '(' + uploadedPhotos.length + '/3)';
+  container.innerHTML = uploadedPhotos.map(function(src, i) {
+    return '<div class="photo-preview-item">' +
+      '<img src="' + src + '" class="photo-thumb-preview">' +
+      '<button type="button" class="photo-del-btn" onclick="uploadedPhotos.splice(' + i + ',1);renderPhotoPreviewList();">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function handlePublishProperty(e) {
+  e.preventDefault();
+
+  var name = document.getElementById('opName').value.trim();
+  var phone = document.getElementById('opPhone').value.trim();
+  var gmail = document.getElementById('opGmail').value.trim();
+
+  var cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (!phone || cleanPhone.length < 7 || cleanPhone.length > 15) {
+    alert("Please provide a valid and real contact phone number.");
+    return;
+  }
+
+  if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
+    alert("Please enter a valid real Gmail address or leave it empty.");
+    return;
+  }
+
+  var house = document.getElementById('opHouse').value.trim();
+  var rent = parseFloat(document.getElementById('opRent').value) || 2500;
+
+  var newRoom = {
+    id: 'L-' + Date.now(),
+    houseName: house,
+    roomType: document.getElementById('opRoomType').value,
+    suitableFor: selectedSuitable.length ? selectedSuitable : ['Family'],
+    amenities: selectedAmenities.length ? selectedAmenities : ['Wi-Fi'],
+    rules: selectedRules.length ? selectedRules : ['No Smoking'],
+    rent: rent,
+    deposit: parseFloat(document.getElementById('opDeposit').value) || 0,
+    country: document.getElementById('opCountry').value,
+    city: document.getElementById('opCity').value.trim(),
+    state: document.getElementById('opState').value.trim(),
+    pin: document.getElementById('opPin').value.trim(),
+    address: document.getElementById('opAddr').value.trim(),
+    lat: lockedMapCoord.lat,
+    lng: lockedMapCoord.lng,
+    ownerUid: DB.currentUser ? DB.currentUser.uid : 'rehzo_owner',
+    ownerName: name,
+    phone: phone,
+    gmail: gmail || 'N/A',
+    status: 'available',
+    photos: uploadedPhotos.length ? uploadedPhotos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'],
+    daysLeft: 90
+  };
+
+  DB.listings.unshift(newRoom);
+  saveStorage();
+  e.target.reset();
+  uploadedPhotos = [];
+  alert("Room published successfully for 90 Days!");
+  toggleOwnerForm(false);
+  goView('owner');
+}
+
+// ================= USER BOOKING MODAL =================
+function openBookingPillModal(id) {
+  var l = DB.listings.find(function(x){ return x.id === id; });
+  if (!l) return;
+  activeBookingRoom = l;
+  var today = new Date().toISOString().slice(0, 10);
+
+  var rulesHTML = (l.rules && l.rules.length) 
+    ? l.rules.map(function(r){ return '<span style="display:inline-block; padding:3px 8px; background:#E2E8F0; border-radius:12px; font-size:10px; font-weight:700; margin:2px;">• ' + r + '</span>'; }).join('')
+    : '<span style="font-size:10px; color:#64748B;">Standard house rules apply</span>';
+
+  var prefillName = DB.currentUser ? DB.currentUser.name : '';
+  var prefillPhone = DB.currentUser ? DB.currentUser.phone : '';
+  var prefillGmail = (DB.currentUser && DB.currentUser.gmail !== 'N/A') ? DB.currentUser.gmail : '';
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Request Room Booking</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" value="' + prefillName + '" placeholder="Full Name"></div>' +
+        '<div class="field-box"><label class="field-label">Real Mobile No *</label><input id="bpPhone" class="pill-input" value="' + prefillPhone + '" placeholder="Mobile"></div>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" value="' + prefillGmail + '" placeholder="name@email.com"></div>' +
+        '<div class="field-box"><label class="field-label">Your Permanent Address *</label><input id="bpOldAddr" class="pill-input" placeholder="Permanent address"></div>' +
+      '</div>' +
+      '<div class="pill-grid">' +
+        '<div class="field-box"><label class="field-label">Check-in Date *</label><input id="bpDate" type="date" value="' + today + '" class="pill-input"></div>' +
+        '<div class="field-box"><label class="field-label">Stay Duration *</label><select id="bpMonths" class="pill-input" onchange="calculateBookingRent()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>' +
+      '</div>' +
+
+      '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; margin:8px 0;">' +
+        '<div style="font-size:11px; font-weight:800; color:#044E3B; margin-bottom:4px;">Owner Conditions & Rules:</div>' +
+        '<div>' + rulesHTML + '</div>' +
+        '<label style="display:flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; color:#1E293B; margin-top:8px; cursor:pointer;">' +
+          '<input type="checkbox" id="agreeRulesCheck" checked style="accent-color:#044E3B;">' +
+          'I agree to abide by all Owner Conditions & Rules *' +
+        '</label>' +
+      '</div>' +
+
+      '<div style="background:#F1F8F5; border:1px solid #A7F3D0; border-radius:16px; padding:10px; font-size:11px; margin:10px 0;">' +
+        '<div style="display:flex; justify-content:space-between;"><span>Monthly Rent:</span> <b id="calcRentPill">₹' + l.rent.toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; margin-top:2px;"><span>Deposit:</span> <b id="calcDepositPill">₹' + (l.deposit||0).toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #6EE7B7; padding-top:4px; font-size:12px; font-weight:800; color:#044E3B;"><span>Total Payable:</span> <span id="calcTotalPill">₹' + (l.rent + (l.deposit||0)).toLocaleString() + '</span></div>' +
+      '</div>' +
+      '<button class="big-action-btn" onclick="submitBookingRequest()">Send Request to Owner →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function calculateBookingRent() {
+  if (!activeBookingRoom) return;
+  var m = parseInt(document.getElementById('bpMonths').value) || 1;
+  var rent = activeBookingRoom.rent;
+  var dep = activeBookingRoom.deposit || 0;
+  document.getElementById('calcRentPill').innerText = '₹' + rent.toLocaleString();
+  document.getElementById('calcDepositPill').innerText = dep ? '₹' + dep.toLocaleString() : 'None';
+  document.getElementById('calcTotalPill').innerText = '₹' + ((rent * m) + dep).toLocaleString();
+}
+
+function submitBookingRequest() {
+  var name = document.getElementById('bpName').value.trim();
+  var phone = document.getElementById('bpPhone').value.trim();
+  var gmail = document.getElementById('bpGmail').value.trim();
+  var addr = document.getElementById('bpOldAddr').value.trim();
+  var date = document.getElementById('bpDate').value;
+  var months = parseInt(document.getElementById('bpMonths').value) || 1;
+  var agreed = document.getElementById('agreeRulesCheck') ? document.getElementById('agreeRulesCheck').checked : true;
+
+  if (!name || !phone || !addr || !date) {
+    alert("Please fill all required booking fields.");
+    return;
+  }
+
+  var cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (cleanPhone.length < 7 || cleanPhone.length > 15) {
+    alert("Please enter a valid real mobile number.");
+    return;
+  }
+
+  if (gmail && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(gmail)) {
+    alert("Please enter a real valid Gmail address or leave it empty.");
+    return;
+  }
+
+  if (!agreed) {
+    alert("You must agree to Owner Conditions & Rules to proceed.");
+    return;
+  }
+
+  var newBk = {
+    id: 'BK-' + Date.now(),
+    trl: null,
+    listingId: activeBookingRoom.id,
+    houseName: activeBookingRoom.houseName,
+    roomType: activeBookingRoom.roomType,
+    rent: activeBookingRoom.rent,
+    duration: months,
+    date: date,
+    people: 1,
+    userUid: DB.currentUser ? DB.currentUser.uid : 'UID-GUEST',
+    userName: name,
+    userPhone: phone,
+    userGmail: gmail || 'N/A',
+    userOldAddress: addr,
+    ownerName: activeBookingRoom.ownerName,
+    ownerPhone: activeBookingRoom.phone,
+    roomExactAddress: activeBookingRoom.address + ', ' + activeBookingRoom.city + ', ' + (activeBookingRoom.state||'') + ' - ' + (activeBookingRoom.pin||''),
+    status: 'pending',
+    cancelRequestedBy: null
+  };
+
+  DB.bookings.unshift(newBk);
+  saveStorage();
+  closeModal();
+  addNotification("Booking request sent for " + activeBookingRoom.houseName + ". Waiting for owner acceptance.");
+  alert("Booking Request Sent!\nOwner has received your request. Once accepted, your 12-Digit TRL Slip will be issued automatically.");
+  goView('bookings');
+}
+
+// ================= OFFICIAL TRL SLIP MODAL =================
+function openSlipModal(bkId) {
+  var b = DB.bookings.find(function(x){ return x.id === bkId; });
+  if (!b) return;
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box" id="printableSlip">' +
+      '<div class="modal-header">' +
+        '<div style="display:flex; align-items:center; gap:6px;">' +
+          '<div style="width:24px; height:24px; border-radius:6px; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;">⌂</div>' +
+          '<b style="font-size:14px; color:#0F172A;">Rehzo Official TRL Slip</b>' +
+        '</div>' +
+        '<div style="display:flex; gap:6px; align-items:center;">' +
+          '<button onclick="window.print()" style="padding:4px 10px; background:#044E3B; color:#fff; border:none; border-radius:12px; font-size:10px; font-weight:800; cursor:pointer;">🖨 Print / PDF</button>' +
+          '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div style="text-align:center; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:10px;">' +
+        '<div style="font-size:8px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">OFFICIAL 12-DIGIT TRL NUMBER</div>' +
+        '<div style="font-size:20px; font-weight:900; letter-spacing:1.5px; color:#0F172A; margin:2px 0;">' + (b.trl || 'PENDING') + '</div>' +
+        '<div style="font-size:8px; color:#64748B;">🔒 Permanent Non-Reusable Record</div>' +
+      '</div>' +
+
+      '<div class="barcode-strip"></div>' +
+
+      '<div style="font-size:11px; line-height:1.7;">' +
+        '<div style="font-weight:800; color:#044E3B; margin-bottom:2px;">🏠 1. ROOM & PROPERTY DETAILS</div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Property Name:</span> <b style="color:#0F172A;">' + b.houseName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + b.roomType + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Exact Room Address:</span> <b style="color:#0F172A; text-align:right; max-width:200px;">' + (b.roomExactAddress || 'Sasaram, Bihar') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">₹' + Number(b.rent).toLocaleString() + ' / month</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + b.date + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Duration:</span> <b style="color:#0F172A;">' + b.duration + ' Month(s)</b></div>' +
+
+        '<div style="font-weight:800; color:#044E3B; margin-top:8px; margin-bottom:2px;">👤 2. TENANT DETAILS (Tenant)</div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Tenant Name:</span> <b style="color:#0F172A;">' + b.userName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Tenant Phone:</span> <b style="color:#0F172A;">' + b.userPhone + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right; max-width:200px;">' + b.userOldAddress + '</b></div>' +
+
+        '<div style="font-weight:800; color:#044E3B; margin-top:8px; margin-bottom:2px;">🏢 3. PROPERTY OWNER DETAILS (Host)</div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + b.ownerName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Phone:</span> <b style="color:#0F172A;">' + b.ownerPhone + '</b></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function closeModal() {
+  document.getElementById('modalSlot').innerHTML = '';
+}
+
+// ================= NOTIFICATIONS ENGINE =================
+function addNotification(msg) {
+  DB.notifications.unshift({ text: msg, time: 'Just now' });
+  saveStorage();
+  var dot = document.getElementById('headerNotifDot');
+  if (dot) dot.style.display = 'block';
+}
+
+function renderNotifications() {
+  var container = document.getElementById('notificationsContainer');
+  var dot = document.getElementById('headerNotifDot');
+  if (dot) dot.style.display = 'none';
+
+  if (!DB.notifications.length) {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No notifications yet.</div>';
+    return;
+  }
+  container.innerHTML = DB.notifications.map(function(n) {
+    return '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:14px; padding:11px 14px; font-size:11.5px; color:#1E293B;">' +
+      '<div>' + n.text + '</div>' +
+      '<div style="font-size:9px; color:#64748B; margin-top:3px;">' + n.time + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ================= PRIVATE ADMIN MODERATION =================
+function renderAdminModeration() {
+  var container = document.getElementById('adminListingsControl');
+  container.innerHTML = DB.listings.map(function(r) {
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
+      '<div><b>' + r.houseName + '</b> (' + r.city + ') - ₹' + r.rent + '</div>' +
+      '<button onclick="DB.listings=DB.listings.filter(function(x){return x.id!==\''+r.id+'\'});saveStorage();renderAdminModeration();renderHomeGrid();" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
+    '</div>';
+  }).join('');
+}
+</script>
 </body>
 </html>
