@@ -80,13 +80,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* Balanced Pill Form Fields */
 .form-section-title { font-size: 12.5px; font-weight: 800; color: #0F172A; margin: 12px 0 6px; border-top: 1px solid #F1F5F9; padding-top: 10px; }
 .pill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 8px; }
-.field-box { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field-box { display: flex; flex-direction: column; gap: 4px; min-width: 0; position: relative; }
 .field-label { font-size: 10.5px; font-weight: 700; color: #334155; }
-.pill-input { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11.5px; font-weight: 600; color: #1E293B; outline: none; }
+.pill-input { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11.5px; font-weight: 600; color: #1E293B; outline: none; transition: border-color 0.2s; }
 .pill-input:focus { border-color: #044E3B; }
-.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 10px; width: 100%; }
-.dial-prefix-wrap span { font-size: 11px; font-weight: 700; color: #475569; margin-right: 3px; white-space: nowrap; }
+.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 6px; width: 100%; }
+.dial-select-inline { border: none; background: transparent; font-size: 11px; font-weight: 700; color: #044E3B; outline: none; max-width: 80px; cursor: pointer; }
 .dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
+
+/* Password Box with Show/Hide */
+.pwd-wrap { position: relative; display: flex; align-items: center; }
+.pwd-wrap input { padding-right: 38px; }
+.pwd-toggle-btn { position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 14px; color: #64748B; padding: 4px; }
 
 /* Drawers */
 .collapsible-trigger { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11px; font-weight: 700; color: #334155; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
@@ -106,8 +111,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 .map-lock-btn { width: 100%; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; padding: 11px; font-size: 11.5px; font-weight: 800; color: #1E293B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0; }
 .map-lock-btn.locked { border-color: #10B981; color: #044E3B; background: #ECFDF5; }
-.big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 10px rgba(4,78,59,0.2); }
-.google-auth-btn { width: 100%; background: #fff; color: #1E293B; border: 1px solid #CBD5E1; border-radius: 30px; padding: 11px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.big-action-btn { width: 100%; background: #044E3B; color: #fff; border: none; border-radius: 30px; padding: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 10px rgba(4,78,59,0.2); transition: transform 0.1s, opacity 0.2s; }
+.big-action-btn:active { transform: scale(0.98); }
+.google-auth-btn { width: 100%; background: #fff; color: #1E293B; border: 1px solid #CBD5E1; border-radius: 30px; padding: 11px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: background-color 0.2s; }
+.google-auth-btn:hover { background-color: #F8FAFC; }
 
 /* Sub Tabs & Stat Cards */
 .sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
@@ -335,7 +342,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           <div class="field-box">
             <label class="field-label">Contact No. *</label>
             <div class="dial-prefix-wrap">
-              <span id="opDialPrefix">+91</span>
+              <span id="opDialPrefix" style="font-size:11px; font-weight:700; color:#044E3B; margin-left:6px;">+91</span>
               <input id="opPhone" type="tel" placeholder="Mobile Number" required>
             </div>
           </div>
@@ -401,14 +408,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           <div class="field-box">
             <label class="field-label">Monthly Rent *</label>
             <div class="dial-prefix-wrap">
-              <span id="opRentSym">₹</span>
+              <span id="opRentSym" style="font-size:11px; font-weight:700; color:#044E3B; margin-left:6px;">₹</span>
               <input id="opRent" type="number" placeholder="Rent" required>
             </div>
           </div>
           <div class="field-box">
             <label class="field-label">Security Deposit (optional)</label>
             <div class="dial-prefix-wrap">
-              <span id="opDepSym">₹</span>
+              <span id="opDepSym" style="font-size:11px; font-weight:700; color:#044E3B; margin-left:6px;">₹</span>
               <input id="opDeposit" type="number" placeholder="Deposit">
             </div>
           </div>
@@ -535,7 +542,35 @@ var WORLD_COUNTRIES = [
   { code: 'SG', name: 'Singapore', dial: '+65', sym: 'S$' },
   { code: 'SA', name: 'Saudi Arabia', dial: '+966', sym: 'SAR' },
   { code: 'NP', name: 'Nepal', dial: '+977', sym: 'NPR' },
-  { code: 'BD', name: 'Bangladesh', dial: '+880', sym: 'BDT' }
+  { code: 'BD', name: 'Bangladesh', dial: '+880', sym: 'BDT' },
+  { code: 'MY', name: 'Malaysia', dial: '+60', sym: 'RM' },
+  { code: 'NZ', name: 'New Zealand', dial: '+64', sym: 'NZ$' },
+  { code: 'ZA', name: 'South Africa', dial: '+27', sym: 'R' },
+  { code: 'JP', name: 'Japan', dial: '+81', sym: '¥' },
+  { code: 'CN', name: 'China', dial: '+86', sym: '¥' },
+  { code: 'KR', name: 'South Korea', dial: '+82', sym: '₩' },
+  { code: 'BR', name: 'Brazil', dial: '+55', sym: 'R$' },
+  { code: 'MX', name: 'Mexico', dial: '+52', sym: '$' },
+  { code: 'IT', name: 'Italy', dial: '+39', sym: '€' },
+  { code: 'ES', name: 'Spain', dial: '+34', sym: '€' },
+  { code: 'NL', name: 'Netherlands', dial: '+31', sym: '€' },
+  { code: 'SE', name: 'Sweden', dial: '+46', sym: 'kr' },
+  { code: 'CH', name: 'Switzerland', dial: '+41', sym: 'CHF' },
+  { code: 'RU', name: 'Russia', dial: '+7', sym: '₽' },
+  { code: 'TR', name: 'Turkey', dial: '+90', sym: '₺' },
+  { code: 'ID', name: 'Indonesia', dial: '+62', sym: 'Rp' },
+  { code: 'TH', name: 'Thailand', dial: '+66', sym: '฿' },
+  { code: 'VN', name: 'Vietnam', dial: '+84', sym: '₫' },
+  { code: 'PH', name: 'Philippines', dial: '+63', sym: '₱' },
+  { code: 'EG', name: 'Egypt', dial: '+20', sym: 'E£' },
+  { code: 'NG', name: 'Nigeria', dial: '+234', sym: '₦' },
+  { code: 'KE', name: 'Kenya', dial: '+254', sym: 'KSh' },
+  { code: 'PK', name: 'Pakistan', dial: '+92', sym: 'Rs' },
+  { code: 'LK', name: 'Sri Lanka', dial: '+94', sym: 'Rs' },
+  { code: 'QA', name: 'Qatar', dial: '+974', sym: 'QR' },
+  { code: 'KW', name: 'Kuwait', dial: '+965', sym: 'KD' },
+  { code: 'OM', name: 'Oman', dial: '+968', sym: 'OMR' },
+  { code: 'BH', name: 'Bahrain', dial: '+973', sym: 'BD' }
 ];
 
 function populateCountryDropdowns() {
@@ -654,6 +689,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   populateCountryDropdowns();
   detectUserCountry();
   updateUserHeaderChip();
+  await handleOAuthRedirect();
   await syncFromSupabase();
 
   setTimeout(function() {
@@ -665,35 +701,68 @@ window.addEventListener('DOMContentLoaded', async function() {
   }, 1000);
 });
 
-// ================= AUTH SYSTEM (SUPABASE PROFILES) =================
+// ================= AUTH SYSTEM (REAL SUPABASE + OAUTH) =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
     if (DB.currentUser) {
-      chip.innerText = '👤 ' + DB.currentUser.name.split(' ')[0] + ' (' + DB.currentUser.uid + ')';
+      chip.innerText = '👤 ' + (DB.currentUser.name ? DB.currentUser.name.split(' ')[0] : 'User') + ' (' + DB.currentUser.uid + ')';
     } else {
       chip.innerText = '👤 Login';
     }
   }
 }
 
+// Handles Google OAuth response automatically
+async function handleOAuthRedirect() {
+  try {
+    var sessionRes = await sb.auth.getSession();
+    var session = sessionRes.data ? sessionRes.data.session : null;
+    if (session && session.user && session.user.email) {
+      var googleEmail = session.user.email;
+      var profRes = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
+      if (profRes.data && profRes.data.length > 0) {
+        DB.currentUser = profRes.data[0];
+        localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+        updateUserHeaderChip();
+      } else {
+        // First-time Google Login -> Open Registration Form
+        var defaultName = (session.user.user_metadata && session.user.user_metadata.full_name) ? session.user.user_metadata.full_name : '';
+        setTimeout(function() {
+          openRegistrationModal({
+            gmail: googleEmail,
+            name: defaultName,
+            isGoogleFirstTime: true
+          });
+        }, 500);
+      }
+    }
+  } catch(e) {
+    console.warn("OAuth Session parse notice:", e);
+  }
+}
+
+// Main Login Modal
 function openProfileModal(callbackAction) {
   if (DB.currentUser) {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
       '<div class="modal-box">' +
         '<div class="modal-header">' +
-          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
+          '<div style="display:flex; align-items:center; gap:8px;">' +
+            '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">⌂</div>' +
+            '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
+          '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
         '</div>' +
         '<div style="text-align:center; padding:10px 0;">' +
           '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
           '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + DB.currentUser.name + '</h2>' +
-          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + DB.currentUser.uid + '</div>' +
+          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">REHZO ID: ' + DB.currentUser.uid + '</div>' +
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
           '<div>📞 <b>Phone:</b> ' + DB.currentUser.phone + '</div>' +
-          '<div>✉️ <b>Recovery Gmail:</b> ' + (DB.currentUser.gmail || 'None') + '</div>' +
-          '<div>☁️ <b>Cloud Status:</b> Connected to Supabase Production</div>' +
+          '<div>✉️ <b>Gmail:</b> ' + (DB.currentUser.gmail || 'Not Linked') + '</div>' +
+          '<div>🛡️ <b>Account:</b> Unified Tenant & Landlord Access</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
       '</div>' +
@@ -702,104 +771,259 @@ function openProfileModal(callbackAction) {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
       '<div class="modal-box">' +
         '<div class="modal-header">' +
-          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Sign in to REHZO</h3>' +
+          '<div style="display:flex; align-items:center; gap:8px;">' +
+            '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">⌂</div>' +
+            '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Welcome to REHZO</h3>' +
+          '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
         '</div>' +
+
+        '<!-- Google OAuth Button -->' +
+        '<button class="google-auth-btn" onclick="startRealGoogleOAuth()">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+          '<span>Continue with Google</span>' +
+        '</button>' +
+
+        '<div style="text-align:center; font-size:10.5px; color:#94A3B8; margin:10px 0; position:relative;">' +
+          '<span style="background:#fff; padding:0 8px; position:relative; z-index:1; font-weight:700;">OR LOGIN WITH REHZO ID</span>' +
+          '<div style="position:absolute; top:50%; left:0; right:0; height:1px; background:#E2E8F0; z-index:0;"></div>' +
+        '</div>' +
+
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">User ID / Mobile *</label>' +
-          '<input id="loginUid" class="pill-input" placeholder="e.g. 9876543210">' +
+          '<label class="field-label">REHZO User ID or Mobile No. *</label>' +
+          '<input id="loginUid" class="pill-input" placeholder="e.g. rahul123 or 9876543210">' +
         '</div>' +
         '<div class="field-box" style="margin-bottom:8px;">' +
           '<label class="field-label">Password *</label>' +
-          '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password">' +
+          '<div class="pwd-wrap">' +
+            '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password">' +
+            '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'loginPwd\', this)">👁️</button>' +
+          '</div>' +
         '</div>' +
-        '<button class="big-action-btn" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Sign In →</button>' +
-        '<div style="text-align:center; margin-top:10px;">' +
-          '<span style="font-size:11px; color:#044E3B; font-weight:800; cursor:pointer;" onclick="openSignUpModal(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Don\'t have an account? Sign Up</span>' +
+        '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
+        '<div style="text-align:center; margin-top:12px;">' +
+          '<span style="font-size:11px; color:#044E3B; font-weight:800; cursor:pointer;" onclick="openRegistrationModal(null, ' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">New here? Create REHZO Account</span>' +
         '</div>' +
       '</div>' +
     '</div>';
   }
 }
 
-function openSignUpModal(callbackAction) {
+// Real Supabase Google OAuth Trigger
+async function startRealGoogleOAuth() {
+  var redirectToUrl = window.location.origin + window.location.pathname;
+  var res = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: redirectToUrl
+    }
+  });
+  if (res.error) {
+    alert("Google Sign-In Error: " + res.error.message);
+  }
+}
+
+// Structured Registration Modal
+function openRegistrationModal(prefillData, callbackAction) {
+  var pName = (prefillData && prefillData.name) ? prefillData.name : '';
+  var pGmail = (prefillData && prefillData.gmail) ? prefillData.gmail : '';
+  var isGoogle = (prefillData && prefillData.isGoogleFirstTime) ? true : false;
+
+  var countryOptionsHTML = WORLD_COUNTRIES.map(function(c) {
+    return '<option value="' + c.dial + '" ' + (c.code === 'IN' ? 'selected' : '') + '>' + c.code + ' (' + c.dial + ')</option>';
+  }).join('');
+
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
-        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO ID</h3>' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">⌂</div>' +
+          '<div>' +
+            '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">' + (isGoogle ? 'Complete Registration' : 'Create REHZO Account') + '</h3>' +
+            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
+          '</div>' +
+        '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
-      '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Full Name *</label>' +
-        '<input id="regName" class="pill-input" placeholder="Full name">' +
-      '</div>' +
-      '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Mobile Number *</label>' +
-        '<input id="regPhone" type="tel" class="pill-input" placeholder="e.g. 9876543210">' +
-      '</div>' +
-      '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Recovery Gmail (Optional)</label>' +
-        '<input id="regGmail" type="email" class="pill-input" placeholder="name@gmail.com">' +
-      '</div>' +
-      '<div class="field-box" style="margin-bottom:12px;">' +
-        '<label class="field-label">Password *</label>' +
-        '<input id="regPwd" type="password" class="pill-input" placeholder="Min 4 characters">' +
-      '</div>' +
-      '<button class="big-action-btn" onclick="submitRegisterAccount(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Register Profile →</button>' +
+
+      (isGoogle ? '<div style="background:#ECFDF5; border:1px solid #A7F3D0; padding:8px 10px; border-radius:12px; font-size:10.5px; color:#044E3B; font-weight:700; margin-bottom:10px;">✓ Google account verified. Please complete your User ID and contact setup below.</div>' : '') +
+
+      '<form id="formRegistration" onsubmit="submitUnifiedRegistration(event, ' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">' +
+
+        '<!-- Row 1: Full Name (Left) | Contact No. + Country Code (Right) -->' +
+        '<div class="pill-grid">' +
+          '<div class="field-box">' +
+            '<label class="field-label">Full Name *</label>' +
+            '<input id="regFullName" class="pill-input" placeholder="e.g. Rahul Sharma" value="' + pName + '" required>' +
+          '</div>' +
+          '<div class="field-box">' +
+            '<label class="field-label">Contact No. *</label>' +
+            '<div class="dial-prefix-wrap">' +
+              '<select id="regCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
+              '<input id="regPhoneInput" type="tel" placeholder="Mobile Number" required>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<!-- Row 2: Gmail (Google Auto-filled) | Create User ID (Right) -->' +
+        '<div class="pill-grid">' +
+          '<div class="field-box">' +
+            '<label class="field-label">Gmail *</label>' +
+            '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + pGmail + '" ' + (isGoogle ? 'readonly style="background:#F1F5F9;"' : '') + ' required>' +
+          '</div>' +
+          '<div class="field-box">' +
+            '<label class="field-label">Create User ID *</label>' +
+            '<input id="regUidInput" class="pill-input" placeholder="e.g. rahul123" onblur="validateUniqueUserId(this.value)" required>' +
+            '<span id="regUidFeedback" style="font-size:9px; font-weight:700; margin-top:1px;"></span>' +
+          '</div>' +
+        '</div>' +
+
+        '<!-- Row 3: Create Password with Show/Hide -->' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Create Password * (Min 6 characters)</label>' +
+          '<div class="pwd-wrap">' +
+            '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Strong password" minlength="6" required>' +
+            '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'regPasswordInput\', this)">👁️</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<button type="submit" id="btnRegisterSubmit" class="big-action-btn">Complete & Enter REHZO →</button>' +
+      '</form>' +
     '</div>' +
   '</div>';
 }
 
-async function submitRegisterAccount(callbackAction) {
-  var name = document.getElementById('regName').value.trim();
-  var phone = document.getElementById('regPhone').value.trim();
-  var gmail = document.getElementById('regGmail').value.trim();
-  var pwd = document.getElementById('regPwd').value;
+function togglePasswordVisibility(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerText = '🙈';
+  } else {
+    input.type = 'password';
+    btn.innerText = '👁️';
+  }
+}
 
-  if (!name || !phone || !pwd) { alert("Please fill all required fields."); return; }
-
-  var uid = 'RZ' + Math.floor(100000 + Math.random() * 900000);
-  var payload = { uid: uid, name: name, phone: phone, gmail: gmail || null, password: pwd };
-
-  var res = await sb.from('profiles').insert([payload]).select().single();
-  if (res.error) {
-    alert("Signup error: " + res.error.message);
+async function validateUniqueUserId(uidVal) {
+  var feedback = document.getElementById('regUidFeedback');
+  if (!feedback) return;
+  var cleanUid = uidVal.trim().toLowerCase();
+  if (cleanUid.length < 3) {
+    feedback.innerText = '⚠️ Must be at least 3 characters';
+    feedback.style.color = '#B45309';
     return;
   }
+  var res = await sb.from('profiles').select('uid').eq('uid', cleanUid);
+  if (res.data && res.data.length > 0) {
+    feedback.innerText = '✕ User ID already taken. Choose another.';
+    feedback.style.color = '#DC2626';
+  } else {
+    feedback.innerText = '✓ User ID available!';
+    feedback.style.color = '#15803D';
+  }
+}
 
-  DB.currentUser = res.data;
-  localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
-  updateUserHeaderChip();
-  closeModal();
-  alert("Profile created successfully! Your REHZO ID: " + uid);
-  resumePendingAction(callbackAction);
+async function submitUnifiedRegistration(e, callbackAction) {
+  e.preventDefault();
+  var btn = document.getElementById('btnRegisterSubmit');
+  btn.disabled = true;
+  btn.innerText = 'Creating Secure Profile...';
+
+  try {
+    var name = document.getElementById('regFullName').value.trim();
+    var dial = document.getElementById('regCountryDial').value;
+    var rawPhone = document.getElementById('regPhoneInput').value.trim();
+    var gmail = document.getElementById('regGmailInput').value.trim().toLowerCase();
+    var uid = document.getElementById('regUidInput').value.trim().toLowerCase();
+    var password = document.getElementById('regPasswordInput').value;
+
+    var cleanDigits = rawPhone.replace(/[^0-9]/g, '');
+    if (cleanDigits.length < 7 || cleanDigits.length > 15) {
+      alert("Please provide a valid contact number.");
+      btn.disabled = false;
+      btn.innerText = 'Complete & Enter REHZO →';
+      return;
+    }
+    var fullPhone = dial + ' ' + cleanDigits;
+
+    // Check duplicate User ID in Supabase
+    var uidCheck = await sb.from('profiles').select('uid').eq('uid', uid);
+    if (uidCheck.data && uidCheck.data.length > 0) {
+      alert("This User ID is already taken. Please choose another one.");
+      btn.disabled = false;
+      btn.innerText = 'Complete & Enter REHZO →';
+      return;
+    }
+
+    var newProfile = {
+      uid: uid,
+      name: name,
+      phone: fullPhone,
+      gmail: gmail,
+      password: password
+    };
+
+    var insertRes = await sb.from('profiles').insert([newProfile]).select().single();
+    if (insertRes.error) throw insertRes.error;
+
+    DB.currentUser = insertRes.data;
+    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    updateUserHeaderChip();
+    closeModal();
+    alert("Welcome to REHZO, " + DB.currentUser.name + "!\nYour Account is live for Booking & Hosting.");
+    resumePendingAction(callbackAction);
+
+  } catch(err) {
+    alert("Registration failed: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'Complete & Enter REHZO →';
+  }
 }
 
 async function submitCredentialsLogin(callbackAction) {
+  var btn = document.getElementById('btnLoginSubmit');
   var identifier = document.getElementById('loginUid').value.trim();
   var pwd = document.getElementById('loginPwd').value;
 
-  if (!identifier || !pwd) { alert("Please enter both ID/Mobile and Password."); return; }
-
-  var res = await sb.from('profiles').select('*')
-    .or('uid.eq.' + identifier + ',phone.eq.' + identifier)
-    .eq('password', pwd);
-
-  if (res.error || !res.data || res.data.length === 0) {
-    alert("Invalid ID or Password. Please try again.");
+  if (!identifier || !pwd) {
+    alert("Please enter both User ID/Mobile and Password.");
     return;
   }
 
-  DB.currentUser = res.data[0];
-  localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
-  updateUserHeaderChip();
-  closeModal();
-  alert("Logged in successfully as " + DB.currentUser.name + "!");
-  resumePendingAction(callbackAction);
+  btn.disabled = true;
+  btn.innerText = 'Verifying...';
+
+  try {
+    var res = await sb.from('profiles').select('*')
+      .or('uid.eq.' + identifier.toLowerCase() + ',phone.ilike.%' + identifier + '%')
+      .eq('password', pwd);
+
+    if (res.error || !res.data || res.data.length === 0) {
+      alert("Invalid User ID/Phone or Password. Please check your credentials.");
+      btn.disabled = false;
+      btn.innerText = 'Login with REHZO ID →';
+      return;
+    }
+
+    DB.currentUser = res.data[0];
+    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    updateUserHeaderChip();
+    closeModal();
+    alert("Logged in successfully as " + DB.currentUser.name + "!");
+    resumePendingAction(callbackAction);
+  } catch(e) {
+    alert("Login error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'Login with REHZO ID →';
+  }
 }
 
-function logoutUser() {
+async function logoutUser() {
   if (confirm("Log out from REHZO?")) {
+    await sb.auth.signOut();
     DB.currentUser = null;
     localStorage.removeItem('rehzo_current_user');
     updateUserHeaderChip();
