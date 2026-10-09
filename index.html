@@ -542,35 +542,7 @@ var WORLD_COUNTRIES = [
   { code: 'SG', name: 'Singapore', dial: '+65', sym: 'S$' },
   { code: 'SA', name: 'Saudi Arabia', dial: '+966', sym: 'SAR' },
   { code: 'NP', name: 'Nepal', dial: '+977', sym: 'NPR' },
-  { code: 'BD', name: 'Bangladesh', dial: '+880', sym: 'BDT' },
-  { code: 'MY', name: 'Malaysia', dial: '+60', sym: 'RM' },
-  { code: 'NZ', name: 'New Zealand', dial: '+64', sym: 'NZ$' },
-  { code: 'ZA', name: 'South Africa', dial: '+27', sym: 'R' },
-  { code: 'JP', name: 'Japan', dial: '+81', sym: '¥' },
-  { code: 'CN', name: 'China', dial: '+86', sym: '¥' },
-  { code: 'KR', name: 'South Korea', dial: '+82', sym: '₩' },
-  { code: 'BR', name: 'Brazil', dial: '+55', sym: 'R$' },
-  { code: 'MX', name: 'Mexico', dial: '+52', sym: '$' },
-  { code: 'IT', name: 'Italy', dial: '+39', sym: '€' },
-  { code: 'ES', name: 'Spain', dial: '+34', sym: '€' },
-  { code: 'NL', name: 'Netherlands', dial: '+31', sym: '€' },
-  { code: 'SE', name: 'Sweden', dial: '+46', sym: 'kr' },
-  { code: 'CH', name: 'Switzerland', dial: '+41', sym: 'CHF' },
-  { code: 'RU', name: 'Russia', dial: '+7', sym: '₽' },
-  { code: 'TR', name: 'Turkey', dial: '+90', sym: '₺' },
-  { code: 'ID', name: 'Indonesia', dial: '+62', sym: 'Rp' },
-  { code: 'TH', name: 'Thailand', dial: '+66', sym: '฿' },
-  { code: 'VN', name: 'Vietnam', dial: '+84', sym: '₫' },
-  { code: 'PH', name: 'Philippines', dial: '+63', sym: '₱' },
-  { code: 'EG', name: 'Egypt', dial: '+20', sym: 'E£' },
-  { code: 'NG', name: 'Nigeria', dial: '+234', sym: '₦' },
-  { code: 'KE', name: 'Kenya', dial: '+254', sym: 'KSh' },
-  { code: 'PK', name: 'Pakistan', dial: '+92', sym: 'Rs' },
-  { code: 'LK', name: 'Sri Lanka', dial: '+94', sym: 'Rs' },
-  { code: 'QA', name: 'Qatar', dial: '+974', sym: 'QR' },
-  { code: 'KW', name: 'Kuwait', dial: '+965', sym: 'KD' },
-  { code: 'OM', name: 'Oman', dial: '+968', sym: 'OMR' },
-  { code: 'BH', name: 'Bahrain', dial: '+973', sym: 'BD' }
+  { code: 'BD', name: 'Bangladesh', dial: '+880', sym: 'BDT' }
 ];
 
 function populateCountryDropdowns() {
@@ -612,7 +584,6 @@ var matchedBookingId = null;
 // ================= SYNC WITH SUPABASE =================
 async function syncFromSupabase() {
   try {
-    // 1. Fetch Listings
     var resListings = await sb.from('listings').select('*').order('created_at', { ascending: false });
     if (!resListings.error && resListings.data) {
       DB.listings = resListings.data.map(function(item) {
@@ -648,7 +619,6 @@ async function syncFromSupabase() {
       });
     }
 
-    // 2. Fetch Bookings
     var resBookings = await sb.from('bookings').select('*').order('created_at', { ascending: false });
     if (!resBookings.error && resBookings.data) {
       DB.bookings = resBookings.data.map(function(b) {
@@ -713,7 +683,6 @@ function updateUserHeaderChip() {
   }
 }
 
-// Handles Google OAuth response automatically
 async function handleOAuthRedirect() {
   try {
     var sessionRes = await sb.auth.getSession();
@@ -726,7 +695,6 @@ async function handleOAuthRedirect() {
         localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
         updateUserHeaderChip();
       } else {
-        // First-time Google Login -> Open Registration Form
         var defaultName = (session.user.user_metadata && session.user.user_metadata.full_name) ? session.user.user_metadata.full_name : '';
         setTimeout(function() {
           openRegistrationModal({
@@ -738,11 +706,11 @@ async function handleOAuthRedirect() {
       }
     }
   } catch(e) {
-    console.warn("OAuth Session parse notice:", e);
+    console.warn("OAuth Session notice:", e);
   }
 }
 
-// Main Login Modal
+// Main Login Modal (Search Bar: "User ID or Mobile No.")
 function openProfileModal(callbackAction) {
   if (DB.currentUser) {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
@@ -757,7 +725,7 @@ function openProfileModal(callbackAction) {
         '<div style="text-align:center; padding:10px 0;">' +
           '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
           '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + DB.currentUser.name + '</h2>' +
-          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">REHZO ID: ' + DB.currentUser.uid + '</div>' +
+          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + DB.currentUser.uid + '</div>' +
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
           '<div>📞 <b>Phone:</b> ' + DB.currentUser.phone + '</div>' +
@@ -790,8 +758,8 @@ function openProfileModal(callbackAction) {
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">REHZO User ID or Mobile No. *</label>' +
-          '<input id="loginUid" class="pill-input" placeholder="e.g. rahul123 or 9876543210">' +
+          '<label class="field-label">User ID or Mobile No. *</label>' +
+          '<input id="loginUid" class="pill-input" placeholder="User ID or Mobile No.">' +
         '</div>' +
         '<div class="field-box" style="margin-bottom:8px;">' +
           '<label class="field-label">Password *</label>' +
@@ -809,17 +777,25 @@ function openProfileModal(callbackAction) {
   }
 }
 
-// Real Supabase Google OAuth Trigger
+// Google OAuth Handler (Gracefully handles disabled provider without crashing)
 async function startRealGoogleOAuth() {
-  var redirectToUrl = window.location.origin + window.location.pathname;
-  var res = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: redirectToUrl
+  try {
+    var redirectToUrl = window.location.origin + window.location.pathname;
+    var res = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: redirectToUrl }
+    });
+    if (res.error) {
+      if (res.error.message && res.error.message.indexOf("provider is not enabled") !== -1) {
+        alert("Google Login is being configured on Supabase Dashboard. Opening Registration Form for instant signup.");
+        openRegistrationModal();
+      } else {
+        alert("Google Login notice: " + res.error.message);
+      }
     }
-  });
-  if (res.error) {
-    alert("Google Sign-In Error: " + res.error.message);
+  } catch(e) {
+    alert("Opening direct registration form...");
+    openRegistrationModal();
   }
 }
 
@@ -846,15 +822,13 @@ function openRegistrationModal(prefillData, callbackAction) {
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
 
-      (isGoogle ? '<div style="background:#ECFDF5; border:1px solid #A7F3D0; padding:8px 10px; border-radius:12px; font-size:10.5px; color:#044E3B; font-weight:700; margin-bottom:10px;">✓ Google account verified. Please complete your User ID and contact setup below.</div>' : '') +
-
       '<form id="formRegistration" onsubmit="submitUnifiedRegistration(event, ' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">' +
 
         '<!-- Row 1: Full Name (Left) | Contact No. + Country Code (Right) -->' +
         '<div class="pill-grid">' +
           '<div class="field-box">' +
             '<label class="field-label">Full Name *</label>' +
-            '<input id="regFullName" class="pill-input" placeholder="e.g. Rahul Sharma" value="' + pName + '" required>' +
+            '<input id="regFullName" class="pill-input" placeholder="Full Name" value="' + pName + '" required>' +
           '</div>' +
           '<div class="field-box">' +
             '<label class="field-label">Contact No. *</label>' +
@@ -865,15 +839,15 @@ function openRegistrationModal(prefillData, callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<!-- Row 2: Gmail (Google Auto-filled) | Create User ID (Right) -->' +
+        '<!-- Row 2: Gmail (optional) | Create User ID (Right) -->' +
         '<div class="pill-grid">' +
           '<div class="field-box">' +
-            '<label class="field-label">Gmail *</label>' +
-            '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + pGmail + '" ' + (isGoogle ? 'readonly style="background:#F1F5F9;"' : '') + ' required>' +
+            '<label class="field-label">Gmail (optional)</label>' +
+            '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + pGmail + '">' +
           '</div>' +
           '<div class="field-box">' +
             '<label class="field-label">Create User ID *</label>' +
-            '<input id="regUidInput" class="pill-input" placeholder="e.g. rahul123" onblur="validateUniqueUserId(this.value)" required>' +
+            '<input id="regUidInput" class="pill-input" placeholder="Create User ID" onblur="validateUniqueUserId(this.value)" required>' +
             '<span id="regUidFeedback" style="font-size:9px; font-weight:700; margin-top:1px;"></span>' +
           '</div>' +
         '</div>' +
@@ -928,7 +902,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
   e.preventDefault();
   var btn = document.getElementById('btnRegisterSubmit');
   btn.disabled = true;
-  btn.innerText = 'Creating Secure Profile...';
+  btn.innerText = 'Creating Profile...';
 
   try {
     var name = document.getElementById('regFullName').value.trim();
@@ -947,7 +921,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
     var fullPhone = dial + ' ' + cleanDigits;
 
-    // Check duplicate User ID in Supabase
     var uidCheck = await sb.from('profiles').select('uid').eq('uid', uid);
     if (uidCheck.data && uidCheck.data.length > 0) {
       alert("This User ID is already taken. Please choose another one.");
@@ -960,7 +933,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
       uid: uid,
       name: name,
       phone: fullPhone,
-      gmail: gmail,
+      gmail: gmail || null,
       password: password
     };
 
@@ -971,7 +944,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Welcome to REHZO, " + DB.currentUser.name + "!\nYour Account is live for Booking & Hosting.");
+    alert("Welcome to REHZO, " + DB.currentUser.name + "!\nYour Account is ready.");
     resumePendingAction(callbackAction);
 
   } catch(err) {
@@ -1584,7 +1557,6 @@ async function handlePublishProperty(e) {
   try {
     var photoUrls = [];
 
-    // 1. Upload files to Supabase 'room-photos' Bucket
     for (var i = 0; i < uploadedPhotoFiles.length; i++) {
       var file = uploadedPhotoFiles[i];
       var cleanName = Date.now() + '-' + Math.random().toString(36).substring(7) + '-' + file.name.replace(/[^a-zA-Z0-9.]/g, '');
@@ -1599,7 +1571,6 @@ async function handlePublishProperty(e) {
       photoUrls = ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
     }
 
-    // 2. Insert Listing to Supabase Table
     var newListing = {
       house_name: document.getElementById('opHouse').value.trim(),
       room_type: document.getElementById('opRoomType').value,
