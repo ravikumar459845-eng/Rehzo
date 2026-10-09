@@ -1,125 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>REHZO | Global Room Rental & Real Estate TRL Network</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REHZO - Smart Global Rental Platform</title>
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Modern Icon Set -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Leaflet Map Styles and Script -->
+  <!-- Leaflet Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Supabase Official JS Client v2 -->
+  <!-- Supabase JS Client v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-    
-    :root {
-      --primary: #4f46e5;
-    }
-    
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      scroll-behavior: smooth;
-    }
-
-    .font-mono-code {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .glassmorphism {
       background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
-
-    .glassmorphism-dark {
-      background: rgba(15, 23, 42, 0.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    #mapPostPicker {
-      height: 380px;
+    #mapPicker, #mapView {
+      height: 320px;
       width: 100%;
-      border-radius: 1.25rem;
+      border-radius: 1rem;
       z-index: 10;
     }
-
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    /* Print styling specifically for TRL Physical Passes */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printArea, #printArea * {
-        visibility: visible;
-      }
-      #printArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 20px;
-      }
-    }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white custom-scrollbar">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
 
-  <!-- ================= HEADER / TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-50 glassmorphism border-b border-slate-200/80 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+  <!-- ================= TOP NAVIGATION ================= -->
+  <header class="sticky top-0 z-50 glassmorphism border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
       
-      <!-- Brand Logo with Secret Admin Trigger -->
-      <div class="flex items-center space-x-3 cursor-pointer select-none group" id="brandLogo" title="REHZO Global - Double tap logo to enter Admin Control Panel">
-        <div class="w-12 h-12 bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-indigo-200 group-hover:scale-105 transition transform">
+      <!-- Brand Logo (Double Click for Admin) -->
+      <div class="flex items-center space-x-3 cursor-pointer select-none group" id="brandLogo" title="REHZO Global | Double click for Admin Command">
+        <div class="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-indigo-200 group-hover:scale-105 transition transform">
           R
         </div>
         <div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-2xl font-black tracking-tight text-slate-900 block leading-none">REHZO</span>
-            <span class="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 rounded-md">PROD</span>
-          </div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mt-1">Cloud Rental Infrastructure</span>
+          <span class="text-2xl font-black tracking-tight text-slate-900 block leading-none">REHZO</span>
+          <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Global Verified Rentals</span>
         </div>
       </div>
 
-      <!-- Navigation Links -->
+      <!-- Navigation Tabs -->
       <nav class="flex items-center space-x-1 sm:space-x-3">
-        <button id="navBtnExplore" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition flex items-center gap-2">
-          <i data-lucide="compass" class="w-4 h-4"></i>
-          <span>Explore</span>
+        <button id="navBtnExplore" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-indigo-600 bg-indigo-50/70 hover:bg-indigo-100 transition flex items-center gap-1.5">
+          <i data-lucide="compass" class="w-4 h-4"></i> Explore
         </button>
-        <button id="navBtnPostRoom" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>List Room</span>
+        <button id="navBtnPostRoom" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> List Property
         </button>
-        <button id="navBtnMyBookings" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition flex items-center gap-2">
-          <i data-lucide="shield-check" class="w-4 h-4"></i>
-          <span>TRL Passes</span>
+        <button id="navBtnMyBookings" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i data-lucide="file-check-2" class="w-4 h-4"></i> My TRL Passes
         </button>
 
-        <!-- Dynamic User Identity Slot -->
         <div id="authSlot" class="pl-2 border-l border-slate-200">
           <!-- Injected via JavaScript -->
         </div>
@@ -127,304 +70,228 @@
     </div>
   </header>
 
-  <!-- ================= FLOATING ALERT NOTIFICATION ================= -->
-  <div id="toastNotification" class="fixed top-24 right-5 z-50 transform translate-y-[-180%] opacity-0 transition-all duration-300 pointer-events-none max-w-md bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3.5 border border-slate-800">
-    <div id="toastIconSlot" class="flex-shrink-0"></div>
-    <div>
-      <p id="toastTitleSlot" class="text-xs font-black text-slate-200 uppercase tracking-wider"></p>
-      <p id="toastMessageSlot" class="text-xs font-semibold text-slate-400 mt-0.5"></p>
-    </div>
+  <!-- ================= NOTIFICATION TOAST ================= -->
+  <div id="toast" class="fixed top-20 right-4 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 pointer-events-none max-w-sm bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+    <div id="toastIcon"></div>
+    <p id="toastMsg" class="text-xs font-semibold"></p>
   </div>
 
-  <!-- ================= MAIN CONTAINER ================= -->
-  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full space-y-10">
+  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-8">
 
-    <!-- VIEW 1: EXPLORE & REAL-TIME SEARCH STREAM -->
-    <section id="viewExplore" class="space-y-8">
+    <!-- VIEW 1: EXPLORE & SEARCH -->
+    <section id="viewExplore" class="space-y-6">
       
-      <!-- Search & Advanced Filter Section -->
-      <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <div class="flex flex-col lg:flex-row gap-4">
+      <!-- Search Banner & Filter Panel -->
+      <div class="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row gap-3">
           <div class="flex-1 relative">
-            <i data-lucide="map-pin" class="w-5 h-5 absolute left-4 top-4 text-slate-400"></i>
-            <input type="text" id="searchCityInput" placeholder="Search city, neighborhood, locality (e.g., Bandra, Whitefield, Rohini)..." class="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" />
+            <i data-lucide="map-pin" class="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400"></i>
+            <input type="text" id="searchCity" placeholder="City, locality, or landmark (e.g. Bandra, Indiranagar, South Ex)..." class="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
           </div>
-
-          <div class="w-full lg:w-64">
-            <select id="searchTypeInput" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+          <div class="w-full md:w-56">
+            <select id="searchType" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
               <option value="">All Categories</option>
               <option value="Single Private Room">Single Private Room</option>
-              <option value="Shared Bed Space">Shared Bed Space</option>
-              <option value="1 BHK Apartment">1 BHK Apartment</option>
+              <option value="Shared Sharing Room">Shared / Bed Space</option>
+              <option value="1 RK / 1 BHK Flat">1 RK / 1 BHK Flat</option>
               <option value="2 BHK Apartment">2 BHK Apartment</option>
-              <option value="3 BHK Luxury Suite">3 BHK Luxury Suite</option>
-              <option value="Studio Apartment">Studio Apartment</option>
+              <option value="Luxury Studio">Luxury Studio</option>
             </select>
           </div>
-
-          <div class="flex gap-2">
-            <button id="btnApplySearch" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 flex-1 lg:flex-none">
-              <i data-lucide="search" class="w-4 h-4"></i>
-              <span>Search Rooms</span>
-            </button>
-            <button id="btnResetFilters" class="px-4 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl text-sm transition" title="Clear Filters">
-              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-            </button>
-          </div>
+          <button id="btnFilterTrigger" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm transition flex items-center justify-center gap-2 shadow-md shadow-indigo-100">
+            <i data-lucide="search" class="w-4 h-4"></i> Find Rooms
+          </button>
         </div>
 
-        <!-- Budget Slider and Multi-Tag Filters -->
-        <div class="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
-          <div>
-            <div class="flex justify-between items-center mb-1">
-              <span class="text-xs font-bold text-slate-500 uppercase">Max Budget:</span>
-              <span id="priceDisplay" class="text-xs font-extrabold text-indigo-600 font-mono-code">₹50,000 / mo</span>
-            </div>
-            <input type="range" id="priceRange" min="2000" max="60000" step="1000" value="50000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
-          </div>
-
-          <div class="lg:col-span-3">
-            <span class="text-xs font-bold text-slate-500 uppercase block mb-2">Suitable Preferences:</span>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <button class="pref-tag px-3.5 py-1.5 rounded-full border border-slate-200 font-semibold hover:border-indigo-400 text-slate-600 transition" data-tag="Students">🎓 Students</button>
-              <button class="pref-tag px-3.5 py-1.5 rounded-full border border-slate-200 font-semibold hover:border-indigo-400 text-slate-600 transition" data-tag="Working Professionals">💼 Working Professionals</button>
-              <button class="pref-tag px-3.5 py-1.5 rounded-full border border-slate-200 font-semibold hover:border-indigo-400 text-slate-600 transition" data-tag="Families">👨‍👩‍👧 Families</button>
-              <button class="pref-tag px-3.5 py-1.5 rounded-full border border-slate-200 font-semibold hover:border-indigo-400 text-slate-600 transition" data-tag="Girls Only">🌸 Girls Only</button>
-              <button class="pref-tag px-3.5 py-1.5 rounded-full border border-slate-200 font-semibold hover:border-indigo-400 text-slate-600 transition" data-tag="Boys Only">⚡ Boys Only</button>
-            </div>
-          </div>
+        <!-- Filter Tags -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+          <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Suitable For:</span>
+          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Students">🎓 Students</button>
+          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Working Professionals">💼 Working Professionals</button>
+          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Families">👨‍👩‍👧 Families</button>
+          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Girls Only">🌸 Girls Only</button>
+          <button class="filter-pill px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-500 font-semibold" data-pref="Boys Only">⚡ Boys Only</button>
         </div>
       </div>
 
-      <!-- Feed Header -->
+      <!-- Listings Grid Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-black text-slate-900 tracking-tight">Verified Rental Properties</h2>
-          <p class="text-xs text-slate-500 mt-1">Live synchronized inventory with Supabase cloud infrastructure</p>
+          <h2 class="text-xl font-black text-slate-900 tracking-tight">Cloud Verified Properties</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Direct verified rental nodes with permanent 90-day retention</p>
         </div>
-        <div class="flex items-center gap-2">
-          <span id="inventoryStatusBadge" class="text-xs font-extrabold px-3 py-1.5 bg-slate-200 text-slate-700 rounded-full">Fetching nodes...</span>
-        </div>
+        <span id="badgeAvailableTotal" class="text-xs font-bold px-3 py-1 bg-slate-200/80 rounded-full text-slate-700">Connecting...</span>
       </div>
 
-      <!-- Rooms Grid Output -->
-      <div id="roomsGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Rendered via JavaScript -->
+      <!-- Room Cards Stream -->
+      <div id="gridRoomStream" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- VIEW 2: COMPREHENSIVE MULTI-STEP PROPERTY POSTING -->
-    <section id="viewPostRoom" class="hidden max-w-4xl mx-auto space-y-8">
-      <div class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-8">
+    <!-- VIEW 2: MULTI-STEP PROPERTY POSTING -->
+    <section id="viewPostRoom" class="hidden max-w-4xl mx-auto space-y-6">
+      <div class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-6">
         <div>
-          <span class="text-[11px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-md">Host / Landlord Portal</span>
-          <h2 class="text-2xl font-black text-slate-900 mt-2">Publish New Rental Property</h2>
-          <p class="text-xs text-slate-500 mt-1">Enter complete details. Your photos will be uploaded directly to Supabase cloud storage.</p>
+          <span class="text-[11px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Owner Node Creation</span>
+          <h2 class="text-2xl font-black text-slate-900 mt-2">Publish Real Estate Rental Node</h2>
+          <p class="text-xs text-slate-500 mt-1">Uploaded listings are stored in Supabase with high-resolution image hosting.</p>
         </div>
 
-        <form id="formPostProperty" class="space-y-8">
+        <form id="formNewProperty" class="space-y-6">
           
-          <!-- Step 1: Basic Classification -->
+          <!-- Section 1: Basic Information -->
           <div class="space-y-4">
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <span class="w-5 h-5 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-[10px]">1</span>
-              <span>General Property Details</span>
-            </h3>
-
+            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">1. Property Essentials</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Property Name / House Title *</label>
-                <input type="text" id="postHouseName" required placeholder="e.g. Royal Heights Residence" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Property / House Name</label>
+                <input type="text" id="inHouseName" required placeholder="e.g. Palm Grove Residency" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Room Category *</label>
-                <select id="postRoomType" required class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Room Category</label>
+                <select id="inRoomType" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
                   <option value="Single Private Room">Single Private Room</option>
-                  <option value="Shared Bed Space">Shared Bed Space</option>
-                  <option value="1 BHK Apartment">1 BHK Apartment</option>
+                  <option value="Shared Sharing Room">Shared / Bed Space</option>
+                  <option value="1 RK / 1 BHK Flat">1 RK / 1 BHK Flat</option>
                   <option value="2 BHK Apartment">2 BHK Apartment</option>
-                  <option value="3 BHK Luxury Suite">3 BHK Luxury Suite</option>
-                  <option value="Studio Apartment">Studio Apartment</option>
+                  <option value="Luxury Studio">Luxury Studio</option>
                 </select>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Monthly Rent (₹) *</label>
-                <input type="number" id="postRent" required placeholder="e.g. 12000" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono-code" />
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Monthly Rent (₹)</label>
+                <input type="number" id="inRent" required placeholder="e.g. 8500" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Security Deposit (₹)</label>
-                <input type="number" id="postDeposit" placeholder="e.g. 15000" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono-code" />
+                <input type="number" id="inDeposit" placeholder="e.g. 10000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
             </div>
           </div>
 
-          <!-- Step 2: Location and Map Geometry -->
-          <div class="space-y-4 pt-6 border-t border-slate-100">
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <span class="w-5 h-5 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-[10px]">2</span>
-              <span>Physical Address & Map Pinning</span>
-            </h3>
-
+          <!-- Section 2: Location & Address -->
+          <div class="space-y-4 pt-4 border-t border-slate-100">
+            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">2. Geo-Location & Physical Address</h3>
+            
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">City *</label>
-                <input type="text" id="postCity" required placeholder="e.g. Mumbai" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">City</label>
+                <input type="text" id="inCity" required placeholder="e.g. Mumbai" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">State</label>
-                <input type="text" id="postState" placeholder="e.g. Maharashtra" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <input type="text" id="inState" placeholder="e.g. Maharashtra" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">PIN Code</label>
-                <input type="text" id="postPin" placeholder="e.g. 400001" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono-code" />
+                <input type="text" id="inPin" placeholder="e.g. 400050" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Complete Street Address *</label>
-              <textarea id="postAddress" rows="2" required placeholder="Door/Flat No., Tower, Street, Near landmark..." class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Complete Address Line</label>
+              <textarea id="inAddress" rows="2" required placeholder="Building No, Flat No, Street, Landmark..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
             </div>
 
             <div>
-              <div class="flex justify-between items-center mb-1.5">
-                <label class="block text-xs font-bold text-slate-700 uppercase">Pinpoint Geographic Location (Click or Drag Marker)</label>
-                <span class="text-[11px] font-mono-code text-indigo-600 font-bold" id="geoCoordinatesLabel">Lat: 19.0760 | Lng: 72.8777</span>
-              </div>
-              <div id="mapPostPicker"></div>
-              <input type="hidden" id="postLat" value="19.0760" />
-              <input type="hidden" id="postLng" value="72.8777" />
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Pinpoint On Interactive Map (Click to place marker)</label>
+              <div id="mapPicker"></div>
+              <input type="hidden" id="inLat">
+              <input type="hidden" id="inLng">
             </div>
           </div>
 
-          <!-- Step 3: Amenities and Suitable Preferences -->
-          <div class="space-y-4 pt-6 border-t border-slate-100">
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <span class="w-5 h-5 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-[10px]">3</span>
-              <span>Amenities & Tenant Rules</span>
-            </h3>
-
+          <!-- Section 3: Details & Amenities -->
+          <div class="space-y-4 pt-4 border-t border-slate-100">
+            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">3. Amenities & Target Tenant</h3>
+            
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Suitable For</label>
-              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postPref" value="Students"> Students</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postPref" value="Working Professionals"> Working Pros</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postPref" value="Families"> Families</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postPref" value="Girls Only"> Girls Only</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postPref" value="Boys Only"> Boys Only</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Suitable For (Select Multiples)</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Students"> Students</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Working Professionals"> Working Pros</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Families"> Families</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Girls Only"> Girls Only</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="pref" value="Boys Only"> Boys Only</label>
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Included Amenities</label>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="WiFi"> WiFi High-Speed</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="Air Conditioner"> Air Conditioner</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="Attached Washroom"> Attached Washroom</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="Geyser / Hot Water"> Geyser / Water</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="RO Drinking Water"> RO Filter Water</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="Reserved Parking"> Vehicle Parking</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="Refrigerator"> Refrigerator</label>
-                <label class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition"><input type="checkbox" name="postAmenity" value="24/7 Security CCTV"> 24/7 CCTV</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Amenities Included</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="WiFi"> WiFi</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="AC"> Air Conditioner</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="Attached Bath"> Attached Bath</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="Geyser"> Geyser</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="RO Water"> RO Water</label>
+                <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50"><input type="checkbox" name="amenity" value="Parking"> Bike/Car Parking</label>
               </div>
             </div>
           </div>
 
-          <!-- Step 4: Storage Upload -->
-          <div class="space-y-4 pt-6 border-t border-slate-100">
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <span class="w-5 h-5 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-[10px]">4</span>
-              <span>High Resolution Photos</span>
-            </h3>
-
-            <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-indigo-500 transition bg-slate-50/50">
-              <i data-lucide="image-up" class="w-10 h-10 text-slate-400 mx-auto mb-2"></i>
-              <input type="file" id="postPhotosInput" multiple accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer" />
-              <p class="text-[11px] text-slate-400 mt-2">Files are automatically synced to Supabase Storage bucket <code>room-photos</code></p>
-              
-              <!-- Selected Photo Previews -->
-              <div id="photoPreviewContainer" class="flex flex-wrap gap-2 mt-4 justify-center"></div>
+          <!-- Section 4: Cloud Media Storage -->
+          <div class="space-y-4 pt-4 border-t border-slate-100">
+            <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">4. High Resolution Photos</h3>
+            <div>
+              <input type="file" id="inPhotos" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-dashed border-slate-300 rounded-2xl p-3">
+              <p class="text-[11px] text-slate-400 mt-1.5">Directly pushed to Supabase Storage bucket: <code>room-photos</code></p>
             </div>
           </div>
 
           <!-- Submit Button -->
           <div class="pt-4">
-            <button type="submit" id="btnSubmitProperty" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl text-base transition shadow-xl shadow-indigo-100 flex items-center justify-center gap-2">
-              <i data-lucide="cloud-lightning" class="w-5 h-5"></i>
-              <span>Publish Property to Live Cloud</span>
+            <button type="submit" id="btnPublishRoom" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-2xl text-base transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+              <i data-lucide="cloud-upload" class="w-5 h-5"></i> Publish Node to REHZO Cloud
             </button>
           </div>
         </form>
       </div>
     </section>
 
-    <!-- VIEW 3: TRL PASSES & DIGITAL CERTIFICATES -->
+    <!-- VIEW 3: USER TRL PASSES & BOOKINGS -->
     <section id="viewMyBookings" class="hidden space-y-6">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span class="text-[11px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-md">Legal Rental Proof</span>
-          <h2 class="text-2xl font-black text-slate-900 mt-2">Official 12-Digit TRL Rental Passes</h2>
-          <p class="text-xs text-slate-500 mt-1">Tenant-Owner verified agreement IDs generated on permanent cloud records.</p>
+          <span class="text-[11px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Verified Passes</span>
+          <h2 class="text-2xl font-black text-slate-900 mt-2">Active Rental TRL Passes</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Official 12-Digit Transaction Reference for Owner-Tenant Legal Transparency</p>
         </div>
-        <button id="btnRefreshBookings" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Cloud
-        </button>
       </div>
 
-      <!-- Passes Container -->
-      <div id="myPassesContainer" class="space-y-6">
-        <!-- Rendered via JavaScript -->
+      <!-- TRL Cards Container -->
+      <div id="bookingCardsContainer" class="space-y-6">
+        <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- VIEW 4: HIDDEN CENTRAL ADMIN CONTROL TOWER -->
+    <!-- VIEW 4: HIDDEN ADMIN PANEL -->
     <section id="viewAdmin" class="hidden space-y-6">
-      <!-- Admin Warning Header -->
-      <div class="bg-amber-500/10 border-2 border-amber-300 p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="bg-amber-500/10 border-2 border-amber-300 p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center space-x-4">
-          <div class="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200 flex-shrink-0">
-            <i data-lucide="shield-alert" class="w-7 h-7"></i>
+          <div class="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h3 class="text-lg font-black text-amber-950">REHZO Administrative Control Tower</h3>
-              <span class="px-2 py-0.5 text-[10px] font-black bg-amber-200 text-amber-900 rounded-md">ROOT ACCESS</span>
-            </div>
-            <p class="text-xs font-semibold text-amber-800 mt-0.5">Central database operations, live listing deletions, and booking status controls.</p>
+            <h3 class="text-lg font-black text-amber-950">REHZO Administrative Control Tower</h3>
+            <p class="text-xs font-semibold text-amber-800">Master database access & listing moderation authority</p>
           </div>
         </div>
-        <button id="btnExitAdminMode" class="px-5 py-2.5 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-xl text-xs transition">
+        <button id="btnExitAdmin" class="px-4 py-2 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-xl text-xs transition">
           Exit Admin Mode
         </button>
       </div>
 
-      <!-- Quick Platform Stats -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-bold text-slate-400 uppercase">Total Live Listings</span>
-          <h4 id="statTotalListings" class="text-2xl font-black text-slate-900 mt-1">--</h4>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-bold text-slate-400 uppercase">Confirmed Bookings</span>
-          <h4 id="statTotalBookings" class="text-2xl font-black text-emerald-600 mt-1">--</h4>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-bold text-slate-400 uppercase">Storage Media Count</span>
-          <h4 id="statStorageCount" class="text-2xl font-black text-indigo-600 mt-1">Active</h4>
-        </div>
-      </div>
-
-      <!-- Active Database Entries (Listings Moderation) -->
-      <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-6">
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-4">
         <div class="flex items-center justify-between">
-          <h4 class="text-base font-black text-slate-900">Listings Database (Live Supabase Table)</h4>
-          <span id="adminListingsCount" class="text-xs font-bold px-3 py-1 bg-slate-100 rounded-full text-slate-600">0 Items</span>
+          <h4 class="font-black text-slate-900 text-base">All Active Cloud Listings (Moderation)</h4>
+          <span id="adminTotalBadge" class="text-xs font-bold text-slate-500">0 items</span>
         </div>
-
-        <div id="adminListingsStream" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Rendered via JavaScript -->
+        <div id="adminListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Admin items -->
         </div>
       </div>
     </section>
@@ -432,353 +299,282 @@
   </main>
 
   <!-- ================= AUTHENTICATION MODAL ================= -->
-  <div id="modalAuth" class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div id="modalAuth" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 space-y-6 animate-in fade-in zoom-in-95 duration-200">
       <div class="flex justify-between items-center">
         <div>
-          <h3 id="authModalHeader" class="text-xl font-black text-slate-900">Account Access</h3>
-          <p id="authModalSubHeader" class="text-xs text-slate-500 mt-1">Enter your phone number and password</p>
+          <h3 id="authTitle" class="text-xl font-black text-slate-900">Sign In to REHZO</h3>
+          <p id="authSub" class="text-xs text-slate-500 mt-1">Book verified rooms or list your property</p>
         </div>
-        <button id="btnCloseAuthModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
+        <button id="btnCloseAuth" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
       </div>
 
-      <form id="formAuthExecute" class="space-y-4">
-        <div id="fieldSignUpFullName" class="hidden">
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Legal Name *</label>
-          <input type="text" id="authFullName" placeholder="e.g. Ravi Kumar" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <form id="formAuth" class="space-y-4">
+        <div id="fieldAuthName" class="hidden">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Legal Name</label>
+          <input type="text" id="inAuthName" placeholder="Ravi Kumar" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
-
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (REHZO ID) *</label>
-          <input type="tel" id="authPhoneNumber" required placeholder="e.g. 9876543210" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono-code" />
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (REHZO ID)</label>
+          <input type="tel" id="inAuthPhone" required placeholder="9876543210" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
-
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Account Password *</label>
-          <input type="password" id="authPasswordInput" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Account Password</label>
+          <input type="password" id="inAuthPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
 
-        <button type="submit" id="btnAuthSubmitFinal" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-100">
-          Sign In
+        <button type="submit" id="btnSubmitAuth" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-md shadow-indigo-100">
+          Enter REHZO Cloud
         </button>
       </form>
 
       <div class="text-center pt-2 border-t border-slate-100">
-        <button id="btnToggleAuthModeSwitch" class="text-xs font-bold text-indigo-600 hover:underline">
-          Don't have an account? Sign Up
+        <button id="btnSwitchAuthMode" class="text-xs font-bold text-indigo-600 hover:underline">
+          Don't have an account? Create an ID
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= BOOKING RESERVATION MODAL ================= -->
-  <div id="modalBookingReservation" class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <!-- ================= BOOKING CONFIRMATION MODAL ================= -->
+  <div id="modalBooking" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
       <div class="flex justify-between items-center">
         <div>
-          <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Official TRL Registry</span>
-          <h3 class="text-lg font-black text-slate-900 mt-1">Confirm Rental Pass Issuance</h3>
+          <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Permanent Pass Request</span>
+          <h3 class="text-lg font-black text-slate-900 mt-1">Book Room & Issue TRL</h3>
         </div>
-        <button id="btnCloseBookingModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
+        <button id="btnCloseBooking" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
       </div>
 
-      <!-- Quick Brief Card -->
-      <div id="bookingSummaryCard" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 text-xs text-slate-600">
-        <!-- Rendered via JS -->
+      <div id="bookingRoomDetailsBrief" class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
+        <!-- Injected details -->
       </div>
 
-      <form id="formConfirmBookingProcess" class="space-y-4">
+      <form id="formConfirmBooking" class="space-y-4">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Check-in Date *</label>
-            <input type="date" id="bookCheckinDate" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none" />
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Check-in Date</label>
+            <input type="date" id="inBookCheckin" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Agreement Duration *</label>
-            <select id="bookDurationSelect" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none bg-white">
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Stay Duration</label>
+            <select id="inBookDuration" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none bg-white">
               <option value="1">1 Month</option>
               <option value="3">3 Months</option>
               <option value="6">6 Months</option>
-              <option value="11">11 Months (Standard)</option>
+              <option value="11">11 Months (Agreement)</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Permanent / Previous Home Address *</label>
-          <textarea id="bookOldAddressInput" required rows="2" placeholder="Required for legal validation and authentic 12-digit TRL issuance..." class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs outline-none"></textarea>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Permanent / Prior Address</label>
+          <textarea id="inBookOldAddress" required rows="2" placeholder="Required for owner verification and TRL document registry..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none"></textarea>
         </div>
 
-        <button type="submit" id="btnExecuteBookOrder" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-sm transition shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
-          <i data-lucide="check-check" class="w-4 h-4"></i>
-          <span>Confirm & Generate 12-Digit TRL</span>
+        <button type="submit" id="btnSubmitBookingFinal" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Generate 12-Digit Authentic TRL
         </button>
       </form>
     </div>
   </div>
 
-  <!-- ================= TRL PRINT / EXPORT SHEET ================= -->
-  <div id="printArea" class="hidden"></div>
-
-  <!-- ================= MASTER ENGINE SCRIPT ================= -->
+  <!-- ================= COMPREHENSIVE JAVASCRIPT SYSTEM ================= -->
   <script>
-    // -------------------------------------------------------------
-    // 1. SUPABASE CLIENT CONNECTIONS (PRE-CONFIGURED)
-    // -------------------------------------------------------------
-    const SUPABASE_PROJECT_URL = "https://zaksdcywktbdebkepzic.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
-    const supabase = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_PUBLISHABLE_KEY);
+    // 1. SUPABASE CLIENT CONNECTIONS
+    const SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
+    const SUPABASE_ANON = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // -------------------------------------------------------------
-    // 2. RUNTIME STATE MANAGEMENT
-    // -------------------------------------------------------------
-    let state = {
-      currentUser: JSON.parse(localStorage.getItem('rehzo_active_session')) || null,
-      authIsSignUp: false,
-      activeFilters: {
-        city: '',
-        type: '',
-        maxRent: 50000,
-        prefs: []
-      },
-      cachedListings: [],
-      pendingBookingRoom: null,
-      leafletPickerMap: null,
-      leafletPickerMarker: null
-    };
+    // 2. STATE MANAGEMENT
+    let currentUser = JSON.parse(localStorage.getItem('rehzo_user_v2')) || null;
+    let authIsSignUp = false;
+    let selectedRoomForBooking = null;
+    let pickerMap = null;
+    let pickerMarker = null;
 
-    // -------------------------------------------------------------
-    // 3. TOAST MESSENGER ENGINE
-    // -------------------------------------------------------------
-    function triggerToast(title, message, isSuccess = true) {
-      const toast = document.getElementById('toastNotification');
-      const titleSlot = document.getElementById('toastTitleSlot');
-      const msgSlot = document.getElementById('toastMessageSlot');
-      const iconSlot = document.getElementById('toastIconSlot');
-
-      titleSlot.innerText = title;
-      msgSlot.innerText = message;
-      iconSlot.innerHTML = isSuccess 
-        ? '<div class="w-7 h-7 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center"><i data-lucide="check" class="w-4 h-4"></i></div>'
-        : '<div class="w-7 h-7 bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>';
+    // 3. TOAST MESSENGER
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toastMsg');
+      const icon = document.getElementById('toastIcon');
       
+      msg.innerText = message;
+      icon.innerHTML = type === 'success' 
+        ? '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>' 
+        : '<i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>';
       lucide.createIcons();
-      toast.classList.remove('translate-y-[-180%]', 'opacity-0');
+
+      toast.classList.remove('translate-y-[-150%]', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
 
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-[-180%]', 'opacity-0');
-      }, 4000);
+        toast.classList.add('translate-y-[-150%]', 'opacity-0');
+      }, 3500);
     }
 
-    // -------------------------------------------------------------
     // 4. NAVIGATION ROUTER
-    // -------------------------------------------------------------
-    function switchView(targetViewId) {
-      const views = ['viewExplore', 'viewPostRoom', 'viewMyBookings', 'viewAdmin'];
-      views.forEach(v => document.getElementById(v).classList.add('hidden'));
+    function showView(viewId) {
+      ['viewExplore', 'viewPostRoom', 'viewMyBookings', 'viewAdmin'].forEach(v => {
+        document.getElementById(v).classList.add('hidden');
+      });
+      document.getElementById(viewId).classList.remove('hidden');
 
-      document.getElementById(targetViewId).classList.remove('hidden');
-
-      if (targetViewId === 'viewPostRoom') {
-        setTimeout(setupLeafletPicker, 250);
+      if (viewId === 'viewPostRoom') {
+        setTimeout(initMapPicker, 200);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // -------------------------------------------------------------
-    // 5. INTERACTIVE MAP PICKER ENGINE
-    // -------------------------------------------------------------
-    function setupLeafletPicker() {
-      const mapContainer = document.getElementById('mapPostPicker');
-      if (state.leafletPickerMap) {
-        state.leafletPickerMap.invalidateSize();
+    // 5. INTERACTIVE MAP PICKER
+    function initMapPicker() {
+      if (pickerMap) {
+        pickerMap.invalidateSize();
         return;
       }
-
-      // Default focus center: Mumbai
-      const defaultLat = 19.0760;
-      const defaultLng = 72.8777;
-
-      state.leafletPickerMap = L.map('mapPostPicker').setView([defaultLat, defaultLng], 12);
-
+      // Center default to India (Mumbai)
+      pickerMap = L.map('mapPicker').setView([19.0760, 72.8777], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(state.leafletPickerMap);
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(pickerMap);
 
-      state.leafletPickerMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(state.leafletPickerMap);
+      pickerMarker = L.marker([19.0760, 72.8777], { draggable: true }).addTo(pickerMap);
 
-      function updateCoordsUI(lat, lng) {
-        document.getElementById('postLat').value = lat.toFixed(6);
-        document.getElementById('postLng').value = lng.toFixed(6);
-        document.getElementById('geoCoordinatesLabel').innerText = `Lat: ${lat.toFixed(4)} | Lng: ${lng.toFixed(4)}`;
-      }
-
-      state.leafletPickerMarker.on('dragend', function(e) {
-        const coords = e.target.getLatLng();
-        updateCoordsUI(coords.lat, coords.lng);
+      pickerMarker.on('dragend', function (e) {
+        const pos = e.target.getLatLng();
+        document.getElementById('inLat').value = pos.lat.toFixed(6);
+        document.getElementById('inLng').value = pos.lng.toFixed(6);
       });
 
-      state.leafletPickerMap.on('click', function(e) {
-        state.leafletPickerMarker.setLatLng(e.latlng);
-        updateCoordsUI(e.latlng.lat, e.latlng.lng);
+      pickerMap.on('click', function(e) {
+        pickerMarker.setLatLng(e.latlng);
+        document.getElementById('inLat').value = e.latlng.lat.toFixed(6);
+        document.getElementById('inLng').value = e.latlng.lng.toFixed(6);
       });
     }
 
-    // -------------------------------------------------------------
-    // 6. AUTHENTICATION & SESSION SYSTEM
-    // -------------------------------------------------------------
-    function syncAuthUI() {
-      const authSlot = document.getElementById('authSlot');
-      if (state.currentUser) {
-        authSlot.innerHTML = `
-          <div class="flex items-center space-x-3">
+    // 6. AUTHENTICATION CONTROLLER
+    function updateAuthStatus() {
+      const slot = document.getElementById('authSlot');
+      if (currentUser) {
+        slot.innerHTML = `
+          <div class="flex items-center space-x-2">
             <div class="text-right hidden sm:block">
-              <span class="text-xs font-black text-slate-800 block leading-tight">${state.currentUser.name}</span>
-              <span class="text-[10px] font-mono-code font-bold text-indigo-600">${state.currentUser.uid}</span>
+              <span class="text-xs font-black text-slate-800 block leading-tight">${currentUser.name}</span>
+              <span class="text-[10px] font-semibold text-slate-400">ID: ${currentUser.uid}</span>
             </div>
-            <button id="btnSignOutSession" class="w-10 h-10 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center transition" title="Log Out">
+            <button id="btnSignOut" class="w-9 h-9 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center transition" title="Log out">
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
         `;
-        document.getElementById('btnSignOutSession').onclick = () => {
-          localStorage.removeItem('rehzo_active_session');
-          state.currentUser = null;
-          syncAuthUI();
-          triggerToast('Session Ended', 'You have been signed out safely.');
-          switchView('viewExplore');
+        document.getElementById('btnSignOut').onclick = () => {
+          localStorage.removeItem('rehzo_user_v2');
+          currentUser = null;
+          updateAuthStatus();
+          showToast('Signed out of session');
+          showView('viewExplore');
         };
       } else {
-        authSlot.innerHTML = `
-          <button id="btnTriggerAuthModal" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-extrabold transition flex items-center gap-2 shadow-md shadow-indigo-100">
-            <i data-lucide="user-check" class="w-4 h-4"></i>
-            <span>Sign In</span>
+        slot.innerHTML = `
+          <button id="btnOpenAuthModal" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i> Sign In
           </button>
         `;
-        document.getElementById('btnTriggerAuthModal').onclick = () => {
+        document.getElementById('btnOpenAuthModal').onclick = () => {
           document.getElementById('modalAuth').classList.remove('hidden');
         };
       }
       lucide.createIcons();
     }
 
-    // -------------------------------------------------------------
-    // 7. REAL-TIME DATA QUERYING (FEED & SEARCH)
-    // -------------------------------------------------------------
-    async function loadCloudListings() {
-      const container = document.getElementById('roomsGridContainer');
-      const badge = document.getElementById('inventoryStatusBadge');
-
+    // 7. FETCH & STREAM LISTINGS
+    async function fetchListings(queryFilter = {}) {
+      const container = document.getElementById('gridRoomStream');
       container.innerHTML = `
-        <div class="col-span-full py-24 text-center space-y-4">
-          <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div class="col-span-full py-20 text-center space-y-3">
+          <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Querying Supabase Cluster...</p>
         </div>
       `;
 
       let query = supabase.from('listings').select('*').order('created_at', { ascending: false });
 
-      if (state.activeFilters.city) {
-        query = query.ilike('city', `%${state.activeFilters.city}%`);
+      if (queryFilter.city) {
+        query = query.ilike('city', `%${queryFilter.city}%`);
       }
-      if (state.activeFilters.type) {
-        query = query.eq('room_type', state.activeFilters.type);
-      }
-      if (state.activeFilters.maxRent) {
-        query = query.lte('rent', state.activeFilters.maxRent);
+      if (queryFilter.type) {
+        query = query.eq('room_type', queryFilter.type);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        container.innerHTML = `
-          <div class="col-span-full py-16 text-center text-rose-500 bg-white rounded-3xl border border-rose-100">
-            <p class="font-bold">Failed to load real-time records</p>
-            <p class="text-xs text-slate-400 mt-1">${error.message}</p>
-          </div>
-        `;
-        badge.innerText = 'Connection Error';
+        container.innerHTML = `<div class="col-span-full text-center py-10 text-rose-500 font-bold">Failed to connect: ${error.message}</div>`;
         return;
       }
 
-      state.cachedListings = data || [];
-      badge.innerText = `${state.cachedListings.length} Nodes Live`;
+      document.getElementById('badgeAvailableTotal').innerText = `${data.length} Available`;
 
-      if (state.cachedListings.length === 0) {
+      if (!data || data.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full py-24 text-center bg-white rounded-3xl border border-slate-200 space-y-3">
-            <i data-lucide="home" class="w-12 h-12 text-slate-300 mx-auto"></i>
-            <h4 class="font-black text-slate-800 text-lg">No matching rooms found</h4>
-            <p class="text-xs text-slate-400 max-w-sm mx-auto">Try widening your budget filter or searching a different locality name.</p>
+          <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+            <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-2"></i>
+            <h4 class="font-bold text-slate-800 text-base">No rooms found matching this search</h4>
+            <p class="text-xs text-slate-400 mt-1">Try searching another city or clear filters.</p>
           </div>
         `;
         lucide.createIcons();
         return;
       }
 
-      container.innerHTML = state.cachedListings.map(item => {
-        const coverPhoto = (item.photos && item.photos.length > 0)
-          ? item.photos[0]
-          : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800';
+      container.innerHTML = data.map(item => {
+        const photo = (item.photos && item.photos.length > 0) 
+          ? item.photos[0] 
+          : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800';
 
-        const amenitiesPills = (item.amenities || []).slice(0, 3).map(a => `
-          <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">${a}</span>
-        `).join('');
-
-        const suitablePills = (item.suitable_for || []).slice(0, 2).map(s => `
-          <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">${s}</span>
+        const amenitiesList = (item.amenities || []).slice(0, 3).map(a => `
+          <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">${a}</span>
         `).join('');
 
         return `
-          <div class="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+          <div class="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
             <div>
-              <div class="h-56 w-full relative overflow-hidden bg-slate-100">
-                <img src="${coverPhoto}" alt="${item.house_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent"></div>
-                
+              <div class="h-52 w-full relative overflow-hidden bg-slate-100">
+                <img src="${photo}" alt="${item.house_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
                 <span class="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full text-slate-900 border border-slate-100 shadow-sm">
                   ${item.room_type}
                 </span>
-
-                <span class="absolute bottom-3 left-3 text-white font-extrabold text-xl">
-                  ₹${item.rent}<span class="text-xs font-normal text-slate-300"> / month</span>
+                <span class="absolute bottom-3 left-3 text-white font-extrabold text-lg">
+                  ₹${item.rent}<span class="text-xs font-medium text-slate-200"> / month</span>
                 </span>
-                
-                ${item.deposit ? `<span class="absolute bottom-3 right-3 text-[11px] text-white/90 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-md">Dep: ₹${item.deposit}</span>` : ''}
               </div>
 
-              <div class="p-6 space-y-4">
+              <div class="p-5 space-y-3">
                 <div>
-                  <h3 class="font-black text-slate-900 text-lg leading-snug group-hover:text-indigo-600 transition">${item.house_name}</h3>
-                  <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
-                    <span>${item.address}, ${item.city}</span>
+                  <h3 class="font-black text-slate-900 text-base leading-snug group-hover:text-indigo-600 transition">${item.house_name}</h3>
+                  <p class="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i> ${item.address}, ${item.city}
                   </p>
                 </div>
 
                 <div class="flex flex-wrap gap-1.5">
-                  ${suitablePills}
-                  ${amenitiesPills}
+                  ${amenitiesList}
                 </div>
 
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                  <div class="flex items-center gap-1.5">
-                    <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[10px] text-slate-700">
-                      ${item.owner_name.charAt(0)}
-                    </div>
-                    <span class="text-[11px] font-bold text-slate-700">${item.owner_name}</span>
-                  </div>
-                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md">Available</span>
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                  <span class="flex items-center gap-1">👤 Host: <strong>${item.owner_name}</strong></span>
+                  <span class="font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Verified</span>
                 </div>
               </div>
             </div>
 
-            <div class="p-6 pt-0">
-              <button onclick="startRoomReservation('${item.id}')" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl text-xs transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
-                <i data-lucide="ticket" class="w-4 h-4"></i>
-                <span>Reserve Room & Generate TRL</span>
+            <div class="p-5 pt-0">
+              <button onclick="requestBookingFlow('${item.id}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs transition shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5">
+                <i data-lucide="calendar-check" class="w-4 h-4"></i> Reserve Room & TRL
               </button>
             </div>
           </div>
@@ -788,219 +584,190 @@
       lucide.createIcons();
     }
 
-    // -------------------------------------------------------------
-    // 8. STORAGE ENGINE & PROPERTY PUBLISHING
-    // -------------------------------------------------------------
-    document.getElementById('postPhotosInput').onchange = (e) => {
-      const preview = document.getElementById('photoPreviewContainer');
-      preview.innerHTML = '';
-      Array.from(e.target.files).forEach(file => {
-        const url = URL.createObjectURL(file);
-        const img = document.createElement('img');
-        img.src = url;
-        img.className = 'w-14 h-14 object-cover rounded-xl border border-slate-200';
-        preview.appendChild(img);
-      });
-    };
-
-    document.getElementById('formPostProperty').onsubmit = async (e) => {
+    // 8. PROPERTY PUBLISHING WITH CLOUD STORAGE
+    document.getElementById('formNewProperty').onsubmit = async (e) => {
       e.preventDefault();
-
-      if (!state.currentUser) {
-        triggerToast('Authentication Required', 'Please sign in first to list your property.', false);
+      if (!currentUser) {
+        showToast('Please sign in first to list your property');
         document.getElementById('modalAuth').classList.remove('hidden');
         return;
       }
 
-      const submitBtn = document.getElementById('btnSubmitProperty');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Syncing Photos with Supabase...`;
+      const btn = document.getElementById('btnPublishRoom');
+      btn.disabled = true;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Uploading Media to Cloud...`;
 
       try {
-        const photoFiles = document.getElementById('postPhotosInput').files;
-        let cdnUrls = [];
+        const photoFiles = document.getElementById('inPhotos').files;
+        let photoUrls = [];
 
-        // Direct multi-upload to 'room-photos' Supabase Bucket
         for (let i = 0; i < photoFiles.length; i++) {
           const file = photoFiles[i];
-          const fileId = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-
+          const cleanName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+          
           const { error: uploadError } = await supabase.storage
             .from('room-photos')
-            .upload(fileId, file);
+            .upload(cleanName, file);
 
           if (!uploadError) {
             const { data: pubData } = supabase.storage
               .from('room-photos')
-              .getPublicUrl(fileId);
-            cdnUrls.push(pubData.publicUrl);
+              .getPublicUrl(cleanName);
+            photoUrls.push(pubData.publicUrl);
           }
         }
 
-        const prefsChecked = Array.from(document.querySelectorAll('input[name="postPref"]:checked')).map(c => c.value);
-        const amenitiesChecked = Array.from(document.querySelectorAll('input[name="postAmenity"]:checked')).map(c => c.value);
+        const selectedPrefs = Array.from(document.querySelectorAll('input[name="pref"]:checked')).map(cb => cb.value);
+        const selectedAmenities = Array.from(document.querySelectorAll('input[name="amenity"]:checked')).map(cb => cb.value);
 
-        const newListingPayload = {
-          house_name: document.getElementById('postHouseName').value.trim(),
-          room_type: document.getElementById('postRoomType').value,
-          rent: parseFloat(document.getElementById('postRent').value),
-          deposit: parseFloat(document.getElementById('postDeposit').value || 0),
+        const newListing = {
+          house_name: document.getElementById('inHouseName').value,
+          room_type: document.getElementById('inRoomType').value,
+          rent: parseFloat(document.getElementById('inRent').value),
+          deposit: parseFloat(document.getElementById('inDeposit').value || 0),
           country: 'India',
-          city: document.getElementById('postCity').value.trim(),
-          state: document.getElementById('postState').value.trim(),
-          pin: document.getElementById('postPin').value.trim(),
-          address: document.getElementById('postAddress').value.trim(),
-          lat: parseFloat(document.getElementById('postLat').value || 19.0760),
-          lng: parseFloat(document.getElementById('postLng').value || 72.8777),
-          suitable_for: prefsChecked,
-          amenities: amenitiesChecked,
-          owner_uid: state.currentUser.uid,
-          owner_name: state.currentUser.name,
-          owner_phone: state.currentUser.phone,
-          photos: cdnUrls,
+          city: document.getElementById('inCity').value,
+          state: document.getElementById('inState').value,
+          pin: document.getElementById('inPin').value,
+          address: document.getElementById('inAddress').value,
+          lat: parseFloat(document.getElementById('inLat').value || 19.0760),
+          lng: parseFloat(document.getElementById('inLng').value || 72.8777),
+          suitable_for: selectedPrefs,
+          amenities: selectedAmenities,
+          owner_uid: currentUser.uid,
+          owner_name: currentUser.name,
+          owner_phone: currentUser.phone,
+          photos: photoUrls,
           status: 'available'
         };
 
-        const { error: insertError } = await supabase.from('listings').insert([newListingPayload]);
-        if (insertError) throw insertError;
+        const { error: dbError } = await supabase.from('listings').insert([newListing]);
+        if (dbError) throw dbError;
 
-        triggerToast('Listing Live!', 'Property has been added to REHZO Cloud successfully.');
-        document.getElementById('formPostProperty').reset();
-        document.getElementById('photoPreviewContainer').innerHTML = '';
-        switchView('viewExplore');
-        loadCloudListings();
-
+        showToast('Property published successfully to REHZO Cloud!', 'success');
+        document.getElementById('formNewProperty').reset();
+        showView('viewExplore');
+        fetchListings();
       } catch (err) {
-        triggerToast('Failed to Publish', err.message, false);
+        showToast('Failed to list: ' + err.message);
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i data-lucide="cloud-lightning" class="w-5 h-5"></i><span>Publish Property to Live Cloud</span>`;
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-5 h-5"></i> Publish Node to REHZO Cloud`;
         lucide.createIcons();
       }
     };
 
-    // -------------------------------------------------------------
-    // 9. 12-DIGIT AUTHENTIC TRL CREATION & BOOKING FLOW
-    // -------------------------------------------------------------
-    window.startRoomReservation = (listingId) => {
-      if (!state.currentUser) {
-        triggerToast('Authentication Required', 'Please sign in to book this room.', false);
+    // 9. 12-DIGIT TRL GENERATOR & BOOKING FLOW
+    window.requestBookingFlow = async (listingId) => {
+      if (!currentUser) {
+        showToast('Please sign in to proceed with booking');
         document.getElementById('modalAuth').classList.remove('hidden');
         return;
       }
 
-      const room = state.cachedListings.find(r => r.id === listingId);
-      if (!room) {
-        triggerToast('Error', 'Room details not found in cache.', false);
+      const { data: room, error } = await supabase.from('listings').select('*').eq('id', listingId).single();
+      if (error || !room) {
+        showToast('Could not fetch room details.');
         return;
       }
 
-      state.pendingBookingRoom = room;
-
-      const summaryCard = document.getElementById('bookingSummaryCard');
-      summaryCard.innerHTML = `
-        <div class="flex justify-between items-center font-extrabold text-slate-900">
-          <span>${room.house_name} (${room.room_type})</span>
-          <span class="text-indigo-600 font-mono-code">₹${room.rent}/mo</span>
+      selectedRoomForBooking = room;
+      document.getElementById('bookingRoomDetailsBrief').innerHTML = `
+        <div class="flex justify-between font-bold text-slate-800">
+          <span>${room.house_name}</span>
+          <span>₹${room.rent}/month</span>
         </div>
         <p class="text-[11px] text-slate-500">📍 ${room.address}, ${room.city}</p>
         <p class="text-[11px] text-slate-500">Host: ${room.owner_name} (${room.owner_phone})</p>
       `;
 
-      // Set default check-in date to tomorrow
-      const nextDay = new Date();
-      nextDay.setDate(nextDay.getDate() + 1);
-      document.getElementById('bookCheckinDate').value = nextDay.toISOString().split('T')[0];
+      // Set default checkin to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('inBookCheckin').value = tomorrow.toISOString().split('T')[0];
 
-      document.getElementById('modalBookingReservation').classList.remove('hidden');
+      document.getElementById('modalBooking').classList.remove('hidden');
     };
 
-    function generate12DigitTRLNumber() {
+    function generateSecureTRL() {
       // 12 Authentic Numerics
-      const block1 = Math.floor(1000 + Math.random() * 9000);
-      const block2 = Math.floor(1000 + Math.random() * 9000);
-      const block3 = Math.floor(1000 + Math.random() * 9000);
-      return `${block1}${block2}${block3}`;
+      const part1 = Math.floor(1000 + Math.random() * 9000);
+      const part2 = Math.floor(1000 + Math.random() * 9000);
+      const part3 = Math.floor(1000 + Math.random() * 9000);
+      return `${part1}${part2}${part3}`;
     }
 
-    document.getElementById('formConfirmBookingProcess').onsubmit = async (e) => {
+    document.getElementById('formConfirmBooking').onsubmit = async (e) => {
       e.preventDefault();
-      if (!state.currentUser || !state.pendingBookingRoom) return;
+      if (!currentUser || !selectedRoomForBooking) return;
 
-      const confirmBtn = document.getElementById('btnExecuteBookOrder');
-      confirmBtn.disabled = true;
-      confirmBtn.innerText = 'Creating Legal TRL Hash...';
+      const btn = document.getElementById('btnSubmitBookingFinal');
+      btn.disabled = true;
+      btn.innerText = 'Creating 12-Digit Registry...';
 
-      const trlCode = generate12DigitTRLNumber();
+      const trlCode = generateSecureTRL();
 
       const bookingRecord = {
         trl: trlCode,
-        listing_id: state.pendingBookingRoom.id,
-        house_name: state.pendingBookingRoom.house_name,
-        room_type: state.pendingBookingRoom.room_type,
-        rent: state.pendingBookingRoom.rent,
-        duration: parseInt(document.getElementById('bookDurationSelect').value),
-        checkin_date: document.getElementById('bookCheckinDate').value,
-        user_uid: state.currentUser.uid,
-        user_name: state.currentUser.name,
-        user_phone: state.currentUser.phone,
-        user_old_address: document.getElementById('bookOldAddressInput').value.trim(),
-        owner_name: state.pendingBookingRoom.owner_name,
-        owner_phone: state.pendingBookingRoom.owner_phone,
-        room_exact_address: state.pendingBookingRoom.address,
+        listing_id: selectedRoomForBooking.id,
+        house_name: selectedRoomForBooking.house_name,
+        room_type: selectedRoomForBooking.room_type,
+        rent: selectedRoomForBooking.rent,
+        duration: parseInt(document.getElementById('inBookDuration').value),
+        checkin_date: document.getElementById('inBookCheckin').value,
+        user_uid: currentUser.uid,
+        user_name: currentUser.name,
+        user_phone: currentUser.phone,
+        user_old_address: document.getElementById('inBookOldAddress').value,
+        owner_name: selectedRoomForBooking.owner_name,
+        owner_phone: selectedRoomForBooking.owner_phone,
+        room_exact_address: selectedRoomForBooking.address,
         status: 'confirmed'
       };
 
       const { error } = await supabase.from('bookings').insert([bookingRecord]);
 
       if (error) {
-        triggerToast('Booking Failed', error.message, false);
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = `<i data-lucide="check-check" class="w-4 h-4"></i><span>Confirm & Generate 12-Digit TRL</span>`;
+        showToast('Booking failed: ' + error.message);
+        btn.disabled = false;
+        btn.innerText = 'Generate 12-Digit Authentic TRL';
         return;
       }
 
-      triggerToast('TRL Pass Issued!', `12-Digit Reference: ${trlCode}`);
-      document.getElementById('modalBookingReservation').classList.add('hidden');
-      confirmBtn.disabled = false;
-      confirmBtn.innerHTML = `<i data-lucide="check-check" class="w-4 h-4"></i><span>Confirm & Generate 12-Digit TRL</span>`;
-      switchView('viewMyBookings');
-      loadMyTRLPasses();
+      showToast(`Success! TRL Pass: ${trlCode}`, 'success');
+      document.getElementById('modalBooking').classList.add('hidden');
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> Generate 12-Digit Authentic TRL`;
+      showView('viewMyBookings');
+      fetchMyBookings();
     };
 
-    // -------------------------------------------------------------
-    // 10. TRL DISPLAY PASSES & PRINT RECEIPT GENERATOR
-    // -------------------------------------------------------------
-    async function loadMyTRLPasses() {
-      const container = document.getElementById('myPassesContainer');
-
-      if (!state.currentUser) {
+    // 10. FETCH BOOKINGS (TRL DISPLAY PASSES)
+    async function fetchMyBookings() {
+      const container = document.getElementById('bookingCardsContainer');
+      if (!currentUser) {
         container.innerHTML = `
-          <div class="p-12 text-center bg-white rounded-3xl border border-slate-200">
-            <p class="text-sm font-bold text-slate-500">Sign in to access your active 12-digit TRL passes.</p>
+          <div class="text-center py-16 bg-white rounded-3xl border border-slate-200">
+            <p class="text-sm font-bold text-slate-500">Sign in to check your active rental passes.</p>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = `
-        <div class="py-16 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-          Syncing TRL passes from cloud...
-        </div>
-      `;
+      container.innerHTML = `<div class="text-center py-16 text-xs text-slate-400 font-bold uppercase tracking-widest">Loading Digital TRL Passes...</div>`;
 
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .or(`user_uid.eq.${state.currentUser.uid},owner_phone.eq.${state.currentUser.phone}`)
+        .or(`user_uid.eq.${currentUser.uid},owner_phone.eq.${currentUser.phone}`)
         .order('created_at', { ascending: false });
 
       if (error || !data || data.length === 0) {
         container.innerHTML = `
-          <div class="p-16 text-center bg-white rounded-3xl border border-slate-200 space-y-2">
+          <div class="text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-2">
             <i data-lucide="ticket" class="w-10 h-10 text-slate-300 mx-auto"></i>
-            <h4 class="font-bold text-slate-800 text-sm">No Active TRL Passes Issued</h4>
-            <p class="text-xs text-slate-400">Select any room in the Explore tab to reserve and issue your official pass.</p>
+            <h4 class="font-bold text-slate-800 text-sm">No Active TRL Passes</h4>
+            <p class="text-xs text-slate-400">Reserve a room to receive your 12-digit permanent rental pass.</p>
           </div>
         `;
         lucide.createIcons();
@@ -1008,42 +775,40 @@
       }
 
       container.innerHTML = data.map(b => `
-        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300 bg-white/10 px-2.5 py-1 rounded-md">Authentic 12-Digit TRL Pass</span>
-              <h3 class="text-3xl font-black tracking-widest text-white mt-1.5 font-mono-code">${b.trl}</h3>
+              <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300 bg-white/10 px-2.5 py-1 rounded-md">12-Digit TRL Official ID</span>
+              <h3 class="text-2xl font-black tracking-widest text-white mt-1 font-mono">${b.trl}</h3>
             </div>
-            <div class="flex items-center gap-3">
-              <button onclick="printTRLPassReceipt('${b.trl}')" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Pass
-              </button>
-              <span class="px-3.5 py-1.5 bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 rounded-xl text-xs font-black uppercase tracking-wider">
+            <div class="text-right">
+              <span class="px-3 py-1 bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-bold uppercase tracking-wider">
                 ${b.status}
               </span>
+              <p class="text-[11px] text-slate-400 mt-1">Issued: ${new Date(b.created_at).toLocaleDateString()}</p>
             </div>
           </div>
 
           <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-            <div class="space-y-1.5">
-              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Rental Node</span>
-              <h4 class="font-black text-slate-900 text-sm">${b.house_name}</h4>
-              <p class="text-slate-600 font-semibold">${b.room_type}</p>
+            <div class="space-y-1">
+              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Reserved Property</p>
+              <h4 class="font-bold text-slate-900 text-sm">${b.house_name}</h4>
+              <p class="text-slate-600">${b.room_type}</p>
               <p class="text-slate-500">${b.room_exact_address}</p>
             </div>
 
-            <div class="space-y-1.5">
-              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Verified Tenant</span>
-              <h4 class="font-black text-slate-900 text-sm">${b.user_name}</h4>
-              <p class="text-slate-600 font-mono-code">ID: ${b.user_uid} | Phone: ${b.user_phone}</p>
+            <div class="space-y-1">
+              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Tenant Identity</p>
+              <h4 class="font-bold text-slate-900 text-sm">${b.user_name}</h4>
+              <p class="text-slate-600">Phone: ${b.user_phone}</p>
               <p class="text-slate-500">Origin: ${b.user_old_address}</p>
             </div>
 
-            <div class="space-y-1.5">
-              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Owner & Agreement Terms</span>
-              <h4 class="font-black text-slate-900 text-sm">${b.owner_name}</h4>
-              <p class="text-slate-600 font-semibold">Rent: ₹${b.rent} / mo | Duration: ${b.duration} Mo</p>
-              <p class="text-slate-500">Move-in Date: ${b.checkin_date}</p>
+            <div class="space-y-1">
+              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Host & Terms</p>
+              <h4 class="font-bold text-slate-900 text-sm">${b.owner_name}</h4>
+              <p class="text-slate-600">Rent: ₹${b.rent} / month | Duration: ${b.duration} mo</p>
+              <p class="text-slate-500">Checkin: ${b.checkin_date}</p>
             </div>
           </div>
         </div>
@@ -1052,206 +817,149 @@
       lucide.createIcons();
     }
 
-    window.printTRLPassReceipt = (trlNumber) => {
-      const b = state.cachedListings; // Retrieve pass info
-      const printZone = document.getElementById('printArea');
-      printZone.innerHTML = `
-        <div style="font-family: sans-serif; border: 2px solid #000; padding: 30px; border-radius: 10px; max-width: 600px; margin: auto;">
-          <h1 style="margin: 0; font-size: 24px;">REHZO CLOUD RENTAL PASS</h1>
-          <p style="margin: 4px 0 20px; font-size: 12px; color: #555;">Permanent 12-Digit Real Estate Transaction Reference</p>
-          <div style="background: #f4f4f4; padding: 15px; border-radius: 6px; font-size: 20px; font-weight: bold; font-family: monospace;">
-            TRL: ${trlNumber}
-          </div>
-          <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;" />
-          <p><strong>Status:</strong> VERIFIED & ACTIVE</p>
-          <p><strong>Platform:</strong> REHZO Distributed Database Infrastructure</p>
-          <p><strong>Verification URL:</strong> https://rehzo.vercel.app</p>
-          <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;" />
-          <p style="font-size: 11px; color: #777;">Present this pass to the property landlord at the time of key handover.</p>
-        </div>
-      `;
-      window.print();
-    };
-
-    // -------------------------------------------------------------
-    // 11. CENTRAL ADMIN CONTROL OPERATIONS
-    // -------------------------------------------------------------
-    function verifyAdminTrigger() {
+    // 11. ADMIN PANEL CONTROLLER
+    function checkAdminTrigger() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('admin') === 'rehzo123') {
-        launchAdminConsole();
+        openAdminDashboard();
       }
     }
 
-    function launchAdminConsole() {
-      switchView('viewAdmin');
-      fetchAdminStatsAndListings();
+    function openAdminDashboard() {
+      showView('viewAdmin');
+      loadAdminListings();
     }
 
-    async function fetchAdminStatsAndListings() {
-      const stream = document.getElementById('adminListingsStream');
-      stream.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-slate-400">Loading master records...</div>';
+    async function loadAdminListings() {
+      const container = document.getElementById('adminListingsGrid');
+      container.innerHTML = '<div class="col-span-full text-center py-6 text-xs text-slate-400">Reading Supabase records...</div>';
 
-      const { data: listings, error: listErr } = await supabase.from('listings').select('*').order('created_at', { ascending: false });
-      const { data: bookings, error: bookErr } = await supabase.from('bookings').select('id');
+      const { data, error } = await supabase.from('listings').select('*').order('created_at', { ascending: false });
+      if (error || !data) return;
 
-      if (listings) {
-        document.getElementById('statTotalListings').innerText = listings.length;
-        document.getElementById('adminListingsCount').innerText = `${listings.length} Items`;
-      }
-      if (bookings) {
-        document.getElementById('statTotalBookings').innerText = bookings.length;
-      }
+      document.getElementById('adminTotalBadge').innerText = `${data.length} listings`;
 
-      if (listErr || !listings || listings.length === 0) {
-        stream.innerHTML = '<div class="col-span-full text-center py-6 text-xs text-slate-400">No entries in database.</div>';
-        return;
-      }
-
-      stream.innerHTML = listings.map(item => `
+      container.innerHTML = data.map(item => `
         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between space-y-3">
           <div>
             <div class="flex justify-between items-start">
-              <h5 class="font-bold text-slate-900 text-sm">${item.house_name}</h5>
+              <h4 class="font-bold text-slate-900 text-sm">${item.house_name}</h4>
               <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 rounded text-slate-700">${item.city}</span>
             </div>
             <p class="text-xs text-slate-500 mt-1">₹${item.rent}/mo | ${item.room_type}</p>
-            <p class="text-[11px] text-slate-400 font-mono-code mt-0.5">Owner: ${item.owner_name} (${item.owner_phone})</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Owner: ${item.owner_name} (${item.owner_phone})</p>
           </div>
-          <button onclick="adminDeleteNode('${item.id}')" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition">
+          <button onclick="adminDelete('${item.id}')" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition">
             Delete Listing Permanently
           </button>
         </div>
       `).join('');
     }
 
-    window.adminDeleteNode = async (id) => {
-      if (!confirm('Admin confirmation: Permanently purge this rental node from database?')) return;
+    window.adminDelete = async (id) => {
+      if (!confirm('Are you sure you want to delete this listing from REHZO database?')) return;
       const { error } = await supabase.from('listings').delete().eq('id', id);
       if (error) {
-        triggerToast('Deletion Failed', error.message, false);
+        showToast('Delete error: ' + error.message);
       } else {
-        triggerToast('Node Purged', 'Record deleted from Supabase permanently.');
-        fetchAdminStatsAndListings();
-        loadCloudListings();
+        showToast('Listing removed successfully', 'success');
+        loadAdminListings();
+        fetchListings();
       }
     };
 
-    // -------------------------------------------------------------
-    // 12. GENERAL INTERACTION LISTENERS & BOOTSTRAP
-    // -------------------------------------------------------------
-    function bindApplicationEvents() {
-      // Navigation Buttons
-      document.getElementById('navBtnExplore').onclick = () => switchView('viewExplore');
-      document.getElementById('navBtnPostRoom').onclick = () => switchView('viewPostRoom');
+    // 12. ATTACH GENERAL LISTENERS
+    function initListeners() {
+      document.getElementById('navBtnExplore').onclick = () => showView('viewExplore');
+      document.getElementById('navBtnPostRoom').onclick = () => showView('viewPostRoom');
       document.getElementById('navBtnMyBookings').onclick = () => {
-        switchView('viewMyBookings');
-        loadMyTRLPasses();
+        showView('viewMyBookings');
+        fetchMyBookings();
       };
-      document.getElementById('btnRefreshBookings').onclick = loadMyTRLPasses;
-      document.getElementById('btnExitAdminMode').onclick = () => switchView('viewExplore');
+      document.getElementById('btnExitAdmin').onclick = () => showView('viewExplore');
 
-      // Admin Secret Trigger (Logo Double Click)
-      let logoClickDelay;
+      // Admin Secret Trigger (Double Tap Logo)
+      let logoClickTimer;
       document.getElementById('brandLogo').addEventListener('click', () => {
-        if (logoClickDelay) {
-          clearTimeout(logoClickDelay);
-          logoClickDelay = null;
-          const enteredKey = prompt('REHZO Administrative Passcode:');
-          if (enteredKey === 'rehzo123') launchAdminConsole();
+        if (logoClickTimer) {
+          clearTimeout(logoClickTimer);
+          logoClickTimer = null;
+          const pass = prompt('Enter REHZO Admin Passcode:');
+          if (pass === 'rehzo123') openAdminDashboard();
         } else {
-          logoClickDelay = setTimeout(() => { logoClickDelay = null; }, 350);
+          logoClickTimer = setTimeout(() => { logoClickTimer = null; }, 400);
         }
       });
 
-      // Modals Dismissal
-      document.getElementById('btnCloseAuthModal').onclick = () => document.getElementById('modalAuth').classList.add('hidden');
-      document.getElementById('btnCloseBookingModal').onclick = () => document.getElementById('modalBookingReservation').classList.add('hidden');
+      // Modals
+      document.getElementById('btnCloseAuth').onclick = () => document.getElementById('modalAuth').classList.add('hidden');
+      document.getElementById('btnCloseBooking').onclick = () => document.getElementById('modalBooking').classList.add('hidden');
 
-      // Switch Sign In / Sign Up
-      document.getElementById('btnToggleAuthModeSwitch').onclick = (e) => {
+      // Auth Mode Switch
+      document.getElementById('btnSwitchAuthMode').onclick = (e) => {
         e.preventDefault();
-        state.authIsSignUp = !state.authIsSignUp;
-        document.getElementById('fieldSignUpFullName').classList.toggle('hidden', !state.authIsSignUp);
-        document.getElementById('authModalHeader').innerText = state.authIsSignUp ? 'Create REHZO ID' : 'Account Access';
-        document.getElementById('authModalSubHeader').innerText = state.authIsSignUp ? 'Register profile on Cloud' : 'Enter your phone number and password';
-        document.getElementById('btnAuthSubmitFinal').innerText = state.authIsSignUp ? 'Register ID' : 'Sign In';
-        e.target.innerText = state.authIsSignUp ? 'Already registered? Sign In' : "Don't have an account? Sign Up";
+        authIsSignUp = !authIsSignUp;
+        document.getElementById('fieldAuthName').classList.toggle('hidden', !authIsSignUp);
+        document.getElementById('authTitle').innerText = authIsSignUp ? 'Create REHZO ID' : 'Sign In to REHZO';
+        document.getElementById('authSub').innerText = authIsSignUp ? 'Register your real estate profile' : 'Book verified rooms or list your property';
+        document.getElementById('btnSubmitAuth').innerText = authIsSignUp ? 'Register Account' : 'Enter REHZO Cloud';
+        e.target.innerText = authIsSignUp ? 'Already registered? Sign In' : "Don't have an account? Create an ID";
       };
 
-      // Auth Execution
-      document.getElementById('formAuthExecute').onsubmit = async (e) => {
+      // Auth Submission
+      document.getElementById('formAuth').onsubmit = async (e) => {
         e.preventDefault();
-        const phone = document.getElementById('authPhoneNumber').value.trim();
-        const password = document.getElementById('authPasswordInput').value;
+        const phone = document.getElementById('inAuthPhone').value.trim();
+        const pwd = document.getElementById('inAuthPassword').value;
 
-        if (state.authIsSignUp) {
-          const name = document.getElementById('authFullName').value.trim();
+        if (authIsSignUp) {
+          const name = document.getElementById('inAuthName').value.trim();
           const uid = 'RZ-' + Math.floor(100000 + Math.random() * 900000);
-
-          const { data, error } = await supabase.from('profiles').insert([{ uid, name, phone, password }]).select().single();
+          const { data, error } = await supabase.from('profiles').insert([{ uid, name, phone, password: pwd }]).select().single();
           if (error) {
-            triggerToast('Registration Error', error.message, false);
+            showToast('Sign up error: ' + error.message);
             return;
           }
-          state.currentUser = data;
+          currentUser = data;
         } else {
-          const { data, error } = await supabase.from('profiles').select('*').eq('phone', phone).eq('password', password).single();
+          const { data, error } = await supabase.from('profiles').select('*').eq('phone', phone).eq('password', pwd).single();
           if (error || !data) {
-            triggerToast('Authentication Failed', 'Invalid phone number or password.', false);
+            showToast('Invalid phone or password credentials');
             return;
           }
-          state.currentUser = data;
+          currentUser = data;
         }
 
-        localStorage.setItem('rehzo_active_session', JSON.stringify(state.currentUser));
-        syncAuthUI();
+        localStorage.setItem('rehzo_user_v2', JSON.stringify(currentUser));
+        updateAuthStatus();
         document.getElementById('modalAuth').classList.add('hidden');
-        triggerToast('Welcome Back', `Logged in as ${state.currentUser.name}`);
+        showToast(`Welcome, ${currentUser.name}!`, 'success');
       };
 
-      // Price Range Tracker
-      document.getElementById('priceRange').oninput = (e) => {
-        state.activeFilters.maxRent = parseInt(e.target.value);
-        document.getElementById('priceDisplay').innerText = `₹${parseInt(e.target.value).toLocaleString()} / mo`;
+      // Search & Filters
+      document.getElementById('btnFilterTrigger').onclick = () => {
+        const city = document.getElementById('searchCity').value.trim();
+        const type = document.getElementById('searchType').value;
+        fetchListings({ city, type });
       };
 
-      // Search & Filters Apply
-      document.getElementById('btnApplySearch').onclick = () => {
-        state.activeFilters.city = document.getElementById('searchCityInput').value.trim();
-        state.activeFilters.type = document.getElementById('searchTypeInput').value;
-        loadCloudListings();
-      };
-
-      // Filter Reset
-      document.getElementById('btnResetFilters').onclick = () => {
-        document.getElementById('searchCityInput').value = '';
-        document.getElementById('searchTypeInput').value = '';
-        document.getElementById('priceRange').value = 50000;
-        document.getElementById('priceDisplay').innerText = '₹50,000 / mo';
-        state.activeFilters = { city: '', type: '', maxRent: 50000, prefs: [] };
-        loadCloudListings();
-      };
-
-      // Preference Tag Toggles
-      document.querySelectorAll('.pref-tag').forEach(tagBtn => {
-        tagBtn.onclick = () => {
-          tagBtn.classList.toggle('bg-indigo-600');
-          tagBtn.classList.toggle('text-white');
-          tagBtn.classList.toggle('border-indigo-600');
+      // Filter pills
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.onclick = () => {
+          btn.classList.toggle('bg-indigo-600');
+          btn.classList.toggle('text-white');
+          btn.classList.toggle('border-indigo-600');
         };
       });
     }
 
-    // -------------------------------------------------------------
     // 13. DOM READY BOOTSTRAP
-    // -------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      syncAuthUI();
-      bindApplicationEvents();
-      loadCloudListings();
-      verifyAdminTrigger();
+      updateAuthStatus();
+      initListeners();
+      fetchListings();
+      checkAdminTrigger();
     });
   </script>
 </body>
