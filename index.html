@@ -671,7 +671,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   }, 1000);
 });
 
-// ================= AUTH SYSTEM (REAL SUPABASE + OAUTH) =================
+// ================= AUTH SYSTEM =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -977,6 +977,7 @@ async function submitCredentialsLogin(callbackAction) {
     updateUserHeaderChip();
     closeModal();
     alert("Logged in successfully as " + DB.currentUser.name + "!");
+    syncFromSupabase();
     resumePendingAction(callbackAction);
   } catch(e) {
     alert("Login error: " + e.message);
@@ -994,6 +995,8 @@ async function logoutUser() {
     updateUserHeaderChip();
     closeModal();
     alert("Logged out successfully.");
+    syncFromSupabase();
+    goView('home');
   }
 }
 
@@ -1279,6 +1282,18 @@ function switchBookingsTab(tab) {
 
 function renderBookingsView() {
   var container = document.getElementById('bookingsListContainer');
+
+  // GUEST GUARD: LOGIN PROMPT
+  if (!DB.currentUser) {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:32px 16px; text-align:center;">' +
+      '<div style="font-size:36px; margin-bottom:8px;">🔒</div>' +
+      '<h4 style="font-size:14px; font-weight:800; color:#0F172A; margin-bottom:4px;">Login Required</h4>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:14px;">Please login to view and manage your booked stays.</p>' +
+      '<button class="big-action-btn" style="max-width:200px; margin:0 auto; padding:8px 16px; font-size:11.5px;" onclick="openProfileModal()">Login Now</button>' +
+    '</div>';
+    return;
+  }
+
   var list = [];
   if (currentBookingsTab === 'current') {
     list = DB.bookings.filter(function(b){ return b.status === 'confirmed' || b.status === 'pending' || b.status === 'cancel_pending'; });
@@ -1288,13 +1303,11 @@ function renderBookingsView() {
     list = DB.bookings;
   }
 
-  if (DB.currentUser) {
-    list = list.filter(function(b){ 
-      var cleanBookingUserPhone = (b.userPhone || '').replace(/\D/g, '');
-      var cleanCurrentPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
-      return b.userUid === DB.currentUser.uid || (cleanCurrentPhone && cleanBookingUserPhone === cleanCurrentPhone); 
-    });
-  }
+  list = list.filter(function(b){ 
+    var cleanBookingUserPhone = (b.userPhone || '').replace(/\D/g, '');
+    var cleanCurrentPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+    return b.userUid === DB.currentUser.uid || (cleanCurrentPhone && cleanBookingUserPhone === cleanCurrentPhone); 
+  });
 
   if (!list.length) {
     container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11.5px; color:#64748B;">No ' + currentBookingsTab + ' bookings found.</div>';
@@ -1316,8 +1329,7 @@ function renderBookingsView() {
         '<div class="compact-h-header">' +
           '<div class="compact-h-title">' + b.houseName + '</div>' +
           '<span class="status-pill ' + (isConfirmed ? 'status-confirmed' : (isPending ? 'status-pending' : (isCancelPending ? 'status-cancel-pending' : 'status-cancelled'))) + '">' +
-            '● ' + statusDisplay +
-          '</span>' +
+            '● ' + statusDisplay + '</span>' +
         '</div>' +
         '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo</div>' +
         '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + b.date + '</div>' +
@@ -1358,6 +1370,11 @@ async function acceptCancelBooking(id) {
 
 // ================= OWNER VIEW =================
 function toggleOwnerForm(show) {
+  if (show && !DB.currentUser) {
+    alert("Please sign in or create an account to list your property.");
+    openProfileModal('openOwnerForm');
+    return;
+  }
   document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
   document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
   if (show && DB.currentUser) {
@@ -1376,27 +1393,38 @@ function switchOwnerTab(tab) {
 }
 
 function renderOwnerView() {
-  var myRooms = DB.currentUser 
-    ? DB.listings.filter(function(l){ 
-        var cleanOwnerPhone = (l.phone || '').replace(/\D/g, '');
-        var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
-        return l.ownerUid === DB.currentUser.uid || (cleanUserPhone && cleanOwnerPhone === cleanUserPhone); 
-      })
-    : DB.listings;
+  var container = document.getElementById('ownerContentContainer');
 
-  var myRequests = DB.currentUser
-    ? DB.bookings.filter(function(b){ 
-        var cleanOwnerPhone = (b.ownerPhone || '').replace(/\D/g, '');
-        var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
-        return (cleanUserPhone && cleanOwnerPhone === cleanUserPhone);
-      })
-    : DB.bookings;
+  // GUEST GUARD: STRICT LOGIN PROMPT
+  if (!DB.currentUser) {
+    document.getElementById('statActiveCount').innerText = 0;
+    document.getElementById('statRequestsCount').innerText = 0;
+    document.getElementById('statExpiredCount').innerText = 0;
+
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:32px 16px; text-align:center;">' +
+      '<div style="font-size:36px; margin-bottom:8px;">🔒</div>' +
+      '<h4 style="font-size:14px; font-weight:800; color:#0F172A; margin-bottom:4px;">Landlord Login Required</h4>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:14px;">Sign in to view your listed properties, booking requests, and edit room info.</p>' +
+      '<button class="big-action-btn" style="max-width:200px; margin:0 auto; padding:8px 16px; font-size:11.5px;" onclick="openProfileModal()">Login as Owner</button>' +
+    '</div>';
+    return;
+  }
+
+  var myRooms = DB.listings.filter(function(l){ 
+    var cleanOwnerPhone = (l.phone || '').replace(/\D/g, '');
+    var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+    return l.ownerUid === DB.currentUser.uid || (cleanUserPhone && cleanOwnerPhone === cleanUserPhone); 
+  });
+
+  var myRequests = DB.bookings.filter(function(b){ 
+    var cleanOwnerPhone = (b.ownerPhone || '').replace(/\D/g, '');
+    var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+    return (cleanUserPhone && cleanOwnerPhone === cleanUserPhone);
+  });
 
   document.getElementById('statActiveCount').innerText = myRooms.filter(function(l){ return l.daysLeft > 0; }).length;
   document.getElementById('statRequestsCount').innerText = myRequests.filter(function(b){ return b.status==='pending' || b.status==='confirmed'; }).length;
   document.getElementById('statExpiredCount').innerText = myRooms.filter(function(l){ return l.daysLeft <= 0; }).length;
-
-  var container = document.getElementById('ownerContentContainer');
 
   if (currentOwnerTab === 'rooms') {
     if (!myRooms.length) {
@@ -1458,6 +1486,12 @@ function renderOwnerView() {
 }
 
 function openEditRoomModal(roomId) {
+  if (!DB.currentUser) {
+    alert("Please sign in first.");
+    openProfileModal();
+    return;
+  }
+
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
 
@@ -1614,6 +1648,12 @@ function renderPhotoPreviewList() {
 async function handlePublishProperty(e) {
   e.preventDefault();
 
+  if (!DB.currentUser) {
+    alert("Please sign in first to publish property.");
+    openProfileModal();
+    return;
+  }
+
   var btn = document.getElementById('btnPublishSubmit');
   btn.disabled = true;
   btn.innerText = 'Uploading to Cloud...';
@@ -1650,7 +1690,7 @@ async function handlePublishProperty(e) {
       address: document.getElementById('opAddr').value.trim(),
       lat: lockedMapCoord.lat,
       lng: lockedMapCoord.lng,
-      owner_uid: DB.currentUser ? DB.currentUser.uid : 'rehzo_owner',
+      owner_uid: DB.currentUser.uid,
       owner_name: document.getElementById('opName').value.trim(),
       owner_phone: document.getElementById('opPhone').value.trim(),
       owner_gmail: document.getElementById('opGmail').value.trim() || null,
