@@ -710,7 +710,6 @@ async function handleOAuthRedirect() {
   }
 }
 
-// Main Login Modal
 function openProfileModal(callbackAction) {
   if (DB.currentUser) {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
@@ -1713,9 +1712,9 @@ function openBookingPillModal(id) {
           '</select>' +
         '</div>' +
       '</div>' +
-      '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; justify-content:space-between; align-items:center;">' +
-        '<span>Monthly: ₹' + Number(l.rent).toLocaleString() + ' × <b>1 Month</b></span>' +
-        '<span style="font-size:14px; font-weight:900;">Total: ₹' + Number(l.rent).toLocaleString() + '</span>' +
+      '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; justify-content:space-between; align-items:center;">' +
+        '<span>Monthly: ₹' + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span>' +
+        '<span style="font-size:14px; font-weight:900;" id="calcTotalText">Total: ₹' + Number(l.rent).toLocaleString() + '</span>' +
       '</div>' +
       '<button class="big-action-btn" id="btnConfirmBooking" onclick="submitBookingRequest()">Send Request to Owner →</button>' +
     '</div>' +
@@ -1725,11 +1724,17 @@ function openBookingPillModal(id) {
 function updateBookingTotalCalculation() {
   if (!activeBookingRoom) return;
   var months = parseInt(document.getElementById('bpMonths').value) || 1;
-  var total = activeBookingRoom.rent * months;
-  var box = document.getElementById('bookingCalcBox');
-  if (box) {
-    box.innerHTML = '<span>Monthly: ₹' + Number(activeBookingRoom.rent).toLocaleString() + ' × <b>' + months + ' ' + (months > 1 ? 'Months' : 'Month') + '</b></span>' +
-                    '<span style="font-size:14px; font-weight:900;">Total: ₹' + Number(total).toLocaleString() + '</span>';
+  var monthlyRent = parseFloat(activeBookingRoom.rent) || 0;
+  var totalAmount = monthlyRent * months;
+
+  var monthElem = document.getElementById('calcMonthText');
+  var totalElem = document.getElementById('calcTotalText');
+
+  if (monthElem) {
+    monthElem.innerText = months + (months > 1 ? ' Months' : ' Month');
+  }
+  if (totalElem) {
+    totalElem.innerText = 'Total: ₹' + Number(totalAmount).toLocaleString();
   }
 }
 
