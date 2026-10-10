@@ -577,6 +577,7 @@ var lockedMapCoord = { lat: 24.9536, lng: 84.0321 };
 var currentBookingsTab = 'current';
 var currentOwnerTab = 'rooms';
 var uploadedPhotoFiles = [];
+var editUploadedPhotoFiles = [];
 var selectedSuitable = ['Family'];
 var selectedAmenities = ['Wi-Fi', 'Parking'];
 var selectedRules = ['No Smoking'];
@@ -1141,7 +1142,7 @@ function openRoomDetailsModal(roomId) {
       '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; margin-bottom:10px; line-height:1.6;">' +
         '<div>📍 <b>Location & Address:</b> ' + r.address + ', ' + r.city + ' (' + (r.state||'') + ' - ' + (r.pin||'') + ')</div>' +
         '<div style="margin-top:2px;">👤 <b>Host:</b> ' + r.ownerName + ' (' + r.phone + ')</div>' +
-        (r.deposit ? '<div>💵 <b>Security Deposit:</b> ₹' + Number(r.deposit).toLocaleString() + '</div>' : '') +
+        '<div>💵 <b>Security Deposit:</b> ₹' + Number(r.deposit || 0).toLocaleString() + '</div>' +
       '</div>' +
       '<div style="margin-bottom:8px;"><div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">👥 Suitable For:</div><div>' + suitableBadges + '</div></div>' +
       '<div style="margin-bottom:8px;"><div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">✨ Amenities Included:</div><div>' + amenitiesBadges + '</div></div>' +
@@ -1341,7 +1342,7 @@ function renderBookingsView() {
 
     var pillClass = isConfirmed ? 'status-confirmed' : (isOwnerAccepted ? 'status-owner-accepted' : (isPending ? 'status-pending' : (isCancelPending ? 'status-cancel-pending' : 'status-cancelled')));
     var statusText = isConfirmed ? 'CONFIRMED' : (isOwnerAccepted ? 'OWNER ACCEPTED (CONFIRM NOW)' : (isPending ? 'WAITING OWNER' : (isCancelPending ? 'CANCEL PENDING' : b.status.toUpperCase())));
-    var totalRent = (parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1);
+    var totalRent = ((parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1)) + (parseFloat(b.deposit) || 0);
 
     return '<div class="compact-h-card">' +
       '<img src="' + cover + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
@@ -1350,7 +1351,7 @@ function renderBookingsView() {
           '<div class="compact-h-title">' + b.houseName + '</div>' +
           '<span class="status-pill ' + pillClass + '">● ' + statusText + '</span>' +
         '</div>' +
-        '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo • Total: ₹' + Number(totalRent).toLocaleString() + '</div>' +
+        '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ₹' + Number(totalRent).toLocaleString() + '</div>' +
         '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + b.date + '</div>' +
         (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + b.trl + '</div>' : '') +
         '<div class="action-row-mini">' +
@@ -1367,7 +1368,7 @@ function renderBookingsView() {
   }).join('');
 }
 
-// TENANT FINAL CONFIRMATION (Generates TRL & Removes room from Home screen)
+// TENANT FINAL CONFIRMATION (Generates TRL & Removes room from Home screen completely)
 async function tenantFinalConfirmBooking(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -1382,10 +1383,13 @@ async function tenantFinalConfirmBooking(bookingId) {
 
   if (b.listingId) {
     await sb.from('listings').update({ status: 'booked' }).eq('id', b.listingId);
+    var targetListing = DB.listings.find(function(x){ return x.id === b.listingId; });
+    if (targetListing) targetListing.status = 'booked';
   }
 
   if (!res.error) {
-    alert("🎉 Room Booking Officially Confirmed!\nYour 12-Digit TRL is: " + trl + "\nExact location is now unlocked on your slip!");
+    alert("🎉 Room Booking Confirmed!\nYour 12-Digit TRL is: " + trl + "\nExact location is now unlocked on your slip!");
+    renderHomeGrid();
     await syncFromSupabase();
     openSlipModal(bookingId);
   } else {
@@ -1394,7 +1398,7 @@ async function tenantFinalConfirmBooking(bookingId) {
 }
 
 async function requestCancelBooking(id, role) {
-  if (confirm("Send cancellation request to the other party?")) {
+  if (confirm("Send cancellation request?")) {
     var res = await sb.from('bookings').update({ status: 'cancel_pending', cancel_requested_by: role }).eq('id', id);
     if (!res.error) {
       alert("Cancellation request sent! Awaiting approval.");
@@ -1409,8 +1413,11 @@ async function acceptCancelBooking(id) {
     var res = await sb.from('bookings').update({ status: 'cancelled', cancel_requested_by: null }).eq('id', id);
     if (!res.error && b && b.listingId) {
       await sb.from('listings').update({ status: 'available' }).eq('id', b.listingId);
+      var targetListing = DB.listings.find(function(x){ return x.id === b.listingId; });
+      if (targetListing) targetListing.status = 'available';
     }
     alert("Booking cancelled and room restored to Home screen!");
+    renderHomeGrid();
     await syncFromSupabase();
   }
 }
@@ -1514,7 +1521,7 @@ function renderOwnerView() {
       var isOwnerAccepted = (b.status === 'owner_accepted');
       var isConfirmed = (b.status === 'confirmed');
       var isCancelPending = (b.status === 'cancel_pending');
-      var totalRent = (parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1);
+      var totalRent = ((parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1)) + (parseFloat(b.deposit) || 0);
 
       return '<div class="compact-h-card" style="align-items:flex-start;">' +
         '<div class="compact-h-content">' +
@@ -1548,7 +1555,7 @@ function renderOwnerView() {
 async function ownerAcceptRequest(bookingId) {
   var res = await sb.from('bookings').update({ status: 'owner_accepted' }).eq('id', bookingId);
   if (!res.error) {
-    alert("Request Accepted!\nTenant has been notified to complete the final confirmation.");
+    alert("Request Accepted!\nTenant will now confirm finally to book the room.");
     await syncFromSupabase();
   }
 }
@@ -1561,10 +1568,15 @@ async function ownerRejectRequest(bookingId) {
   }
 }
 
-// FULL A TO Z OWNER EDIT MODAL
+// FULL A TO Z OWNER EDIT MODAL WITH PHOTO EDITING
+var currentEditListingPhotos = [];
+
 function openFullEditRoomModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
+
+  currentEditListingPhotos = (r.photos && r.photos.length) ? r.photos.slice() : [];
+  editUploadedPhotoFiles = [];
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
@@ -1597,7 +1609,7 @@ function openFullEditRoomModal(roomId) {
           '<input id="edRent" type="number" class="pill-input" value="' + r.rent + '">' +
         '</div>' +
         '<div class="field-box">' +
-          '<label class="field-label">Deposit (₹)</label>' +
+          '<label class="field-label">Security Deposit (₹)</label>' +
           '<input id="edDeposit" type="number" class="pill-input" value="' + (r.deposit || 0) + '">' +
         '</div>' +
       '</div>' +
@@ -1621,8 +1633,8 @@ function openFullEditRoomModal(roomId) {
         '<div class="field-box">' +
           '<label class="field-label">Availability Status</label>' +
           '<select id="edStatus" class="pill-input">' +
-            '<option value="available" ' + (r.status==='available'?'selected':'') + '>Available (Live)</option>' +
-            '<option value="booked" ' + (r.status==='booked'?'selected':'') + '>Booked (Hidden)</option>' +
+            '<option value="available" ' + (r.status==='available'?'selected':'') + '>Available (Live on Home)</option>' +
+            '<option value="booked" ' + (r.status==='booked'?'selected':'') + '>Booked (Hidden from Home)</option>' +
           '</select>' +
         '</div>' +
       '</div>' +
@@ -1632,9 +1644,57 @@ function openFullEditRoomModal(roomId) {
         '<input id="edAddr" class="pill-input" value="' + r.address + '">' +
       '</div>' +
 
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Edit Photos (Max 3)</label>' +
+        '<div class="photo-upload-row" id="editPhotoPreviewContainer"></div>' +
+        '<input type="file" id="editPhotoFileInput" accept="image/*" multiple onchange="handleEditPhotoPick(event)" style="display:none;">' +
+        '<div class="photo-add-box" onclick="document.getElementById(\'editPhotoFileInput\').click()">' +
+          '<span style="font-size:16px;">⇪</span>' +
+          '<span>Add Photo</span>' +
+        '</div>' +
+      '</div>' +
+
       '<button class="big-action-btn" id="btnSaveFullEdit" onclick="saveFullRoomEdit(\'' + r.id + '\')">Save Complete Updates →</button>' +
     '</div>' +
   '</div>';
+
+  renderEditPhotoPreviews();
+}
+
+function renderEditPhotoPreviews() {
+  var container = document.getElementById('editPhotoPreviewContainer');
+  if (!container) return;
+  var html = '';
+
+  currentEditListingPhotos.forEach(function(url, idx) {
+    html += '<div class="photo-preview-item">' +
+      '<img src="' + url + '" class="photo-thumb-preview">' +
+      '<button type="button" class="photo-del-btn" onclick="currentEditListingPhotos.splice(' + idx + ',1);renderEditPhotoPreviews();">✕</button>' +
+    '</div>';
+  });
+
+  editUploadedPhotoFiles.forEach(function(file, idx) {
+    var previewUrl = URL.createObjectURL(file);
+    html += '<div class="photo-preview-item">' +
+      '<img src="' + previewUrl + '" class="photo-thumb-preview">' +
+      '<button type="button" class="photo-del-btn" onclick="editUploadedPhotoFiles.splice(' + idx + ',1);renderEditPhotoPreviews();">✕</button>' +
+    '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function handleEditPhotoPick(event) {
+  var maxAllowed = 3 - (currentEditListingPhotos.length + editUploadedPhotoFiles.length);
+  if (maxAllowed <= 0) {
+    alert("You can have a maximum of 3 photos.");
+    return;
+  }
+  var files = Array.prototype.slice.call(event.target.files, 0, maxAllowed);
+  files.forEach(function(f) {
+    if (f.type.startsWith('image/')) editUploadedPhotoFiles.push(f);
+  });
+  renderEditPhotoPreviews();
 }
 
 async function saveFullRoomEdit(roomId) {
@@ -1652,25 +1712,48 @@ async function saveFullRoomEdit(roomId) {
   btn.disabled = true;
   btn.innerText = 'Updating Cloud...';
 
-  var res = await sb.from('listings').update({
-    house_name: houseName,
-    room_type: roomType,
-    rent: rent,
-    deposit: deposit,
-    city: city,
-    state: state,
-    pin: pin,
-    address: address,
-    status: status
-  }).eq('id', roomId);
+  try {
+    var finalPhotos = currentEditListingPhotos.slice();
 
-  if (!res.error) {
-    alert("Property updated successfully!");
-    closeModal();
-    await syncFromSupabase();
-    renderOwnerView();
-  } else {
-    alert("Update failed: " + res.error.message);
+    for (var i = 0; i < editUploadedPhotoFiles.length; i++) {
+      var file = editUploadedPhotoFiles[i];
+      var cleanName = Date.now() + '-' + Math.random().toString(36).substring(7) + '-' + file.name.replace(/[^a-zA-Z0-9.]/g, '');
+      var uploadRes = await sb.storage.from('room-photos').upload(cleanName, file);
+      if (!uploadRes.error) {
+        var urlData = sb.storage.from('room-photos').getPublicUrl(cleanName);
+        finalPhotos.push(urlData.data.publicUrl);
+      }
+    }
+
+    if (!finalPhotos.length) {
+      finalPhotos = ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+    }
+
+    var res = await sb.from('listings').update({
+      house_name: houseName,
+      room_type: roomType,
+      rent: rent,
+      deposit: deposit,
+      city: city,
+      state: state,
+      pin: pin,
+      address: address,
+      status: status,
+      photos: finalPhotos
+    }).eq('id', roomId);
+
+    if (!res.error) {
+      alert("Property updated successfully!");
+      closeModal();
+      await syncFromSupabase();
+      renderHomeGrid();
+      renderOwnerView();
+    } else {
+      alert("Update failed: " + res.error.message);
+    }
+  } catch(err) {
+    alert("Error updating property: " + err.message);
+  } finally {
     btn.disabled = false;
     btn.innerText = 'Save Complete Updates →';
   }
@@ -1853,9 +1936,10 @@ function openBookingPillModal(id) {
           '</select>' +
         '</div>' +
       '</div>' +
-      '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; justify-content:space-between; align-items:center;">' +
-        '<span>Monthly: ₹' + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span>' +
-        '<span style="font-size:14px; font-weight:900;" id="calcTotalText">Total: ₹' + Number(l.rent).toLocaleString() + '</span>' +
+      '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; flex-direction:column; gap:3px;">' +
+        '<div style="display:flex; justify-content:space-between;"><span>Rent: ₹' + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span><span>₹' + Number(l.rent).toLocaleString() + '</span></div>' +
+        '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ₹' + Number(l.deposit || 0).toLocaleString() + '</span></div>' +
+        '<div style="border-top:1px dashed #A7F3D0; margin-top:4px; padding-top:4px; display:flex; justify-content:space-between; font-weight:900; font-size:13px;" id="calcTotalText"><span>Total Amount:</span><span>₹' + Number((parseFloat(l.rent) || 0) + (parseFloat(l.deposit) || 0)).toLocaleString() + '</span></div>' +
       '</div>' +
       '<button class="big-action-btn" id="btnConfirmBooking" onclick="submitBookingRequest()">Send Request to Owner →</button>' +
     '</div>' +
@@ -1866,16 +1950,14 @@ function updateBookingTotalCalculation() {
   if (!activeBookingRoom) return;
   var months = parseInt(document.getElementById('bpMonths').value) || 1;
   var monthlyRent = parseFloat(activeBookingRoom.rent) || 0;
-  var totalAmount = monthlyRent * months;
+  var deposit = parseFloat(activeBookingRoom.deposit) || 0;
+  var totalAmount = (monthlyRent * months) + deposit;
 
-  var monthElem = document.getElementById('calcMonthText');
-  var totalElem = document.getElementById('calcTotalText');
-
-  if (monthElem) {
-    monthElem.innerText = months + (months > 1 ? ' Months' : ' Month');
-  }
-  if (totalElem) {
-    totalElem.innerText = 'Total: ₹' + Number(totalAmount).toLocaleString();
+  var box = document.getElementById('bookingCalcBox');
+  if (box) {
+    box.innerHTML = '<div style="display:flex; justify-content:space-between;"><span>Rent: ₹' + Number(monthlyRent).toLocaleString() + ' × <b>' + months + ' ' + (months > 1 ? 'Months' : 'Month') + '</b></span><span>₹' + Number(monthlyRent * months).toLocaleString() + '</span></div>' +
+      '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ₹' + Number(deposit).toLocaleString() + '</span></div>' +
+      '<div style="border-top:1px dashed #A7F3D0; margin-top:4px; padding-top:4px; display:flex; justify-content:space-between; font-weight:900; font-size:13px;"><span>Total Amount:</span><span>₹' + Number(totalAmount).toLocaleString() + '</span></div>';
   }
 }
 
@@ -1937,10 +2019,24 @@ function openSlipModal(bkId) {
   var b = DB.bookings.find(function(x){ return x.id === bkId; });
   if (!b) return;
 
-  var totalRent = (parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1);
-  var mapsLink = (b.roomLat && b.roomLng) 
-    ? 'https://www.google.com/maps/search/?api=1&query=' + b.roomLat + ',' + b.roomLng 
-    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((b.roomExactAddress || '') + ', ' + (b.roomCity || ''));
+  var l = DB.listings.find(function(x){ return x.id === b.listingId; }) || {};
+
+  var houseName = b.houseName || l.houseName || 'Raj mahal';
+  var roomType = b.roomType || l.roomType || 'Hostel';
+  var address = b.roomExactAddress || l.address || 'Sasaram bolliya, Sasaram';
+  var city = b.roomCity || l.city || 'Sasaram';
+  var state = b.roomState || l.state || 'Bihar';
+  var pin = b.roomPin || l.pin || '821115';
+  var rent = b.rent || l.rent || 7000;
+  var deposit = (b.deposit !== undefined && b.deposit !== null) ? b.deposit : (l.deposit || 1000);
+  var duration = b.duration || 1;
+  var totalAmount = (parseFloat(rent) * parseInt(duration)) + parseFloat(deposit);
+
+  var lat = b.roomLat || l.lat;
+  var lng = b.roomLng || l.lng;
+  var mapsLink = (lat && lng) 
+    ? 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng 
+    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address + ', ' + city);
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box-pdf" id="printableSlip">' +
@@ -1966,13 +2062,13 @@ function openSlipModal(bkId) {
       '<div style="font-size:10.5px; line-height:1.65;">' +
         '<!-- 1. ROOM & PROPERTY DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + b.houseName + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + b.roomType + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + (b.roomExactAddress || '') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + (b.roomCity || '') + ' (' + (b.roomState || '') + ')</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + (b.roomPin || 'N/A') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">₹' + Number(b.rent).toLocaleString() + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Security Deposit:</span> <b style="color:#0F172A;">₹' + Number(b.deposit || 0).toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + houseName + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + roomType + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + address + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + city + (state ? ' (' + state + ')' : '') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + pin + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">₹' + Number(rent).toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Security Deposit:</span> <b style="color:#0F172A;">₹' + Number(deposit).toLocaleString() + '</b></div>' +
         '<div style="margin-top:4px; padding:4px 8px; background:#F1F5F9; border-radius:8px; font-size:10px;">' +
           '📍 <b>Live Map Location:</b> <a href="' + mapsLink + '" target="_blank" style="color:#044E3B; font-weight:800; text-decoration:underline;">Open in Google Maps ↗</a>' +
         '</div>' +
@@ -1981,16 +2077,16 @@ function openSlipModal(bkId) {
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">👤 TENANT DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + b.userName + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Mobile No:</span> <b style="color:#0F172A;">' + b.userPhone + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + b.userOldAddress + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + b.userOldAddress + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + b.date + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent:</span> <span>₹' + Number(totalRent).toLocaleString() + '</span></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + duration + ' ' + (duration > 1 ? 'Months' : 'Month') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
 
         '<!-- 3. OWNER DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + b.ownerName + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No:</span> <b style="color:#0F172A;">' + b.ownerPhone + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Gmail:</span> <b style="color:#0F172A;">' + (b.ownerGmail || 'Not Provided') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + (b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No:</span> <b style="color:#0F172A;">' + (b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Gmail:</span> <b style="color:#0F172A;">' + (b.ownerGmail || l.gmail || 'Not Provided') + '</b></div>' +
       '</div>' +
     '</div>' +
   '</div>';
