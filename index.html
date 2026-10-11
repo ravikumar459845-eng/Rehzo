@@ -32,7 +32,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .header-actions { display: flex; align-items: center; gap: 8px; }
 .user-chip { background: #ECFDF5; border: 1px solid #A7F3D0; color: #044E3B; border-radius: 20px; padding: 4px 10px; font-size: 10.5px; font-weight: 800; cursor: pointer; }
 .icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; position: relative; }
-.notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #EF4444; display: none; }
+.notif-badge { position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px; border-radius: 8px; background: #EF4444; color: #fff; font-size: 9px; font-weight: 900; display: none; align-items: center; justify-content: center; padding: 0 4px; border: 1.5px solid #fff; }
 
 /* Main Wrapper */
 .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 12px 14px; }
@@ -142,12 +142,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .status-cancel-pending { background: #FEF3C7; color: #B45309; }
 .status-owner-accepted { background: #DBEAFE; color: #1D4ED8; }
 
-/* Prominent Action Buttons */
+/* Action Buttons */
 .action-row-mini { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .btn-action-large { padding: 6px 14px; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; font-size: 11px; font-weight: 800; color: #1E293B; cursor: pointer; text-align: center; }
 .btn-action-large.danger { color: #DC2626; border-color: #FCA5A5; }
 .btn-action-large.success { background: #044E3B; color: #fff; border-color: #044E3B; }
 .btn-action-large.disabled { opacity: 0.5; cursor: not-allowed; background: #F1F5F9; }
+
+/* Notification Card */
+.notif-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+.notif-card.unread { border-left: 4px solid #044E3B; background: #F0FDF4; }
+.notif-title { font-weight: 800; color: #0F172A; display: flex; justify-content: space-between; }
+.notif-time { font-size: 9px; color: #94A3B8; font-weight: 600; }
 
 /* Bottom Nav Bar */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
@@ -191,7 +197,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="user-chip" id="userHeaderChip" onclick="openProfileModal()">👤 Login</div>
     <button class="icon-btn" onclick="goView('notifications')">
       🔔
-      <span class="notif-dot" id="headerNotifDot"></span>
+      <span class="notif-badge" id="headerNotifBadge">0</span>
     </button>
   </div>
 </header>
@@ -285,7 +291,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     </div>
     <div class="sub-tabs-row">
       <button class="sub-tab-btn active" id="tabBookingsCurrent" onclick="switchBookingsTab('current')">Current</button>
-      <button class="sub-tab-btn" id="tabBookingsHistory" onclick="switchBookingsTab('history')">History</button>
+      <button class="sub-tab-btn" id="tabBookingsConfirm" onclick="switchBookingsTab('confirm')">Confirm</button>
       <button class="sub-tab-btn" id="tabBookingsCancelled" onclick="switchBookingsTab('cancelled')">Cancelled</button>
     </div>
     <div id="bookingsListContainer"></div>
@@ -485,7 +491,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
   <!-- ================= 6. NOTIFICATIONS ================= -->
   <section id="view-notifications" class="view">
     <div class="sub-header">
-      <h3 class="sub-title">Notifications</h3>
+      <h3 class="sub-title">Notifications & Requests</h3>
+      <span onclick="markAllNotifsRead()" style="font-size:11px; font-weight:700; color:#044E3B; cursor:pointer;">Mark all read</span>
     </div>
     <div id="notificationsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
   </section>
@@ -571,8 +578,7 @@ function populateCountryDropdowns() {
 var DB = {
   currentUser: JSON.parse(localStorage.getItem('rehzo_current_user')) || null,
   listings: [],
-  bookings: [],
-  notifications: JSON.parse(localStorage.getItem('rehzo_notifs')) || []
+  bookings: []
 };
 
 var userGeo = { lat: 24.9536, lng: 84.0321 };
@@ -692,7 +698,8 @@ async function syncFromSupabase() {
           roomLat: b.room_lat,
           roomLng: b.room_lng,
           status: b.status || 'pending',
-          cancelRequestedBy: b.cancel_requested_by
+          cancelRequestedBy: b.cancel_requested_by,
+          createdAt: b.created_at
         };
       });
     }
@@ -700,9 +707,11 @@ async function syncFromSupabase() {
     console.error("Supabase load error:", e);
   }
 
+  updateNotificationsBadge();
   renderHomeGrid();
   if (document.getElementById('view-bookings').classList.contains('active')) renderBookingsView();
   if (document.getElementById('view-owner').classList.contains('active')) renderOwnerView();
+  if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
 }
 
 // ================= SPLASH & AUTO INITIALIZATION =================
@@ -722,7 +731,146 @@ window.addEventListener('DOMContentLoaded', async function() {
   }, 1000);
 });
 
-// ================= AUTH SYSTEM (WITHOUT BROWSER BREACH POPUP) =================
+// ================= NOTIFICATIONS ENGINE =================
+function getRelevantNotifications() {
+  if (!DB.currentUser) return [];
+  var notifs = [];
+  var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+
+  DB.bookings.forEach(function(b) {
+    var cleanTenantPhone = (b.userPhone || '').replace(/\D/g, '');
+    var cleanOwnerPhone = (b.ownerPhone || '').replace(/\D/g, '');
+
+    // Owner notifications
+    if (cleanOwnerPhone && cleanOwnerPhone === cleanUserPhone) {
+      if (b.status === 'pending') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'New Booking Request 📥',
+          desc: b.userName + ' requested to book ' + b.houseName + ' (' + b.duration + ' mo).',
+          time: b.date || 'Recent',
+          action: 'owner'
+        });
+      } else if (b.status === 'confirmed') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'Booking Confirmed! 🎉',
+          desc: b.userName + ' confirmed the stay for ' + b.houseName + '. TRL: ' + (b.trl || ''),
+          time: b.date || 'Recent',
+          action: 'owner'
+        });
+      } else if (b.status === 'cancel_pending' && b.cancelRequestedBy === 'user') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'Cancellation Request ⚠️',
+          desc: b.userName + ' requested to cancel the booking for ' + b.houseName + '.',
+          time: b.date || 'Recent',
+          action: 'owner'
+        });
+      }
+    }
+
+    // Tenant notifications
+    if (b.userUid === DB.currentUser.uid || (cleanTenantPhone && cleanTenantPhone === cleanUserPhone)) {
+      if (b.status === 'owner_accepted') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'Request Accepted by Owner! ✅',
+          desc: 'Owner accepted your request for ' + b.houseName + '. Please go to My Bookings to confirm.',
+          time: b.date || 'Recent',
+          action: 'bookings'
+        });
+      } else if (b.status === 'confirmed') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'Stay Confirmed & Locked 🏠',
+          desc: 'Your booking for ' + b.houseName + ' is 100% verified. TRL: ' + (b.trl || ''),
+          time: b.date || 'Recent',
+          action: 'bookings'
+        });
+      } else if (b.status === 'rejected') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'Request Declined / Booked ✕',
+          desc: 'Booking for ' + b.houseName + ' could not be processed.',
+          time: b.date || 'Recent',
+          action: 'bookings'
+        });
+      } else if (b.status === 'cancel_pending' && b.cancelRequestedBy === 'owner') {
+        notifs.push({
+          id: 'notif_' + b.id,
+          title: 'Owner Requested Cancellation ⚠️',
+          desc: 'Owner requested cancellation for ' + b.houseName + '.',
+          time: b.date || 'Recent',
+          action: 'bookings'
+        });
+      }
+    }
+  });
+
+  return notifs;
+}
+
+function updateNotificationsBadge() {
+  var badge = document.getElementById('headerNotifBadge');
+  if (!badge) return;
+  var notifs = getRelevantNotifications();
+  var readList = JSON.parse(localStorage.getItem('rehzo_read_notifs') || '[]');
+  var unreadCount = notifs.filter(function(n){ return readList.indexOf(n.id) === -1; }).length;
+
+  if (unreadCount > 0) {
+    badge.innerText = unreadCount;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderNotifications() {
+  var container = document.getElementById('notificationsContainer');
+  if (!container) return;
+
+  if (!DB.currentUser) {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">Please login to view notifications.</div>';
+    return;
+  }
+
+  var notifs = getRelevantNotifications();
+  var readList = JSON.parse(localStorage.getItem('rehzo_read_notifs') || '[]');
+
+  if (!notifs.length) {
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">No notifications at this moment.</div>';
+    return;
+  }
+
+  container.innerHTML = notifs.map(function(n) {
+    var isRead = readList.indexOf(n.id) !== -1;
+    return '<div class="notif-card ' + (isRead ? '' : 'unread') + '" onclick="handleNotifClick(\'' + n.id + '\', \'' + n.action + '\')">' +
+      '<div class="notif-title"><span>' + n.title + '</span><span class="notif-time">' + n.time + '</span></div>' +
+      '<div style="color:#475569;">' + n.desc + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function handleNotifClick(notifId, actionView) {
+  var readList = JSON.parse(localStorage.getItem('rehzo_read_notifs') || '[]');
+  if (readList.indexOf(notifId) === -1) {
+    readList.push(notifId);
+    localStorage.setItem('rehzo_read_notifs', JSON.stringify(readList));
+  }
+  updateNotificationsBadge();
+  if (actionView) goView(actionView);
+}
+
+function markAllNotifsRead() {
+  var notifs = getRelevantNotifications();
+  var readList = notifs.map(function(n){ return n.id; });
+  localStorage.setItem('rehzo_read_notifs', JSON.stringify(readList));
+  updateNotificationsBadge();
+  renderNotifications();
+}
+
+// ================= AUTH SYSTEM =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -1092,7 +1240,7 @@ function checkAdminAccess() {
   else if (pass !== null) alert("Incorrect passcode.");
 }
 
-// ================= RENDER LISTINGS (STRICT COUNTRY & BOOKED FILTER) =================
+// ================= RENDER LISTINGS =================
 function renderHomeGrid(items) {
   var list = items || DB.listings.filter(function(x){ 
     return (x.status === 'available') && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
@@ -1330,11 +1478,11 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS =================
+// ================= MY BOOKINGS (UPDATED: CURRENT, CONFIRM, CANCELLED) =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
-  document.getElementById('tabBookingsHistory').className = 'sub-tab-btn ' + (tab==='history'?'active':'');
+  document.getElementById('tabBookingsConfirm').className = 'sub-tab-btn ' + (tab==='confirm'?'active':'');
   document.getElementById('tabBookingsCancelled').className = 'sub-tab-btn ' + (tab==='cancelled'?'active':'');
   renderBookingsView();
 }
@@ -1354,11 +1502,14 @@ function renderBookingsView() {
 
   var list = [];
   if (currentBookingsTab === 'current') {
-    list = DB.bookings.filter(function(b){ return b.status === 'confirmed' || b.status === 'pending' || b.status === 'owner_accepted' || b.status === 'cancel_pending'; });
+    // CURRENT: Active pending or awaiting final confirmation
+    list = DB.bookings.filter(function(b){ return b.status === 'pending' || b.status === 'owner_accepted' || b.status === 'cancel_pending'; });
+  } else if (currentBookingsTab === 'confirm') {
+    // CONFIRM: Only confirmed bookings
+    list = DB.bookings.filter(function(b){ return b.status === 'confirmed'; });
   } else if (currentBookingsTab === 'cancelled') {
+    // CANCELLED: Cancelled or rejected bookings
     list = DB.bookings.filter(function(b){ return b.status === 'cancelled' || b.status === 'rejected'; });
-  } else {
-    list = DB.bookings;
   }
 
   list = list.filter(function(b){ 
@@ -2145,11 +2296,6 @@ function openSlipModal(bkId) {
 
 function closeModal() {
   document.getElementById('modalSlot').innerHTML = '';
-}
-
-function renderNotifications() {
-  var container = document.getElementById('notificationsContainer');
-  container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11px; color:#64748B;">Connected to Supabase production notifications.</div>';
 }
 
 // ================= ADMIN PANEL =================
