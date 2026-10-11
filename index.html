@@ -142,7 +142,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .status-cancel-pending { background: #FEF3C7; color: #B45309; }
 .status-owner-accepted { background: #DBEAFE; color: #1D4ED8; }
 
-/* Action Buttons */
+/* Prominent Action Buttons */
 .action-row-mini { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .btn-action-large { padding: 6px 14px; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; font-size: 11px; font-weight: 800; color: #1E293B; cursor: pointer; text-align: center; }
 .btn-action-large.danger { color: #DC2626; border-color: #FCA5A5; }
@@ -714,23 +714,6 @@ async function syncFromSupabase() {
   if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
 }
 
-// ================= SPLASH & AUTO INITIALIZATION =================
-window.addEventListener('DOMContentLoaded', async function() {
-  populateCountryDropdowns();
-  updateUserHeaderChip();
-  await autoDetectUserCountry();
-  await handleOAuthRedirect();
-  await syncFromSupabase();
-
-  setTimeout(function() {
-    var splash = document.getElementById('splashOverlay');
-    if (splash) {
-      splash.style.opacity = '0';
-      setTimeout(function() { splash.style.display = 'none'; }, 500);
-    }
-  }, 1000);
-});
-
 // ================= NOTIFICATIONS ENGINE =================
 function getRelevantNotifications() {
   if (!DB.currentUser) return [];
@@ -1240,10 +1223,15 @@ function checkAdminAccess() {
   else if (pass !== null) alert("Incorrect passcode.");
 }
 
-// ================= RENDER LISTINGS =================
+// ================= RENDER LISTINGS (STRICT EXCLUSION FOR CONFIRMED/BOOKED ROOMS) =================
 function renderHomeGrid(items) {
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   var list = items || DB.listings.filter(function(x){ 
-    return (x.status === 'available') && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
+    var isAlreadyConfirmed = confirmedRoomIds.indexOf(x.id) !== -1;
+    return (x.status === 'available') && (!isAlreadyConfirmed) && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
   });
 
   var container = document.getElementById('homeRoomsGrid');
@@ -1272,7 +1260,8 @@ function triggerBookRoomFlow(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
 
-  if (r.status !== 'available') {
+  var isBookedInBookings = DB.bookings.some(function(b){ return b.listingId === roomId && b.status === 'confirmed'; });
+  if (r.status !== 'available' || isBookedInBookings) {
     alert("This room is already confirmed and booked by another tenant!");
     return;
   }
@@ -1356,9 +1345,14 @@ function handleSearch(val) {
   }
   alertBox.style.display = 'none';
 
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   var sLow = q.toLowerCase();
   var filtered = DB.listings.filter(function(l) {
-    return (l.status === 'available') && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (
+    var isAlreadyConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+    return (l.status === 'available') && (!isAlreadyConfirmed) && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (
       l.houseName.toLowerCase().indexOf(sLow) !== -1 ||
       l.city.toLowerCase().indexOf(sLow) !== -1 ||
       l.roomType.toLowerCase().indexOf(sLow) !== -1
@@ -1370,8 +1364,13 @@ function handleSearch(val) {
 function applyFilters() {
   var c = document.getElementById('countryFilter').value || detectedCountryCode;
   var t = document.getElementById('typeFilter').value;
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   var filtered = DB.listings.filter(function(l) {
-    return (l.status === 'available') && (l.daysLeft > 0) && (!c || l.country === c) && (!t || l.roomType === t);
+    var isAlreadyConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+    return (l.status === 'available') && (!isAlreadyConfirmed) && (l.daysLeft > 0) && (!c || l.country === c) && (!t || l.roomType === t);
   });
   renderHomeGrid(filtered);
 }
@@ -1380,10 +1379,16 @@ function filterChip(cat, el) {
   var chips = document.querySelectorAll('.chip');
   for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
   el.classList.add('active');
+
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   if (cat === 'all') renderHomeGrid();
   else {
     var filtered = DB.listings.filter(function(l){
-      return (l.status === 'available') && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
+      var isAlreadyConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+      return (l.status === 'available') && (!isAlreadyConfirmed) && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
     });
     renderHomeGrid(filtered);
   }
@@ -1407,9 +1412,14 @@ function getDistKm(lat1, lon1, lat2, lon2) {
 
 function renderNearGrid() {
   var near = [];
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   for (var i = 0; i < DB.listings.length; i++) {
     var l = DB.listings[i];
-    if (l.status === 'available' && l.daysLeft > 0 && l.lat && l.lng && l.country === detectedCountryCode) {
+    var isAlreadyConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+    if (l.status === 'available' && !isAlreadyConfirmed && l.daysLeft > 0 && l.lat && l.lng && l.country === detectedCountryCode) {
       var d = getDistKm(userGeo.lat, userGeo.lng, l.lat, l.lng);
       if (d <= 10) near.push(Object.assign({}, l, { distKm: d.toFixed(1) }));
     }
@@ -1462,7 +1472,15 @@ function detectGPS(isManual) {
 
 function renderSearchGrid() {
   var container = document.getElementById('searchRoomsGrid');
-  var list = DB.listings.filter(function(x){ return x.status === 'available' && x.daysLeft > 0 && x.country === detectedCountryCode; });
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
+  var list = DB.listings.filter(function(x){ 
+    var isAlreadyConfirmed = confirmedRoomIds.indexOf(x.id) !== -1;
+    return x.status === 'available' && !isAlreadyConfirmed && x.daysLeft > 0 && x.country === detectedCountryCode; 
+  });
+
   container.innerHTML = list.map(function(r) {
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
@@ -1478,7 +1496,7 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS (UPDATED: CURRENT, CONFIRM, CANCELLED) =================
+// ================= MY BOOKINGS =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
@@ -1502,13 +1520,10 @@ function renderBookingsView() {
 
   var list = [];
   if (currentBookingsTab === 'current') {
-    // CURRENT: Active pending or awaiting final confirmation
     list = DB.bookings.filter(function(b){ return b.status === 'pending' || b.status === 'owner_accepted' || b.status === 'cancel_pending'; });
   } else if (currentBookingsTab === 'confirm') {
-    // CONFIRM: Only confirmed bookings
     list = DB.bookings.filter(function(b){ return b.status === 'confirmed'; });
   } else if (currentBookingsTab === 'cancelled') {
-    // CANCELLED: Cancelled or rejected bookings
     list = DB.bookings.filter(function(b){ return b.status === 'cancelled' || b.status === 'rejected'; });
   }
 
@@ -1560,7 +1575,7 @@ function renderBookingsView() {
   }).join('');
 }
 
-// TENANT FINAL CONFIRMATION (FIRST COME, FIRST SERVED RACE CONDITION CHECK)
+// TENANT FINAL CONFIRMATION (RACE CONDITION PROOF)
 async function tenantFinalConfirmBooking(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -1584,7 +1599,6 @@ async function tenantFinalConfirmBooking(bookingId) {
   if (!res.error && b.listingId) {
     await sb.from('listings').update({ status: 'booked' }).eq('id', b.listingId);
     
-    // Auto-reject any other pending/owner_accepted requests for this specific room
     await sb.from('bookings').update({ status: 'rejected' })
       .eq('listing_id', b.listingId)
       .neq('id', bookingId)
@@ -1592,6 +1606,8 @@ async function tenantFinalConfirmBooking(bookingId) {
 
     var targetListing = DB.listings.find(function(x){ return x.id === b.listingId; });
     if (targetListing) targetListing.status = 'booked';
+    b.status = 'confirmed';
+    b.trl = trl;
   }
 
   if (!res.error) {
