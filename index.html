@@ -138,7 +138,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .status-cancel-pending { background: #FEF3C7; color: #B45309; }
 .status-owner-accepted { background: #DBEAFE; color: #1D4ED8; }
 
-/* Action Buttons */
 .action-row-mini { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .btn-action-large { padding: 6px 14px; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; font-size: 11px; font-weight: 800; color: #1E293B; cursor: pointer; text-align: center; }
 .btn-action-large.danger { color: #DC2626; border-color: #FCA5A5; }
@@ -918,13 +917,14 @@ async function handleOAuthRedirect() {
     var sessionRes = await sb.auth.getSession();
     var session = sessionRes.data ? sessionRes.data.session : null;
     
+    // Check if user came back from OAuth specifically for registration verification
     var pendingOAuthReg = localStorage.getItem('rehzo_pending_reg_oauth');
     var pendingOAuthRecov = localStorage.getItem('rehzo_pending_recov_oauth');
 
     if (session && session.user && session.user.email) {
       var googleEmail = session.user.email;
       
-      // CASE 1: Google OAuth Callback for Registration Verification
+      // REGISTRATION HANDLER
       if (pendingOAuthReg === 'true') {
         localStorage.removeItem('rehzo_pending_reg_oauth');
         
@@ -945,24 +945,24 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // CASE 2: Google OAuth Callback for Account Recovery Verification
+      // RECOVERY HANDLER (AUTO MATCH WITH FOUND USER GMAIL)
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
-        var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_recov_target_user') || 'null');
+        var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
         
         if (savedRecovUser) {
           recoveryFoundUser = savedRecovUser;
           setTimeout(function() {
             openForgotCredentialsModal();
-            document.getElementById('recovPhoneInput').value = savedRecovUser.phone ? savedRecovUser.phone.replace(/\D/g,'').slice(-10) : '';
+            document.getElementById('recovPhoneInput').value = recoveryFoundUser.phone.replace(/\D/g,'');
             executeFindMyIdOnly();
             evaluateRecoveryGoogleMatch(googleEmail);
           }, 400);
+          return;
         }
-        return;
       }
 
-      // CASE 3: Normal Session
+      // Normal session check
       var profRes = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
       if (profRes.data && profRes.data.length > 0) {
         DB.currentUser = profRes.data[0];
@@ -1339,6 +1339,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
     var fullPhone = dial + ' ' + cleanDigits;
 
+    // CHECK IF CONTACT NO ALREADY EXISTS
     var phoneCheck = await sb.from('profiles').select('uid').ilike('phone', '%' + cleanDigits + '%');
     if (phoneCheck.data && phoneCheck.data.length > 0) {
       alert("Your account already exists with this Contact No. (" + fullPhone + ")!\nPlease login with your existing account.");
@@ -1347,6 +1348,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
+    // CHECK IF GMAIL ALREADY EXISTS
     var gmailCheck = await sb.from('profiles').select('uid').ilike('gmail', registrationGoogleVerifiedEmail);
     if (gmailCheck.data && gmailCheck.data.length > 0) {
       alert("Your account already exists with this Gmail (" + registrationGoogleVerifiedEmail + ")!\nPlease login with your existing account.");
@@ -1355,6 +1357,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
+    // CHECK IF USER ID ALREADY EXISTS
     var uidCheck = await sb.from('profiles').select('uid').ilike('uid', fullUid);
     if (uidCheck.data && uidCheck.data.length > 0) {
       alert("User ID " + fullUid + " is already taken. Please choose another suffix.");
@@ -1478,7 +1481,7 @@ async function submitCredentialsLogin(callbackAction) {
   }
 }
 
-// STEP-BY-STEP RECOVERY: DIRECT REGISTERED GMAIL VERIFICATION VIA GOOGLE OAUTH
+// STEP-BY-STEP RECOVERY: DIRECT SAME-GMAIL VERIFICATION
 function openForgotCredentialsModal() {
   recoveryFoundUser = null;
   recoveryGoogleVerified = false;
@@ -1540,7 +1543,7 @@ async function executeFindMyIdOnly() {
     }
 
     recoveryFoundUser = res.data[0];
-    localStorage.setItem('rehzo_recov_target_user', JSON.stringify(recoveryFoundUser));
+    localStorage.setItem('rehzo_temp_recov_user', JSON.stringify(recoveryFoundUser));
 
     resultBox.style.display = 'block';
     resultBox.innerHTML = '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:12px; margin-bottom:12px;">' +
@@ -1551,7 +1554,7 @@ async function executeFindMyIdOnly() {
 
     '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:14px; padding:12px;">' +
       '<div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">Want to Reset Password?</div>' +
-      '<div style="font-size:10.5px; color:#64748B; margin-bottom:10px;">Tap below to verify with your registered Google Gmail.</div>' +
+      '<div style="font-size:10.5px; color:#64748B; margin-bottom:10px;">Tap below to verify your linked Google account (' + (recoveryFoundUser.gmail ? recoveryFoundUser.gmail : 'Registered Gmail') + ').</div>' +
       
       '<button type="button" class="google-auth-btn" id="btnGoogleVerifyRecov" onclick="triggerRecoveryGoogleAuth()" style="margin-bottom:6px;">' +
         '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
@@ -1579,6 +1582,7 @@ async function executeFindMyIdOnly() {
   }
 }
 
+// PASSES EXACT REGISTERED GMAIL AS LOGIN_HINT TO GOOGLE
 async function triggerRecoveryGoogleAuth() {
   if (!recoveryFoundUser) {
     alert("Please find your ID first.");
@@ -1588,21 +1592,32 @@ async function triggerRecoveryGoogleAuth() {
   try {
     await sb.auth.signOut();
     localStorage.setItem('rehzo_pending_recov_oauth', 'true');
-    localStorage.setItem('rehzo_recov_target_user', JSON.stringify(recoveryFoundUser));
 
     var redirectToUrl = window.location.origin + window.location.pathname;
+    
+    // Pass login_hint so Google pre-selects the EXACT registered Gmail
+    var oauthOptions = {
+      redirectTo: redirectToUrl,
+      queryParams: {
+        prompt: 'select_account'
+      }
+    };
+
+    if (recoveryFoundUser.gmail) {
+      oauthOptions.queryParams.login_hint = recoveryFoundUser.gmail;
+    }
+
     var res = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { 
-        redirectTo: redirectToUrl,
-        queryParams: { prompt: 'select_account' }
-      }
+      options: oauthOptions
     });
 
     if (res.error) {
       localStorage.removeItem('rehzo_pending_recov_oauth');
-      var manualEmail = prompt("Please select and enter your registered Google Gmail to verify:");
-      if (manualEmail) evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
+      var manualEmail = prompt("Please enter your registered Google Gmail to verify:");
+      if (manualEmail) {
+        evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
+      }
     }
   } catch(e) {
     localStorage.removeItem('rehzo_pending_recov_oauth');
@@ -1625,8 +1640,9 @@ function evaluateRecoveryGoogleMatch(email) {
     }
     if (resetArea) resetArea.style.display = 'block';
     recoveryGoogleVerified = true;
+    localStorage.removeItem('rehzo_temp_recov_user');
   } else {
-    alert("Verification Failed!\nThe selected Google account (" + cleanEmail + ") does not match the registered Gmail for User ID " + (recoveryFoundUser ? recoveryFoundUser.uid : ''));
+    alert("Verification Failed!\nThe Google account (" + cleanEmail + ") does not match the registered Gmail for User ID " + (recoveryFoundUser ? recoveryFoundUser.uid : ''));
     if (status) {
       status.innerText = '✕ Email mismatch with registered profile.';
       status.style.color = '#DC2626';
@@ -2775,6 +2791,7 @@ function openSlipModal(bkId) {
       '<div class="barcode-strip"></div>' +
 
       '<div style="font-size:10.5px; line-height:1.65;">' +
+        '<!-- 1. ROOM & PROPERTY DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
@@ -2787,6 +2804,7 @@ function openSlipModal(bkId) {
           '📍 <b>Live Map Location:</b> <a href="' + mapsLink + '" target="_blank" style="color:#044E3B; font-weight:800; text-decoration:underline;">Open in Google Maps ↗</a>' +
         '</div>' +
 
+        '<!-- 2. TENANT DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">👤 TENANT DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + cleanText(b.userName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
@@ -2795,6 +2813,7 @@ function openSlipModal(bkId) {
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
 
+        '<!-- 3. OWNER DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + cleanText(b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
