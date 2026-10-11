@@ -543,6 +543,22 @@ var SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
 var SUPABASE_KEY = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ================= SECURITY & SANITIZATION UTILITIES =================
+function cleanText(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, function(m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+
+async function hashPassword(plainPassword) {
+  if (!plainPassword) return '';
+  var enc = new TextEncoder();
+  var hashBuffer = await crypto.subtle.digest('SHA-256', enc.encode(plainPassword + "_rehzo_salt_2026"));
+  var hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
 // ================= EXTENSIVE WORLDWIDE COUNTRIES LIST =================
 var WORLD_COUNTRIES = [
   { code: 'IN', name: 'India', dial: '+91', sym: '₹' },
@@ -747,7 +763,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'New Booking Request 📥',
-          desc: b.userName + ' requested to book ' + b.houseName + ' (' + b.duration + ' mo).',
+          desc: cleanText(b.userName) + ' requested to book ' + cleanText(b.houseName) + ' (' + b.duration + ' mo).',
           time: b.date || 'Recent',
           action: 'owner'
         });
@@ -755,7 +771,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Booking Confirmed! 🎉',
-          desc: b.userName + ' confirmed the stay for ' + b.houseName + '. TRL: ' + (b.trl || ''),
+          desc: cleanText(b.userName) + ' confirmed the stay for ' + cleanText(b.houseName) + '. TRL: ' + (b.trl || ''),
           time: b.date || 'Recent',
           action: 'owner'
         });
@@ -763,7 +779,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Cancellation Request ⚠️',
-          desc: b.userName + ' requested to cancel the booking for ' + b.houseName + '.',
+          desc: cleanText(b.userName) + ' requested to cancel the booking for ' + cleanText(b.houseName) + '.',
           time: b.date || 'Recent',
           action: 'owner'
         });
@@ -776,7 +792,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Request Accepted by Owner! ✅',
-          desc: 'Owner accepted your request for ' + b.houseName + '. Please go to My Bookings to confirm.',
+          desc: 'Owner accepted your request for ' + cleanText(b.houseName) + '. Please go to My Bookings to confirm.',
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -784,7 +800,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Stay Confirmed & Locked 🏠',
-          desc: 'Your booking for ' + b.houseName + ' is 100% verified. TRL: ' + (b.trl || ''),
+          desc: 'Your booking for ' + cleanText(b.houseName) + ' is 100% verified. TRL: ' + (b.trl || ''),
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -792,7 +808,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Request Declined / Booked ✕',
-          desc: 'Booking for ' + b.houseName + ' could not be processed.',
+          desc: 'Booking for ' + cleanText(b.houseName) + ' could not be processed.',
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -800,7 +816,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Owner Requested Cancellation ⚠️',
-          desc: 'Owner requested cancellation for ' + b.houseName + '.',
+          desc: 'Owner requested cancellation for ' + cleanText(b.houseName) + '.',
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -922,12 +938,12 @@ function openProfileModal(callbackAction) {
         '</div>' +
         '<div style="text-align:center; padding:10px 0;">' +
           '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
-          '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + DB.currentUser.name + '</h2>' +
-          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + DB.currentUser.uid + '</div>' +
+          '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + cleanText(DB.currentUser.name) + '</h2>' +
+          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + cleanText(DB.currentUser.uid) + '</div>' +
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
-          '<div>📞 <b>Phone:</b> ' + DB.currentUser.phone + '</div>' +
-          '<div>✉️ <b>Gmail:</b> ' + (DB.currentUser.gmail || 'Not Linked') + '</div>' +
+          '<div>📞 <b>Phone:</b> ' + cleanText(DB.currentUser.phone) + '</div>' +
+          '<div>✉️ <b>Gmail:</b> ' + (DB.currentUser.gmail ? cleanText(DB.currentUser.gmail) : 'Not Linked') + '</div>' +
           '<div>🛡️ <b>Access:</b> Country Strictly Locked to GPS/Location</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
@@ -964,6 +980,9 @@ function openProfileModal(callbackAction) {
             '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'loginPwd\', this)">👁️</button>' +
           '</div>' +
+        '</div>' +
+        '<div style="text-align:right; margin-bottom:10px;">' +
+          '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openRecoveryModal()">Forgot User ID or Password?</span>' +
         '</div>' +
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
         '<div style="text-align:center; margin-top:12px;">' +
@@ -1053,6 +1072,127 @@ function openRegistrationModal(prefillData, callbackAction) {
   '</div>';
 }
 
+// ================= FORGOT USER ID & PASSWORD RECOVERY =================
+function openRecoveryModal() {
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">🔑</div>' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Account Recovery</h3>' +
+        '</div>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+
+      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your registered Contact Number and linked Gmail to find your User ID or reset your password.</p>' +
+
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Registered Mobile Number *</label>' +
+        '<input id="recPhone" type="tel" class="pill-input" placeholder="e.g. 7707064294">' +
+      '</div>' +
+
+      '<div class="field-box" style="margin-bottom:8px;">' +
+        '<label class="field-label">Linked Gmail (optional)</label>' +
+        '<input id="recGmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
+      '</div>' +
+
+      '<div style="display:flex; gap:8px; margin-top:10px;">' +
+        '<button class="btn-action-large" style="flex:1;" onclick="findMyUserId()">Find My User ID</button>' +
+      '</div>' +
+
+      '<div style="border-top:1px solid #E2E8F0; margin:14px 0 10px; padding-top:10px;">' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Set New Password</label>' +
+          '<input id="recNewPassword" type="password" class="pill-input" placeholder="Enter new strong password" minlength="6">' +
+        '</div>' +
+        '<button class="big-action-btn" id="btnResetPassword" onclick="resetMyPassword()">Update Password →</button>' +
+      '</div>' +
+
+      '<div id="recoveryStatusBox" style="margin-top:10px; font-size:11px; font-weight:700; text-align:center;"></div>' +
+    '</div>' +
+  '</div>';
+}
+
+async function findMyUserId() {
+  var phone = document.getElementById('recPhone').value.trim().replace(/\D/g, '');
+  var gmail = document.getElementById('recGmail').value.trim().toLowerCase();
+  var statusBox = document.getElementById('recoveryStatusBox');
+
+  if (!phone && !gmail) {
+    statusBox.innerText = 'Please provide mobile number or gmail.';
+    statusBox.style.color = '#DC2626';
+    return;
+  }
+
+  statusBox.innerText = 'Searching account...';
+  statusBox.style.color = '#044E3B';
+
+  var query = sb.from('profiles').select('uid, name, phone, gmail');
+  if (phone) query = query.ilike('phone', '%' + phone + '%');
+  if (gmail) query = query.ilike('gmail', gmail);
+
+  var res = await query;
+  if (res.data && res.data.length > 0) {
+    var p = res.data[0];
+    statusBox.innerHTML = '<span style="color:#15803D;">Account Found!<br>Hello ' + cleanText(p.name) + ', your <b>User ID is: ' + cleanText(p.uid) + '</b></span>';
+  } else {
+    statusBox.innerText = 'No account found matching these details.';
+    statusBox.style.color = '#DC2626';
+  }
+}
+
+async function resetMyPassword() {
+  var phone = document.getElementById('recPhone').value.trim().replace(/\D/g, '');
+  var gmail = document.getElementById('recGmail').value.trim().toLowerCase();
+  var newPwd = document.getElementById('recNewPassword').value;
+  var statusBox = document.getElementById('recoveryStatusBox');
+
+  if (!phone && !gmail) {
+    statusBox.innerText = 'Please provide mobile number or gmail first.';
+    statusBox.style.color = '#DC2626';
+    return;
+  }
+
+  if (!newPwd || newPwd.length < 6) {
+    statusBox.innerText = 'New password must be at least 6 characters.';
+    statusBox.style.color = '#DC2626';
+    return;
+  }
+
+  var btn = document.getElementById('btnResetPassword');
+  btn.disabled = true;
+  btn.innerText = 'Updating...';
+
+  var query = sb.from('profiles').select('uid');
+  if (phone) query = query.ilike('phone', '%' + phone + '%');
+  if (gmail) query = query.ilike('gmail', gmail);
+
+  var check = await query;
+  if (!check.data || check.data.length === 0) {
+    statusBox.innerText = 'Verification failed. No matching account.';
+    statusBox.style.color = '#DC2626';
+    btn.disabled = false;
+    btn.innerText = 'Update Password →';
+    return;
+  }
+
+  var uid = check.data[0].uid;
+  var hashed = await hashPassword(newPwd);
+
+  var updateRes = await sb.from('profiles').update({ password: hashed }).eq('uid', uid);
+  btn.disabled = false;
+  btn.innerText = 'Update Password →';
+
+  if (!updateRes.error) {
+    alert("Password updated successfully! Please login with your new password.");
+    closeModal();
+    openProfileModal();
+  } else {
+    statusBox.innerText = 'Failed to reset password: ' + updateRes.error.message;
+    statusBox.style.color = '#DC2626';
+  }
+}
+
 function togglePasswordVisibility(inputId, btn) {
   var input = document.getElementById(inputId);
   if (!input) return;
@@ -1115,12 +1255,14 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
+    var secureHashedPassword = await hashPassword(password);
+
     var newProfile = {
       uid: uid,
       name: name,
       phone: fullPhone,
       gmail: gmail || null,
-      password: password
+      password: secureHashedPassword
     };
 
     var insertRes = await sb.from('profiles').insert([newProfile]).select().single();
@@ -1130,7 +1272,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Welcome to REHZO, " + DB.currentUser.name + "!\nYour Account is ready.");
+    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour Account is secured & ready.");
     resumePendingAction(callbackAction);
 
   } catch(err) {
@@ -1155,9 +1297,11 @@ async function submitCredentialsLogin(callbackAction) {
   btn.innerText = 'Verifying...';
 
   try {
+    var hashedPwd = await hashPassword(pwd);
+
+    // Backward-compatible verification: supports both hashed and pre-existing plain text passwords
     var res = await sb.from('profiles').select('*')
-      .or('uid.eq.' + identifier.toLowerCase() + ',phone.ilike.%' + identifier + '%')
-      .eq('password', pwd);
+      .or('uid.eq.' + identifier.toLowerCase() + ',phone.ilike.%' + identifier + '%');
 
     if (res.error || !res.data || res.data.length === 0) {
       alert("Invalid User ID/Phone or Password.");
@@ -1166,11 +1310,25 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    DB.currentUser = res.data[0];
+    var user = res.data[0];
+    if (user.password !== hashedPwd && user.password !== pwd) {
+      alert("Invalid User ID/Phone or Password.");
+      btn.disabled = false;
+      btn.innerText = 'Login with REHZO ID →';
+      return;
+    }
+
+    // Auto-migrate legacy plain text password to secure hash on login
+    if (user.password === pwd) {
+      await sb.from('profiles').update({ password: hashedPwd }).eq('uid', user.uid);
+      user.password = hashedPwd;
+    }
+
+    DB.currentUser = user;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Logged in successfully as " + DB.currentUser.name + "!");
+    alert("Logged in successfully as " + cleanText(DB.currentUser.name) + "!");
     await syncFromSupabase();
     resumePendingAction(callbackAction);
   } catch(e) {
@@ -1240,10 +1398,15 @@ function checkAdminAccess() {
   else if (pass !== null) alert("Incorrect passcode.");
 }
 
-// ================= RENDER LISTINGS =================
+// ================= RENDER LISTINGS (CONFIRMED BOOKINGS REMOVED FROM HOME) =================
 function renderHomeGrid(items) {
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   var list = items || DB.listings.filter(function(x){ 
-    return (x.status === 'available') && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
+    var isAlreadyConfirmed = confirmedRoomIds.indexOf(x.id) !== -1;
+    return (x.status === 'available') && (!isAlreadyConfirmed) && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
   });
 
   var container = document.getElementById('homeRoomsGrid');
@@ -1259,9 +1422,9 @@ function renderHomeGrid(items) {
         '<span class="avail-badge">Available</span>' +
       '</div>' +
       '<div class="room-details">' +
-        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
+        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
-        '<div class="room-city">📍 ' + r.city + ' • ' + r.roomType + '</div>' +
+        '<div class="room-city">📍 ' + cleanText(r.city) + ' • ' + cleanText(r.roomType) + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
@@ -1305,15 +1468,15 @@ function openRoomDetailsModal(roomId) {
 
   var cover = (r.photos && r.photos.length) ? r.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
   var suitableBadges = (r.suitableFor && r.suitableFor.length)
-    ? r.suitableFor.map(function(s){ return '<span style="display:inline-block; padding:3px 9px; background:#E6F3ED; color:#044E3B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">• ' + s + '</span>'; }).join('')
+    ? r.suitableFor.map(function(s){ return '<span style="display:inline-block; padding:3px 9px; background:#E6F3ED; color:#044E3B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">• ' + cleanText(s) + '</span>'; }).join('')
     : '<span style="font-size:10.5px; color:#64748B;">Anyone</span>';
 
   var amenitiesBadges = (r.amenities && r.amenities.length)
-    ? r.amenities.map(function(a){ return '<span style="display:inline-block; padding:3px 9px; background:#F1F5F9; color:#334155; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">✓ ' + a + '</span>'; }).join('')
+    ? r.amenities.map(function(a){ return '<span style="display:inline-block; padding:3px 9px; background:#F1F5F9; color:#334155; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">✓ ' + cleanText(a) + '</span>'; }).join('')
     : '<span style="font-size:10.5px; color:#64748B;">Basic amenities</span>';
 
   var rulesBadges = (r.rules && r.rules.length)
-    ? r.rules.map(function(ru){ return '<span style="display:inline-block; padding:3px 9px; background:#FEF2F2; color:#991B1B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">⚠️ ' + ru + '</span>'; }).join('')
+    ? r.rules.map(function(ru){ return '<span style="display:inline-block; padding:3px 9px; background:#FEF2F2; color:#991B1B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">⚠️ ' + cleanText(ru) + '</span>'; }).join('')
     : '<span style="font-size:10.5px; color:#64748B;">Standard house rules apply</span>';
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
@@ -1324,13 +1487,13 @@ function openRoomDetailsModal(roomId) {
       '</div>' +
       '<img src="' + cover + '" style="width:100%; height:160px; border-radius:16px; object-fit:cover; margin-bottom:12px;">' +
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-        '<h2 style="font-size:16px; font-weight:900; color:#0F172A;">' + r.houseName + '</h2>' +
-        '<span style="background:#ECFDF5; color:#044E3B; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:800;">' + r.roomType + '</span>' +
+        '<h2 style="font-size:16px; font-weight:900; color:#0F172A;">' + cleanText(r.houseName) + '</h2>' +
+        '<span style="background:#ECFDF5; color:#044E3B; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:800;">' + cleanText(r.roomType) + '</span>' +
       '</div>' +
       '<div style="font-size:15px; font-weight:900; color:#044E3B; margin-bottom:8px;">₹' + Number(r.rent).toLocaleString() + ' <span style="font-size:10px; color:#64748B; font-weight:normal;">/ month</span></div>' +
       '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; margin-bottom:10px; line-height:1.6;">' +
-        '<div>📍 <b>Location & Address:</b> ' + r.address + ', ' + r.city + ' (' + (r.state||'') + ' - ' + (r.pin||'') + ')</div>' +
-        '<div style="margin-top:2px;">👤 <b>Host:</b> ' + r.ownerName + ' (' + r.phone + ')</div>' +
+        '<div>📍 <b>Location & Address:</b> ' + cleanText(r.address) + ', ' + cleanText(r.city) + ' (' + cleanText(r.state||'') + ' - ' + cleanText(r.pin||'') + ')</div>' +
+        '<div style="margin-top:2px;">👤 <b>Host:</b> ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ')</div>' +
         '<div>💵 <b>Security Deposit:</b> ₹' + Number(r.deposit || 0).toLocaleString() + '</div>' +
       '</div>' +
       '<div style="margin-bottom:8px;"><div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">👥 Suitable For:</div><div>' + suitableBadges + '</div></div>' +
@@ -1349,16 +1512,18 @@ function handleSearch(val) {
     if (b) {
       matchedBookingId = b.id;
       alertBox.style.display = 'block';
-      document.getElementById('trlAlertDetails').innerText = b.houseName + ' • ' + b.userName + ' (' + (b.status ? b.status.toUpperCase() : 'PENDING') + ')';
+      document.getElementById('trlAlertDetails').innerText = cleanText(b.houseName) + ' • ' + cleanText(b.userName) + ' (' + (b.status ? b.status.toUpperCase() : 'PENDING') + ')';
       document.getElementById('trlViewSlipBtn').onclick = function() { openSlipModal(b.id); };
       return;
     }
   }
   alertBox.style.display = 'none';
 
+  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
   var sLow = q.toLowerCase();
   var filtered = DB.listings.filter(function(l) {
-    return (l.status === 'available') && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (
+    var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+    return (l.status === 'available') && (!isConfirmed) && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (
       l.houseName.toLowerCase().indexOf(sLow) !== -1 ||
       l.city.toLowerCase().indexOf(sLow) !== -1 ||
       l.roomType.toLowerCase().indexOf(sLow) !== -1
@@ -1370,8 +1535,11 @@ function handleSearch(val) {
 function applyFilters() {
   var c = document.getElementById('countryFilter').value || detectedCountryCode;
   var t = document.getElementById('typeFilter').value;
+  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
+
   var filtered = DB.listings.filter(function(l) {
-    return (l.status === 'available') && (l.daysLeft > 0) && (!c || l.country === c) && (!t || l.roomType === t);
+    var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+    return (l.status === 'available') && (!isConfirmed) && (l.daysLeft > 0) && (!c || l.country === c) && (!t || l.roomType === t);
   });
   renderHomeGrid(filtered);
 }
@@ -1382,8 +1550,10 @@ function filterChip(cat, el) {
   el.classList.add('active');
   if (cat === 'all') renderHomeGrid();
   else {
+    var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
     var filtered = DB.listings.filter(function(l){
-      return (l.status === 'available') && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
+      var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+      return (l.status === 'available') && (!isConfirmed) && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
     });
     renderHomeGrid(filtered);
   }
@@ -1407,9 +1577,12 @@ function getDistKm(lat1, lon1, lat2, lon2) {
 
 function renderNearGrid() {
   var near = [];
+  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
+
   for (var i = 0; i < DB.listings.length; i++) {
     var l = DB.listings[i];
-    if (l.status === 'available' && l.daysLeft > 0 && l.lat && l.lng && l.country === detectedCountryCode) {
+    var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
+    if (l.status === 'available' && !isConfirmed && l.daysLeft > 0 && l.lat && l.lng && l.country === detectedCountryCode) {
       var d = getDistKm(userGeo.lat, userGeo.lng, l.lat, l.lng);
       if (d <= 10) near.push(Object.assign({}, l, { distKm: d.toFixed(1) }));
     }
@@ -1426,7 +1599,7 @@ function renderNearGrid() {
         '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
       '</div>' +
       '<div class="room-details">' +
-        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
+        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
@@ -1462,7 +1635,9 @@ function detectGPS(isManual) {
 
 function renderSearchGrid() {
   var container = document.getElementById('searchRoomsGrid');
-  var list = DB.listings.filter(function(x){ return x.status === 'available' && x.daysLeft > 0 && x.country === detectedCountryCode; });
+  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
+  var list = DB.listings.filter(function(x){ return x.status === 'available' && (confirmedRoomIds.indexOf(x.id) === -1) && x.daysLeft > 0 && x.country === detectedCountryCode; });
+
   container.innerHTML = list.map(function(r) {
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
@@ -1470,7 +1645,7 @@ function renderSearchGrid() {
         '<span class="avail-badge">Available</span>' +
       '</div>' +
       '<div class="room-details">' +
-        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + r.houseName + '</div>' +
+        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
@@ -1478,7 +1653,7 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS (UPDATED: CURRENT, CONFIRM, CANCELLED) =================
+// ================= MY BOOKINGS =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
@@ -1502,13 +1677,10 @@ function renderBookingsView() {
 
   var list = [];
   if (currentBookingsTab === 'current') {
-    // CURRENT: Active pending or awaiting final confirmation
     list = DB.bookings.filter(function(b){ return b.status === 'pending' || b.status === 'owner_accepted' || b.status === 'cancel_pending'; });
   } else if (currentBookingsTab === 'confirm') {
-    // CONFIRM: Only confirmed bookings
     list = DB.bookings.filter(function(b){ return b.status === 'confirmed'; });
   } else if (currentBookingsTab === 'cancelled') {
-    // CANCELLED: Cancelled or rejected bookings
     list = DB.bookings.filter(function(b){ return b.status === 'cancelled' || b.status === 'rejected'; });
   }
 
@@ -1540,7 +1712,7 @@ function renderBookingsView() {
       '<img src="' + cover + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
       '<div class="compact-h-content">' +
         '<div class="compact-h-header">' +
-          '<div class="compact-h-title">' + b.houseName + '</div>' +
+          '<div class="compact-h-title">' + cleanText(b.houseName) + '</div>' +
           '<span class="status-pill ' + pillClass + '">● ' + statusText + '</span>' +
         '</div>' +
         '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ₹' + Number(totalRent).toLocaleString() + '</div>' +
@@ -1560,7 +1732,7 @@ function renderBookingsView() {
   }).join('');
 }
 
-// TENANT FINAL CONFIRMATION (FIRST COME, FIRST SERVED RACE CONDITION CHECK)
+// TENANT FINAL CONFIRMATION
 async function tenantFinalConfirmBooking(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -1584,7 +1756,6 @@ async function tenantFinalConfirmBooking(bookingId) {
   if (!res.error && b.listingId) {
     await sb.from('listings').update({ status: 'booked' }).eq('id', b.listingId);
     
-    // Auto-reject any other pending/owner_accepted requests for this specific room
     await sb.from('bookings').update({ status: 'rejected' })
       .eq('listing_id', b.listingId)
       .neq('id', bookingId)
@@ -1592,6 +1763,8 @@ async function tenantFinalConfirmBooking(bookingId) {
 
     var targetListing = DB.listings.find(function(x){ return x.id === b.listingId; });
     if (targetListing) targetListing.status = 'booked';
+    b.status = 'confirmed';
+    b.trl = trl;
   }
 
   if (!res.error) {
@@ -1706,11 +1879,11 @@ function renderOwnerView() {
         '<img src="' + r.photos[0] + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
         '<div class="compact-h-content">' +
           '<div class="compact-h-header">' +
-            '<div class="compact-h-title">' + r.houseName + '</div>' +
+            '<div class="compact-h-title">' + cleanText(r.houseName) + '</div>' +
             '<span class="status-pill ' + (r.status==='available'?'status-confirmed':'status-pending') + '">● ' + r.status.toUpperCase() + '</span>' +
           '</div>' +
           '<div class="compact-h-rent">₹' + Number(r.rent).toLocaleString() + '/mo</div>' +
-          '<div class="compact-h-sub">' + r.city + ' • <b>' + r.daysLeft + ' days left</b> (Only Owner Visible)</div>' +
+          '<div class="compact-h-sub">' + cleanText(r.city) + ' • <b>' + r.daysLeft + ' days left</b> (Only Owner Visible)</div>' +
           '<div class="action-row-mini">' +
             '<button class="btn-action-large" onclick="openRoomDetailsModal(\'' + r.id + '\')">View</button>' +
             '<button class="btn-action-large success" onclick="openFullEditRoomModal(\'' + r.id + '\')">✏️ Edit</button>' +
@@ -1733,13 +1906,13 @@ function renderOwnerView() {
       return '<div class="compact-h-card" style="align-items:flex-start;">' +
         '<div class="compact-h-content">' +
           '<div class="compact-h-header">' +
-            '<div class="compact-h-title">' + b.houseName + '</div>' +
+            '<div class="compact-h-title">' + cleanText(b.houseName) + '</div>' +
             '<span class="status-pill ' + (isConfirmed ? 'status-confirmed' : (isOwnerAccepted ? 'status-owner-accepted' : (isPending ? 'status-pending' : (isCancelPending ? 'status-cancel-pending' : 'status-cancelled')))) + '">' +
               '● ' + (isOwnerAccepted ? 'AWAITING TENANT CONFIRM' : b.status.toUpperCase()) + '</span>' +
           '</div>' +
           '<div style="font-size:10.5px; color:#334155; margin-top:3px; line-height:1.4;">' +
-            '<div><b>Guest:</b> ' + b.userName + ' (' + b.duration + ' mo)</div>' +
-            '<div>📞 ' + b.userPhone + ' • Total: ₹' + Number(totalRent).toLocaleString() + '</div>' +
+            '<div><b>Guest:</b> ' + cleanText(b.userName) + ' (' + b.duration + ' mo)</div>' +
+            '<div>📞 ' + cleanText(b.userPhone) + ' • Total: ₹' + Number(totalRent).toLocaleString() + '</div>' +
             (b.trl ? '<div style="font-weight:700; color:#044E3B; margin-top:2px;">TRL: ' + b.trl + '</div>' : '') +
           '</div>' +
           '<div class="action-row-mini" style="margin-top:8px;">' +
@@ -1793,7 +1966,7 @@ function openFullEditRoomModal(roomId) {
       '<div class="pill-grid">' +
         '<div class="field-box">' +
           '<label class="field-label">House Name *</label>' +
-          '<input id="edHouse" class="pill-input" value="' + r.houseName + '">' +
+          '<input id="edHouse" class="pill-input" value="' + cleanText(r.houseName) + '">' +
         '</div>' +
         '<div class="field-box">' +
           '<label class="field-label">Room Type *</label>' +
@@ -1822,18 +1995,18 @@ function openFullEditRoomModal(roomId) {
       '<div class="pill-grid">' +
         '<div class="field-box">' +
           '<label class="field-label">City *</label>' +
-          '<input id="edCity" class="pill-input" value="' + r.city + '">' +
+          '<input id="edCity" class="pill-input" value="' + cleanText(r.city) + '">' +
         '</div>' +
         '<div class="field-box">' +
           '<label class="field-label">State</label>' +
-          '<input id="edState" class="pill-input" value="' + (r.state||'') + '">' +
+          '<input id="edState" class="pill-input" value="' + cleanText(r.state||'') + '">' +
         '</div>' +
       '</div>' +
 
       '<div class="pill-grid">' +
         '<div class="field-box">' +
           '<label class="field-label">Area Pin Code</label>' +
-          '<input id="edPin" class="pill-input" value="' + (r.pin||'') + '">' +
+          '<input id="edPin" class="pill-input" value="' + cleanText(r.pin||'') + '">' +
         '</div>' +
         '<div class="field-box">' +
           '<label class="field-label">Availability Status</label>' +
@@ -1846,7 +2019,7 @@ function openFullEditRoomModal(roomId) {
 
       '<div class="field-box" style="margin-bottom:8px;">' +
         '<label class="field-label">Full Address *</label>' +
-        '<input id="edAddr" class="pill-input" value="' + r.address + '">' +
+        '<input id="edAddr" class="pill-input" value="' + cleanText(r.address) + '">' +
       '</div>' +
 
       '<div class="field-box" style="margin-bottom:8px;">' +
@@ -2123,11 +2296,11 @@ function openBookingPillModal(id) {
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" value="' + prefillName + '" placeholder="Full Name"></div>' +
-        '<div class="field-box"><label class="field-label">Mobile No *</label><input id="bpPhone" class="pill-input" value="' + prefillPhone + '" placeholder="Mobile"></div>' +
+        '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" value="' + cleanText(prefillName) + '" placeholder="Full Name"></div>' +
+        '<div class="field-box"><label class="field-label">Mobile No *</label><input id="bpPhone" class="pill-input" value="' + cleanText(prefillPhone) + '" placeholder="Mobile"></div>' +
       '</div>' +
       '<div class="pill-grid">' +
-        '<div class="field-box"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" value="' + prefillGmail + '" placeholder="name@email.com"></div>' +
+        '<div class="field-box"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" value="' + cleanText(prefillGmail) + '" placeholder="name@email.com"></div>' +
         '<div class="field-box"><label class="field-label">Your Permanent Address *</label><input id="bpOldAddr" class="pill-input" placeholder="Permanent address"></div>' +
       '</div>' +
       '<div class="pill-grid">' +
@@ -2266,11 +2439,11 @@ function openSlipModal(bkId) {
 
       '<div style="font-size:10.5px; line-height:1.65;">' +
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + houseName + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + roomType + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + address + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + city + (state ? ' (' + state + ')' : '') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + pin + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(address) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + cleanText(city) + (state ? ' (' + cleanText(state) + ')' : '') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + cleanText(pin) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">₹' + Number(rent).toLocaleString() + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Security Deposit:</span> <b style="color:#0F172A;">₹' + Number(deposit).toLocaleString() + '</b></div>' +
         '<div style="margin-top:4px; padding:4px 8px; background:#F1F5F9; border-radius:8px; font-size:10px;">' +
@@ -2278,17 +2451,17 @@ function openSlipModal(bkId) {
         '</div>' +
 
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">👤 TENANT DETAILS</div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + b.userName + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Mobile No:</span> <b style="color:#0F172A;">' + b.userPhone + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + b.userOldAddress + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + cleanText(b.userName) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Mobile No:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(b.userOldAddress) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + b.date + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + duration + ' ' + (duration > 1 ? 'Months' : 'Month') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
 
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + (b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No:</span> <b style="color:#0F172A;">' + (b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Gmail:</span> <b style="color:#0F172A;">' + (b.ownerGmail || l.gmail || 'Not Provided') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + cleanText(b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No:</span> <b style="color:#0F172A;">' + cleanText(b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Gmail:</span> <b style="color:#0F172A;">' + cleanText(b.ownerGmail || l.gmail || 'Not Provided') + '</b></div>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -2307,7 +2480,7 @@ function renderAdminModeration() {
   }
   container.innerHTML = DB.listings.map(function(r) {
     return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
-      '<div><b>' + r.houseName + '</b> (' + r.city + ') - ₹' + r.rent + '</div>' +
+      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') - ₹' + r.rent + '</div>' +
       '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
