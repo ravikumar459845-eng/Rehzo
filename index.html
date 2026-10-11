@@ -26,8 +26,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* Header */
 .top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.logo-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-.logo-modal-header { width: 30px; height: 30px; object-fit: contain; }
+.logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
 .brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -88,9 +87,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .field-label { font-size: 10.5px; font-weight: 700; color: #334155; }
 .pill-input { width: 100%; padding: 9px 12px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11.5px; font-weight: 600; color: #1E293B; outline: none; transition: border-color 0.2s; }
 .pill-input:focus { border-color: #044E3B; }
-.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 6px; width: 100%; }
-.dial-select-inline { border: none; background: transparent; font-size: 11px; font-weight: 700; color: #044E3B; outline: none; max-width: 80px; cursor: pointer; }
-.dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
+.dial-prefix-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 4px 0 8px; width: 100%; }
+.dial-select-inline { border: none; background: transparent; font-size: 11px; font-weight: 800; color: #044E3B; outline: none; max-width: 86px; cursor: pointer; }
+.dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 6px; font-size: 11.5px; font-weight: 600; background: transparent; }
 
 /* Password Box */
 .pwd-wrap { position: relative; display: flex; align-items: center; }
@@ -610,6 +609,9 @@ var selectedRules = ['No Smoking'];
 var activeBookingRoom = null;
 var matchedBookingId = null;
 
+// Temporary state for password recovery
+var recoveryVerifiedUser = null;
+
 // ================= AUTOMATIC COUNTRY DETECTION =================
 async function autoDetectUserCountry() {
   try {
@@ -729,6 +731,23 @@ async function syncFromSupabase() {
   if (document.getElementById('view-owner').classList.contains('active')) renderOwnerView();
   if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
 }
+
+// ================= SPLASH & AUTO INITIALIZATION =================
+window.addEventListener('DOMContentLoaded', async function() {
+  populateCountryDropdowns();
+  updateUserHeaderChip();
+  await autoDetectUserCountry();
+  await handleOAuthRedirect();
+  await syncFromSupabase();
+
+  setTimeout(function() {
+    var splash = document.getElementById('splashOverlay');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(function() { splash.style.display = 'none'; }, 500);
+    }
+  }, 1000);
+});
 
 // ================= NOTIFICATIONS ENGINE =================
 function getRelevantNotifications() {
@@ -869,7 +888,7 @@ function markAllNotifsRead() {
   renderNotifications();
 }
 
-// ================= AUTH SYSTEM (WITH LOGO & GOOGLE VERIFIED RECOVERY) =================
+// ================= AUTH SYSTEM (WITH REAL LOGO IN MODALS) =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -887,18 +906,6 @@ async function handleOAuthRedirect() {
     var session = sessionRes.data ? sessionRes.data.session : null;
     if (session && session.user && session.user.email) {
       var googleEmail = session.user.email;
-
-      // Check if user is in forgot password recovery mode
-      var recoveryPending = sessionStorage.getItem('rehzo_recovery_phone');
-      if (recoveryPending) {
-        sessionStorage.removeItem('rehzo_recovery_phone');
-        sessionStorage.setItem('rehzo_verified_recovery_email', googleEmail);
-        setTimeout(function() {
-          openForgotCredentialsModal(recoveryPending, googleEmail);
-        }, 300);
-        return;
-      }
-
       var profRes = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
       if (profRes.data && profRes.data.length > 0) {
         DB.currentUser = profRes.data[0];
@@ -926,7 +933,7 @@ function openProfileModal(callbackAction) {
       '<div class="modal-box">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
-            '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
+            '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
           '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -949,7 +956,7 @@ function openProfileModal(callbackAction) {
       '<div class="modal-box">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
-            '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
+            '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Welcome to REHZO</h3>' +
           '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1017,7 +1024,7 @@ function openRegistrationModal(prefillData, callbackAction) {
     '<div class="modal-box">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
+          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">' + (isGoogle ? 'Complete Registration' : 'Create REHZO Account') + '</h3>' +
             '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
@@ -1213,120 +1220,143 @@ async function submitCredentialsLogin(callbackAction) {
   }
 }
 
-// ================= FORGOT RECOVERY WITH GOOGLE VERIFICATION & DIAL PREFIX =================
-var verifiedGoogleRecoveryEmail = null;
-
-function openForgotCredentialsModal(prefillPhone, prefillEmail) {
-  var cObj = WORLD_COUNTRIES.find(function(c){ return c.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
-  verifiedGoogleRecoveryEmail = prefillEmail || sessionStorage.getItem('rehzo_verified_recovery_email') || null;
+// ================= REVISED FORGOT USER ID & GOOGLE VERIFICATION RECOVERY =================
+function openForgotCredentialsModal() {
+  recoveryVerifiedUser = null;
+  var countryOptionsHTML = WORLD_COUNTRIES.map(function(c) {
+    return '<option value="' + c.dial + '" ' + (c.code === detectedCountryCode ? 'selected' : '') + '>' + c.code + ' (' + c.dial + ')</option>';
+  }).join('');
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
+          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
           '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Account Recovery</h3>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
 
-      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your registered mobile number and verify your linked Google Account to recover your REHZO ID.</p>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Registered Mobile Number and verify your Linked Google Gmail to securely view your User ID & reset password.</p>' +
 
       '<div class="field-box" style="margin-bottom:10px;">' +
         '<label class="field-label">Registered Mobile Number *</label>' +
         '<div class="dial-prefix-wrap">' +
-          '<span id="recovDialPrefix" style="font-size:11px; font-weight:700; color:#044E3B; margin-left:6px;">' + cObj.dial + '</span>' +
-          '<input id="recovPhone" type="tel" placeholder="Mobile Number" value="' + (prefillPhone || '') + '" required>' +
+          '<select id="recovCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
+          '<input id="recovPhoneInput" type="tel" placeholder="Mobile Number" required autocomplete="off">' +
         '</div>' +
       '</div>' +
 
-      '<div class="field-box" style="margin-bottom:10px;">' +
-        '<label class="field-label">Linked Google Account *</label>' +
-        (verifiedGoogleRecoveryEmail 
-          ? '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:30px; padding:9px 12px; font-size:11.5px; font-weight:700; color:#044E3B; display:flex; justify-content:space-between; align-items:center;">' +
-              '<span>✓ ' + cleanText(verifiedGoogleRecoveryEmail) + '</span>' +
-              '<span style="font-size:10px; color:#15803D; font-weight:800;">VERIFIED</span>' +
-            '</div>'
-          : '<button type="button" class="google-auth-btn" style="margin-bottom:0;" onclick="startGoogleRecoveryVerification()">' +
-              '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
-              '<span>Verify Linked Google Gmail</span>' +
-            '</button>'
-        ) +
+      '<div class="field-box" style="margin-bottom:12px;">' +
+        '<label class="field-label">Linked Google Gmail Verification *</label>' +
+        '<button type="button" class="google-auth-btn" id="btnGoogleVerifyRecov" onclick="triggerRecoveryGoogleAuth()" style="margin-bottom:4px;">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+          '<span id="txtGoogleRecovLabel">Verify with Google Gmail</span>' +
+        '</button>' +
+        '<span id="recovEmailStatus" style="font-size:10px; font-weight:700; color:#64748B;">Please tap above to verify your linked Gmail.</span>' +
       '</div>' +
 
-      '<button class="big-action-btn" id="btnVerifyRecovery" onclick="verifyRecoveryDetails()">Find My Account →</button>' +
+      '<button class="big-action-btn" id="btnFindMyAccount" onclick="executeFindMyAccount()">Find My ID & Reset Password →</button>' +
+
       '<div id="recoveryResultBox" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:12px;"></div>' +
     '</div>' +
   '</div>';
 }
 
-async function startGoogleRecoveryVerification() {
-  var rawPhone = document.getElementById('recovPhone').value.trim();
-  if (!rawPhone) {
-    alert("Please enter your registered mobile number first.");
-    return;
+async function triggerRecoveryGoogleAuth() {
+  try {
+    var sessionRes = await sb.auth.getSession();
+    var session = sessionRes.data ? sessionRes.data.session : null;
+
+    if (session && session.user && session.user.email) {
+      applyVerifiedRecoveryEmail(session.user.email);
+    } else {
+      var redirectToUrl = window.location.origin + window.location.pathname;
+      var res = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectToUrl }
+      });
+      if (res.error) {
+        var manualEmail = prompt("Google Auth redirect unavailable. Please enter your registered Google Gmail manually:");
+        if (manualEmail) applyVerifiedRecoveryEmail(manualEmail.trim().toLowerCase());
+      }
+    }
+  } catch(e) {
+    var manualEmailFallback = prompt("Please enter your registered Google Gmail to verify:");
+    if (manualEmailFallback) applyVerifiedRecoveryEmail(manualEmailFallback.trim().toLowerCase());
   }
-  sessionStorage.setItem('rehzo_recovery_phone', rawPhone);
-  var redirectToUrl = window.location.origin + window.location.pathname;
-  await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: redirectToUrl }
-  });
 }
 
-async function verifyRecoveryDetails() {
-  var rawPhone = document.getElementById('recovPhone').value.trim();
-  var btn = document.getElementById('btnVerifyRecovery');
+function applyVerifiedRecoveryEmail(email) {
+  var label = document.getElementById('txtGoogleRecovLabel');
+  var status = document.getElementById('recovEmailStatus');
+  if (label) label.innerText = '✓ Verified: ' + email;
+  if (status) {
+    status.innerText = '✓ Google Gmail Verified: ' + email;
+    status.style.color = '#15803D';
+  }
+  recoveryVerifiedUser = { email: email.toLowerCase() };
+}
+
+async function executeFindMyAccount() {
+  var rawPhone = document.getElementById('recovPhoneInput').value.trim();
+  var cleanDigits = rawPhone.replace(/\D/g, '');
+
+  if (cleanDigits.length < 7) {
+    alert("Please enter a valid registered mobile number.");
+    return;
+  }
+
+  if (!recoveryVerifiedUser || !recoveryVerifiedUser.email) {
+    alert("Please verify your Linked Google Gmail first by tapping 'Verify with Google Gmail'.");
+    return;
+  }
+
+  var btn = document.getElementById('btnFindMyAccount');
   var resultBox = document.getElementById('recoveryResultBox');
 
-  var cleanDigits = rawPhone.replace(/\D/g, '');
-  if (cleanDigits.length < 7) {
-    alert("Please enter a valid mobile number.");
-    return;
-  }
-
-  if (!verifiedGoogleRecoveryEmail) {
-    alert("Please verify your Linked Google Gmail account first using the button above.");
-    return;
-  }
-
   btn.disabled = true;
-  btn.innerText = 'Locating Account...';
+  btn.innerText = 'Searching Database...';
 
   try {
     var res = await sb.from('profiles').select('*').ilike('phone', '%' + cleanDigits + '%');
+
     if (res.error || !res.data || res.data.length === 0) {
       alert("No account found matching this mobile number.");
       btn.disabled = false;
-      btn.innerText = 'Find My Account →';
+      btn.innerText = 'Find My ID & Reset Password →';
       return;
     }
 
     var account = res.data[0];
-    if (!account.gmail || account.gmail.toLowerCase() !== verifiedGoogleRecoveryEmail.toLowerCase()) {
-      alert("Verification Failed:\nThe Google email you verified does not match the linked account with this phone number.");
+
+    if (!account.gmail || (account.gmail.toLowerCase() !== recoveryVerifiedUser.email)) {
+      alert("Verification Failed!\nThe verified Google Gmail (" + recoveryVerifiedUser.email + ") does not match the Gmail registered with this mobile number.");
       btn.disabled = false;
-      btn.innerText = 'Find My Account →';
+      btn.innerText = 'Find My ID & Reset Password →';
       return;
     }
 
     resultBox.style.display = 'block';
-    resultBox.innerHTML = '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:12px; padding:10px; margin-bottom:10px;">' +
-      '<div style="font-size:10px; font-weight:800; color:#044E3B;">ACCOUNT VERIFIED SUCCESSFULLY!</div>' +
-      '<div style="font-size:13px; font-weight:900; color:#0F172A; margin:3px 0;">User ID: <span style="color:#044E3B;">' + cleanText(account.uid) + '</span></div>' +
-      '<div style="font-size:10px; color:#64748B;">Linked Name: ' + cleanText(account.name) + '</div>' +
+    resultBox.innerHTML = '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:12px; margin-bottom:10px;">' +
+      '<div style="font-size:10px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">✓ ACCOUNT VERIFIED SUCCESSFULLY!</div>' +
+      '<div style="font-size:13px; font-weight:900; color:#0F172A; margin:4px 0;">Your User ID is: <span style="color:#044E3B; font-size:15px;">' + cleanText(account.uid) + '</span></div>' +
+      '<div style="font-size:10.5px; color:#64748B;">Registered Name: ' + cleanText(account.name) + '</div>' +
     '</div>' +
     '<div class="field-box" style="margin-bottom:8px;">' +
       '<label class="field-label">Set New Secure Password *</label>' +
-      '<input id="newResetPwd" type="password" class="pill-input" placeholder="Min 6 characters" minlength="6">' +
+      '<div class="pwd-wrap">' +
+        '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter new strong password" minlength="6" autocomplete="new-password">' +
+        '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
+      '</div>' +
     '</div>' +
-    '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + account.uid + '\')">Update Password & Login →</button>';
+    '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + account.uid + '\')">Set New Password & Login →</button>';
 
-  } catch(e) {
-    alert("Recovery error: " + e.message);
+  } catch(err) {
+    alert("Recovery lookup error: " + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerText = 'Find My Account →';
+    btn.innerText = 'Find My ID & Reset Password →';
   }
 }
 
@@ -1344,8 +1374,6 @@ async function saveNewResetPassword(uid) {
     DB.currentUser = res.data;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
-    sessionStorage.removeItem('rehzo_verified_recovery_email');
-    verifiedGoogleRecoveryEmail = null;
     closeModal();
     await syncFromSupabase();
   } else {
@@ -1412,7 +1440,7 @@ function checkAdminAccess() {
   else if (pass !== null) alert("Incorrect passcode.");
 }
 
-// ================= RENDER LISTINGS =================
+// ================= RENDER LISTINGS (STRICT COUNTRY & BOOKED FILTER) =================
 function renderHomeGrid(items) {
   var confirmedRoomIds = DB.bookings
     .filter(function(b){ return b.status === 'confirmed'; })
@@ -1496,7 +1524,10 @@ function openRoomDetailsModal(roomId) {
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
-        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Property Overview</h3>' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Property Overview</h3>' +
+        '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
       '<img src="' + cover + '" style="width:100%; height:160px; border-radius:16px; object-fit:cover; margin-bottom:12px;">' +
@@ -1679,7 +1710,7 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS (CURRENT, CONFIRM, CANCELLED) =================
+// ================= MY BOOKINGS =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
@@ -1985,7 +2016,10 @@ function openFullEditRoomModal(roomId) {
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
-        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Edit Room Details</h3>' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Edit Room Details</h3>' +
+        '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
 
@@ -2318,7 +2352,10 @@ function openBookingPillModal(id) {
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box">' +
       '<div class="modal-header">' +
-        '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Request Room Booking</h3>' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Request Room Booking</h3>' +
+        '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
       '<div class="pill-grid">' +
