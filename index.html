@@ -92,11 +92,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .dial-select-inline { border: none; background: transparent; font-size: 11px; font-weight: 800; color: #044E3B; outline: none; max-width: 86px; cursor: pointer; }
 .dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 6px; font-size: 11.5px; font-weight: 600; background: transparent; }
 
-/* RZ Prefix Input Box */
-.rz-input-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 12px; width: 100%; transition: border-color 0.2s; }
+/* Custom Prefix Input Box with Dropdown (RZ, RE, HR, ZO, OE) */
+.rz-input-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 8px 0 10px; width: 100%; transition: border-color 0.2s; }
 .rz-input-wrap:focus-within { border-color: #044E3B; }
-.rz-badge { font-size: 12px; font-weight: 900; color: #044E3B; letter-spacing: 0.5px; }
-.rz-input-wrap input { flex: 1; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
+.prefix-select-inline { border: none; background: transparent; font-size: 11.5px; font-weight: 900; color: #044E3B; outline: none; cursor: pointer; margin-right: 4px; }
+.rz-input-wrap input { flex: 1; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; min-width: 0; }
 
 /* Password Box */
 .pwd-wrap { position: relative; display: flex; align-items: center; }
@@ -168,9 +168,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .nav-item.active { color: #044E3B; }
 .nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Modals */
+/* Modals (Custom Slim & Long Architecture) */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
-.modal-box { background: #fff; border-radius: 20px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-box { background: #fff; border-radius: 22px; width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-box-slim { background: #fff; border-radius: 24px; width: 100%; max-width: 360px; max-height: 94vh; overflow-y: auto; padding: 18px 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
 .modal-box-pdf { background: #fff; border-radius: 20px; width: 100%; max-width: 350px; max-height: 92vh; overflow-y: auto; padding: 16px 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px; }
 .barcode-strip { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 26px; margin: 8px 0; border-radius: 3px; }
@@ -911,7 +912,7 @@ function markAllNotifsRead() {
   renderNotifications();
 }
 
-// ================= AUTH SYSTEM =================
+// ================= AUTH SYSTEM (COMPACT & SLIM LOGIN MODAL) =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -953,7 +954,7 @@ async function handleOAuthRedirect() {
 function openProfileModal(callbackAction) {
   if (DB.currentUser) {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-      '<div class="modal-box">' +
+      '<div class="modal-box-slim">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
             '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
@@ -969,14 +970,14 @@ function openProfileModal(callbackAction) {
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
           '<div>📞 <b>Contact No.:</b> ' + cleanText(DB.currentUser.phone) + '</div>' +
           '<div>✉️ <b>Gmail:</b> ' + cleanText(DB.currentUser.gmail || 'Not Linked') + '</div>' +
-          '<div>🛡️ <b>Access:</b> Verified Tenant & Landlord Account</div>' +
+          '<div>🛡️ <b>Access:</b> Verified Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
       '</div>' +
     '</div>';
   } else {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-      '<div class="modal-box">' +
+      '<div class="modal-box-slim">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
             '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
@@ -985,18 +986,8 @@ function openProfileModal(callbackAction) {
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
         '</div>' +
 
-        '<button class="google-auth-btn" onclick="startRealGoogleOAuth()">' +
-          '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
-          '<span>Continue with Google</span>' +
-        '</button>' +
-
-        '<div style="text-align:center; font-size:10.5px; color:#94A3B8; margin:10px 0; position:relative;">' +
-          '<span style="background:#fff; padding:0 8px; position:relative; z-index:1; font-weight:700;">OR LOGIN WITH REHZO ID</span>' +
-          '<div style="position:absolute; top:50%; left:0; right:0; height:1px; background:#E2E8F0; z-index:0;"></div>' +
-        '</div>' +
-
-        '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">User ID or Contact No. *</label>' +
+        '<div class="field-box" style="margin-bottom:10px;">' +
+          '<label class="field-label">User ID or Register Contact No. *</label>' +
           '<input id="loginUid" class="pill-input" placeholder="User id RZ or contact no" autocomplete="off">' +
         '</div>' +
         '<div class="field-box" style="margin-bottom:4px;">' +
@@ -1006,31 +997,15 @@ function openProfileModal(callbackAction) {
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'loginPwd\', this)">👁️</button>' +
           '</div>' +
         '</div>' +
-        '<div style="text-align:right; margin-bottom:10px;">' +
+        '<div style="text-align:right; margin-bottom:12px;">' +
           '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
         '</div>' +
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
-        '<div style="text-align:center; margin-top:12px;">' +
+        '<div style="text-align:center; margin-top:14px;">' +
           '<span style="font-size:11px; color:#044E3B; font-weight:800; cursor:pointer;" onclick="openRegistrationModal(null, ' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">New here? Create REHZO Account</span>' +
         '</div>' +
       '</div>' +
     '</div>';
-  }
-}
-
-async function startRealGoogleOAuth() {
-  try {
-    var redirectToUrl = window.location.origin + window.location.pathname;
-    var res = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: redirectToUrl }
-    });
-    if (res.error) {
-      alert("Google login notice: Opening direct registration form.");
-      openRegistrationModal();
-    }
-  } catch(e) {
-    openRegistrationModal();
   }
 }
 
@@ -1044,13 +1019,13 @@ function openRegistrationModal(prefillData, callbackAction) {
   }).join('');
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-    '<div class="modal-box">' +
+    '<div class="modal-box-slim">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
           '<div>' +
-            '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
-            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
+            '<h3 style="font-size:14.5px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
+            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Owners</p>' +
           '</div>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1068,35 +1043,42 @@ function openRegistrationModal(prefillData, callbackAction) {
               '<select id="regCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
               '<input id="regPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off" onfocus="showPhoneWarning()" onblur="hidePhoneWarning()">' +
             '</div>' +
-            '<span id="regPhoneWarning" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Country code mila kar total 1 se 17 digits.</span>' +
+            '<span id="regPhoneWarning" style="display:none; font-size:8.5px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ 1 se 17 digits total.</span>' +
           '</div>' +
         '</div>' +
 
-        '<div class="field-box" style="margin-bottom:10px;">' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
           '<label class="field-label">Google Gmail Verification *</label>' +
-          '<button type="button" class="google-auth-btn" id="btnRegisterGoogleVerify" onclick="triggerRegisterGoogleAuth()" style="margin-bottom:3px;">' +
-            '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+          '<button type="button" class="google-auth-btn" id="btnRegisterGoogleVerify" onclick="triggerRegisterGoogleAuth()" style="margin-bottom:3px; padding:9px 12px; font-size:11.5px;">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
             '<span id="txtRegGoogleLabel">' + (registrationGoogleVerifiedEmail ? '✓ Verified: ' + registrationGoogleVerifiedEmail : 'Verify with Google Gmail') + '</span>' +
           '</button>' +
-          '<span id="regGoogleStatus" style="font-size:10px; font-weight:700; color:' + (registrationGoogleVerifiedEmail ? '#15803D' : '#64748B') + ';">' + (registrationGoogleVerifiedEmail ? '✓ Google Gmail Verified!' : 'Please tap above to verify your Gmail.') + '</span>' +
+          '<span id="regGoogleStatus" style="font-size:9.5px; font-weight:700; color:' + (registrationGoogleVerifiedEmail ? '#15803D' : '#64748B') + ';">' + (registrationGoogleVerifiedEmail ? '✓ Google Gmail Verified!' : 'Please tap above to verify your Gmail.') + '</span>' +
         '</div>' +
 
         '<div class="pill-grid">' +
           '<div class="field-box">' +
             '<label class="field-label">Create User ID *</label>' +
             '<div class="rz-input-wrap">' +
-              '<span class="rz-badge">RZ</span>' +
-              '<input id="regUidSuffix" placeholder="Unique ID" minlength="2" maxlength="10" onfocus="showUidWarning()" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
+              '<select id="regUidPrefix" class="prefix-select-inline">' +
+                '<option value="RZ">RZ</option>' +
+                '<option value="RE">RE</option>' +
+                '<option value="HR">HR</option>' +
+                '<option value="ZO">ZO</option>' +
+                '<option value="OE">OE</option>' +
+              '</select>' +
+              '<input id="regUidSuffix" placeholder="ID (2-10 chars)" minlength="2" maxlength="10" onfocus="showUidWarning()" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
             '</div>' +
-            '<span id="regUidFeedback" style="display:none; font-size:9px; font-weight:700; margin-top:2px;"></span>' +
+            '<span id="regUidFeedback" style="display:none; font-size:8.5px; font-weight:700; margin-top:2px;"></span>' +
           '</div>' +
+
           '<div class="field-box">' +
             '<label class="field-label">Create Password *</label>' +
             '<div class="pwd-wrap">' +
-              '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Enter password" minlength="4" maxlength="12" onfocus="showPwdWarning()" onblur="hidePwdWarning()" required autocomplete="new-password">' +
+              '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Password" minlength="4" maxlength="12" onfocus="showPwdWarning()" onblur="hidePwdWarning()" required autocomplete="new-password">' +
               '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'regPasswordInput\', this)">👁️</button>' +
             '</div>' +
-            '<span id="regPwdFeedback" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password 4 se 12 characters ka hona chahiye.</span>' +
+            '<span id="regPwdFeedback" style="display:none; font-size:8.5px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password 4 se 12 characters ka.</span>' +
           '</div>' +
         '</div>' +
 
@@ -1121,7 +1103,7 @@ function showUidWarning() {
   if (fb) {
     fb.style.display = 'block';
     fb.style.color = '#B45309';
-    fb.innerText = '⚠️ RZ ko lekar 4 se 12 characters ka hona chahiye.';
+    fb.innerText = '⚠️ Prefix mila kar total 4 se 12 characters.';
   }
 }
 
@@ -1186,21 +1168,23 @@ function togglePasswordVisibility(inputId, btn) {
 async function validateUniqueUserId(suffixVal) {
   var feedback = document.getElementById('regUidFeedback');
   if (!feedback) return;
-  var raw = suffixVal.trim().replace(/^rz/i, '');
-  var totalLen = 2 + raw.length; // 'RZ' (2) + suffix
+  var prefixEl = document.getElementById('regUidPrefix');
+  var pfx = prefixEl ? prefixEl.value : 'RZ';
+  var raw = suffixVal.trim().replace(new RegExp('^' + pfx, 'i'), '');
+  var totalLen = pfx.length + raw.length;
 
   if (totalLen < 4 || totalLen > 12) {
     feedback.style.display = 'block';
-    feedback.innerText = '⚠️ RZ ko lekar 4 se 12 characters ka hona chahiye.';
+    feedback.innerText = '⚠️ ' + pfx + ' ko lekar 4 se 12 characters hone chahiye.';
     feedback.style.color = '#B45309';
     return;
   }
 
-  var fullUid = ('RZ' + raw).toUpperCase();
+  var fullUid = (pfx + raw).toUpperCase();
   var res = await sb.from('profiles').select('uid').ilike('uid', fullUid);
   if (res.data && res.data.length > 0) {
     feedback.style.display = 'block';
-    feedback.innerText = '✕ ' + fullUid + ' already taken! Choose another.';
+    feedback.innerText = '✕ ' + fullUid + ' already taken!';
     feedback.style.color = '#DC2626';
   } else {
     feedback.style.display = 'block';
@@ -1219,7 +1203,8 @@ async function submitUnifiedRegistration(e, callbackAction) {
     var name = document.getElementById('regFullName').value.trim();
     var dial = document.getElementById('regCountryDial').value;
     var rawPhone = document.getElementById('regPhoneInput').value.trim();
-    var rawSuffix = document.getElementById('regUidSuffix').value.trim().replace(/^rz/i, '');
+    var prefix = document.getElementById('regUidPrefix').value;
+    var rawSuffix = document.getElementById('regUidSuffix').value.trim().replace(new RegExp('^' + prefix, 'i'), '');
     var password = document.getElementById('regPasswordInput').value;
 
     if (!registrationGoogleVerifiedEmail) {
@@ -1230,21 +1215,21 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
 
     if (password.length < 4 || password.length > 12) {
-      alert("Password must be between 4 and 12 characters only!");
+      alert("Password strictly 4 se 12 characters ka hona chahiye!");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
     }
 
-    var totalUidLength = 2 + rawSuffix.length;
+    var totalUidLength = prefix.length + rawSuffix.length;
     if (totalUidLength < 4 || totalUidLength > 12) {
-      alert("User ID (RZ ke sath) strictly 4 se 12 characters ka hona chahiye!");
+      alert("User ID (" + prefix + " mila kar) strictly 4 se 12 characters ka hona chahiye!");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
     }
 
-    var fullUid = ('RZ' + rawSuffix).toUpperCase();
+    var fullUid = (prefix + rawSuffix).toUpperCase();
 
     var cleanDigits = rawPhone.replace(/[^0-9]/g, '');
     var fullContactWithDial = (dial + cleanDigits).replace(/[^0-9]/g, '');
@@ -1309,22 +1294,18 @@ async function submitCredentialsLogin(callbackAction) {
     return;
   }
 
-  var identifier = rawIdentifier;
-  if (/^[a-zA-Z0-9]{2,10}$/.test(rawIdentifier) && !rawIdentifier.toUpperCase().startsWith('RZ') && !/^\+?\d{7,17}$/.test(rawIdentifier)) {
-    identifier = 'RZ' + rawIdentifier;
-  }
-
   btn.disabled = true;
   btn.innerText = 'Authenticating...';
 
   try {
     var hashedInputPwd = await hashPassword(pwd);
 
+    var cleanDigits = rawIdentifier.replace(/[^0-9]/g, '');
     var res = await sb.from('profiles').select('*')
-      .or('uid.ilike.' + identifier.toUpperCase() + ',phone.ilike.%' + rawIdentifier + '%');
+      .or('uid.ilike.' + rawIdentifier.toUpperCase() + (cleanDigits.length >= 7 ? ',phone.ilike.%' + cleanDigits + '%' : ''));
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Account not found. Please check your User ID (RZ...) or Contact No.");
+      alert("Account not found. Please check your User ID or Register Contact No.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1334,7 +1315,7 @@ async function submitCredentialsLogin(callbackAction) {
     var isPasswordCorrect = (profile.password === hashedInputPwd) || (profile.password === pwd);
 
     if (!isPasswordCorrect) {
-      alert("Invalid password. Please check your password or tap 'Forgot User ID or Password'.");
+      alert("Invalid password. Please check your credentials or reset password.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1370,7 +1351,7 @@ function openForgotCredentialsModal() {
   }).join('');
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-    '<div class="modal-box">' +
+    '<div class="modal-box-slim">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
@@ -2653,7 +2634,6 @@ function openSlipModal(bkId) {
       '<div class="barcode-strip"></div>' +
 
       '<div style="font-size:10.5px; line-height:1.65;">' +
-        '<!-- 1. ROOM & PROPERTY DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
