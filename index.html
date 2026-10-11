@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>REHZO — Find Your Perfect Room</title>
 
 <!-- Supabase JS Client v2 CDN -->
@@ -10,6 +10,7 @@
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; overflow-x: hidden; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
 
 /* Splash Screen */
@@ -24,7 +25,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 }
 
 /* Header */
-.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
+.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; width: 100%; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
@@ -91,6 +92,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .dial-select-inline { border: none; background: transparent; font-size: 11px; font-weight: 800; color: #044E3B; outline: none; max-width: 86px; cursor: pointer; }
 .dial-prefix-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 9px 6px; font-size: 11.5px; font-weight: 600; background: transparent; }
 
+/* RZ Prefix Input Box */
+.rz-input-wrap { display: flex; align-items: center; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 0 12px; width: 100%; }
+.rz-badge { font-size: 12px; font-weight: 900; color: #044E3B; letter-spacing: 0.5px; }
+.rz-input-wrap input { flex: 1; border: none; outline: none; padding: 9px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
+
 /* Password Box */
 .pwd-wrap { position: relative; display: flex; align-items: center; }
 .pwd-wrap input { padding-right: 38px; }
@@ -156,7 +162,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .notif-time { font-size: 9px; color: #94A3B8; font-weight: 600; }
 
 /* Bottom Nav Bar */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; max-width: 500px; margin: 0 auto; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; max-width: 500px; margin: 0 auto; width: 100%; }
 .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 2px; }
 .nav-item.active { color: #044E3B; }
 .nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -610,7 +616,8 @@ var activeBookingRoom = null;
 var matchedBookingId = null;
 
 // Temporary state for password recovery
-var recoveryVerifiedUser = null;
+var recoveryFoundUser = null;
+var recoveryGoogleVerified = false;
 
 // ================= AUTOMATIC COUNTRY DETECTION =================
 async function autoDetectUserCountry() {
@@ -888,7 +895,7 @@ function markAllNotifsRead() {
   renderNotifications();
 }
 
-// ================= AUTH SYSTEM (WITH REAL LOGO IN MODALS) =================
+// ================= AUTH SYSTEM (WITH RZ PREFIX & 6-12 WORD PASSWORD) =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -941,12 +948,12 @@ function openProfileModal(callbackAction) {
         '<div style="text-align:center; padding:10px 0;">' +
           '<div style="width:54px; height:54px; border-radius:50%; background:#044E3B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 8px;">👤</div>' +
           '<h2 style="font-size:16px; font-weight:800; color:#0F172A;">' + cleanText(DB.currentUser.name) + '</h2>' +
-          '<div style="font-size:11px; font-weight:700; color:#044E3B; margin-top:2px;">User ID: ' + cleanText(DB.currentUser.uid) + '</div>' +
+          '<div style="font-size:12px; font-weight:800; color:#044E3B; margin-top:2px;">User ID: ' + cleanText(DB.currentUser.uid) + '</div>' +
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
           '<div>📞 <b>Phone:</b> ' + cleanText(DB.currentUser.phone) + '</div>' +
           '<div>✉️ <b>Gmail:</b> ' + cleanText(DB.currentUser.gmail || 'Not Linked') + '</div>' +
-          '<div>🛡️ <b>Access:</b> Country Strictly Locked to GPS/Location</div>' +
+          '<div>🛡️ <b>Access:</b> Verified Tenant & Landlord Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
       '</div>' +
@@ -973,13 +980,13 @@ function openProfileModal(callbackAction) {
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">User ID or Mobile No. *</label>' +
-          '<input id="loginUid" class="pill-input" placeholder="User ID or Mobile No." autocomplete="off">' +
+          '<label class="field-label">User ID (e.g. RZ3595) or Mobile No. *</label>' +
+          '<input id="loginUid" class="pill-input" placeholder="User ID (RZ...) or Mobile No." autocomplete="off">' +
         '</div>' +
         '<div class="field-box" style="margin-bottom:4px;">' +
-          '<label class="field-label">Password *</label>' +
+          '<label class="field-label">Password * (6 to 12 characters)</label>' +
           '<div class="pwd-wrap">' +
-            '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" autocomplete="new-password">' +
+            '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" minlength="6" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'loginPwd\', this)">👁️</button>' +
           '</div>' +
         '</div>' +
@@ -1054,16 +1061,19 @@ function openRegistrationModal(prefillData, callbackAction) {
             '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + cleanText(pGmail) + '" autocomplete="off">' +
           '</div>' +
           '<div class="field-box">' +
-            '<label class="field-label">Create User ID *</label>' +
-            '<input id="regUidInput" class="pill-input" placeholder="Create User ID" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
-            '<span id="regUidFeedback" style="font-size:9px; font-weight:700; margin-top:1px;"></span>' +
+            '<label class="field-label">Create User ID * (RZ will be added)</label>' +
+            '<div class="rz-input-wrap">' +
+              '<span class="rz-badge">RZ</span>' +
+              '<input id="regUidSuffix" placeholder="e.g. 3595" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
+            '</div>' +
+            '<span id="regUidFeedback" style="font-size:9px; font-weight:700; margin-top:2px;"></span>' +
           '</div>' +
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Create Password * (Secure 6+ characters)</label>' +
+          '<label class="field-label">Create Password * (Strictly 6 to 12 characters)</label>' +
           '<div class="pwd-wrap">' +
-            '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Create strong password" minlength="6" required autocomplete="new-password">' +
+            '<input id="regPasswordInput" type="password" class="pill-input" placeholder="6 to 12 characters" minlength="6" maxlength="12" required autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'regPasswordInput\', this)">👁️</button>' +
           '</div>' +
         '</div>' +
@@ -1086,21 +1096,22 @@ function togglePasswordVisibility(inputId, btn) {
   }
 }
 
-async function validateUniqueUserId(uidVal) {
+async function validateUniqueUserId(suffixVal) {
   var feedback = document.getElementById('regUidFeedback');
   if (!feedback) return;
-  var cleanUid = uidVal.trim().toLowerCase();
-  if (cleanUid.length < 3) {
-    feedback.innerText = '⚠️ Must be at least 3 characters';
+  var raw = suffixVal.trim().replace(/^rz/i, '');
+  if (raw.length < 2) {
+    feedback.innerText = '⚠️ Must have at least 2 digits/chars';
     feedback.style.color = '#B45309';
     return;
   }
-  var res = await sb.from('profiles').select('uid').eq('uid', cleanUid);
+  var fullUid = ('RZ' + raw).toUpperCase();
+  var res = await sb.from('profiles').select('uid').ilike('uid', fullUid);
   if (res.data && res.data.length > 0) {
-    feedback.innerText = '✕ User ID already taken. Choose another.';
+    feedback.innerText = '✕ ' + fullUid + ' is already taken! Choose another.';
     feedback.style.color = '#DC2626';
   } else {
-    feedback.innerText = '✓ User ID available!';
+    feedback.innerText = '✓ User ID available: ' + fullUid;
     feedback.style.color = '#15803D';
   }
 }
@@ -1109,15 +1120,31 @@ async function submitUnifiedRegistration(e, callbackAction) {
   e.preventDefault();
   var btn = document.getElementById('btnRegisterSubmit');
   btn.disabled = true;
-  btn.innerText = 'Securing & Creating Profile...';
+  btn.innerText = 'Creating Profile...';
 
   try {
     var name = document.getElementById('regFullName').value.trim();
     var dial = document.getElementById('regCountryDial').value;
     var rawPhone = document.getElementById('regPhoneInput').value.trim();
     var gmail = document.getElementById('regGmailInput').value.trim().toLowerCase();
-    var uid = document.getElementById('regUidInput').value.trim().toLowerCase();
+    var rawSuffix = document.getElementById('regUidSuffix').value.trim().replace(/^rz/i, '');
     var password = document.getElementById('regPasswordInput').value;
+
+    if (password.length < 6 || password.length > 12) {
+      alert("Password must be between 6 and 12 characters only!");
+      btn.disabled = false;
+      btn.innerText = 'Complete & Enter REHZO →';
+      return;
+    }
+
+    if (rawSuffix.length < 2) {
+      alert("Please enter a valid User ID suffix (at least 2 letters/numbers).");
+      btn.disabled = false;
+      btn.innerText = 'Complete & Enter REHZO →';
+      return;
+    }
+
+    var fullUid = ('RZ' + rawSuffix).toUpperCase();
 
     var cleanDigits = rawPhone.replace(/[^0-9]/g, '');
     if (cleanDigits.length < 7 || cleanDigits.length > 15) {
@@ -1128,9 +1155,9 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
     var fullPhone = dial + ' ' + cleanDigits;
 
-    var uidCheck = await sb.from('profiles').select('uid').eq('uid', uid);
+    var uidCheck = await sb.from('profiles').select('uid').ilike('uid', fullUid);
     if (uidCheck.data && uidCheck.data.length > 0) {
-      alert("This User ID is already taken. Please choose another one.");
+      alert("User ID " + fullUid + " is already taken. Please choose another one.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1139,7 +1166,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     var hashedPassword = await hashPassword(password);
 
     var newProfile = {
-      uid: uid,
+      uid: fullUid,
       name: name,
       phone: fullPhone,
       gmail: gmail || null,
@@ -1153,7 +1180,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour Account is secured.");
+    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour registered User ID is: " + fullUid);
     resumePendingAction(callbackAction);
 
   } catch(err) {
@@ -1174,6 +1201,11 @@ async function submitCredentialsLogin(callbackAction) {
     return;
   }
 
+  if (pwd.length < 6 || pwd.length > 12) {
+    alert("Password must be between 6 and 12 characters long.");
+    return;
+  }
+
   btn.disabled = true;
   btn.innerText = 'Authenticating...';
 
@@ -1181,10 +1213,10 @@ async function submitCredentialsLogin(callbackAction) {
     var hashedInputPwd = await hashPassword(pwd);
 
     var res = await sb.from('profiles').select('*')
-      .or('uid.eq.' + identifier.toLowerCase() + ',phone.ilike.%' + identifier + '%');
+      .or('uid.ilike.' + identifier.toUpperCase() + ',phone.ilike.%' + identifier + '%');
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Account not found. Please check your User ID or phone number.");
+      alert("Account not found. Please check your User ID (RZ...) or Mobile Number.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1194,7 +1226,7 @@ async function submitCredentialsLogin(callbackAction) {
     var isPasswordCorrect = (profile.password === hashedInputPwd) || (profile.password === pwd);
 
     if (!isPasswordCorrect) {
-      alert("Invalid password. Please check your credentials or reset password.");
+      alert("Invalid password. Please check your password or tap 'Forgot User ID or Password'.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1220,9 +1252,11 @@ async function submitCredentialsLogin(callbackAction) {
   }
 }
 
-// ================= REVISED FORGOT USER ID & GOOGLE VERIFICATION RECOVERY =================
+// ================= STEP-BY-STEP RECOVERY: FIND ID FIRST, GOOGLE VERIFY FOR PASSWORD =================
 function openForgotCredentialsModal() {
-  recoveryVerifiedUser = null;
+  recoveryFoundUser = null;
+  recoveryGoogleVerified = false;
+
   var countryOptionsHTML = WORLD_COUNTRIES.map(function(c) {
     return '<option value="' + c.dial + '" ' + (c.code === detectedCountryCode ? 'selected' : '') + '>' + c.code + ' (' + c.dial + ')</option>';
   }).join('');
@@ -1237,7 +1271,7 @@ function openForgotCredentialsModal() {
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
 
-      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Registered Mobile Number and verify your Linked Google Gmail to securely view your User ID & reset password.</p>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Registered Mobile Number to find your User ID. To set a new password, verify with your linked Google Gmail.</p>' +
 
       '<div class="field-box" style="margin-bottom:10px;">' +
         '<label class="field-label">Registered Mobile Number *</label>' +
@@ -1247,73 +1281,24 @@ function openForgotCredentialsModal() {
         '</div>' +
       '</div>' +
 
-      '<div class="field-box" style="margin-bottom:12px;">' +
-        '<label class="field-label">Linked Google Gmail Verification *</label>' +
-        '<button type="button" class="google-auth-btn" id="btnGoogleVerifyRecov" onclick="triggerRecoveryGoogleAuth()" style="margin-bottom:4px;">' +
-          '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
-          '<span id="txtGoogleRecovLabel">Verify with Google Gmail</span>' +
-        '</button>' +
-        '<span id="recovEmailStatus" style="font-size:10px; font-weight:700; color:#64748B;">Please tap above to verify your linked Gmail.</span>' +
-      '</div>' +
+      '<button class="big-action-btn" id="btnFindMyIdOnly" onclick="executeFindMyIdOnly()">Find My ID →</button>' +
 
-      '<button class="big-action-btn" id="btnFindMyAccount" onclick="executeFindMyAccount()">Find My ID & Reset Password →</button>' +
-
-      '<div id="recoveryResultBox" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:12px;"></div>' +
+      '<div id="recoveryIdResultBox" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:12px;"></div>' +
     '</div>' +
   '</div>';
 }
 
-async function triggerRecoveryGoogleAuth() {
-  try {
-    var sessionRes = await sb.auth.getSession();
-    var session = sessionRes.data ? sessionRes.data.session : null;
-
-    if (session && session.user && session.user.email) {
-      applyVerifiedRecoveryEmail(session.user.email);
-    } else {
-      var redirectToUrl = window.location.origin + window.location.pathname;
-      var res = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: redirectToUrl }
-      });
-      if (res.error) {
-        var manualEmail = prompt("Google Auth redirect unavailable. Please enter your registered Google Gmail manually:");
-        if (manualEmail) applyVerifiedRecoveryEmail(manualEmail.trim().toLowerCase());
-      }
-    }
-  } catch(e) {
-    var manualEmailFallback = prompt("Please enter your registered Google Gmail to verify:");
-    if (manualEmailFallback) applyVerifiedRecoveryEmail(manualEmailFallback.trim().toLowerCase());
-  }
-}
-
-function applyVerifiedRecoveryEmail(email) {
-  var label = document.getElementById('txtGoogleRecovLabel');
-  var status = document.getElementById('recovEmailStatus');
-  if (label) label.innerText = '✓ Verified: ' + email;
-  if (status) {
-    status.innerText = '✓ Google Gmail Verified: ' + email;
-    status.style.color = '#15803D';
-  }
-  recoveryVerifiedUser = { email: email.toLowerCase() };
-}
-
-async function executeFindMyAccount() {
+async function executeFindMyIdOnly() {
   var rawPhone = document.getElementById('recovPhoneInput').value.trim();
   var cleanDigits = rawPhone.replace(/\D/g, '');
 
   if (cleanDigits.length < 7) {
-    alert("Please enter a valid registered mobile number.");
+    alert("Please enter a valid mobile number.");
     return;
   }
 
-  if (!recoveryVerifiedUser || !recoveryVerifiedUser.email) {
-    alert("Please verify your Linked Google Gmail first by tapping 'Verify with Google Gmail'.");
-    return;
-  }
-
-  var btn = document.getElementById('btnFindMyAccount');
-  var resultBox = document.getElementById('recoveryResultBox');
+  var btn = document.getElementById('btnFindMyIdOnly');
+  var resultBox = document.getElementById('recoveryIdResultBox');
 
   btn.disabled = true;
   btn.innerText = 'Searching Database...';
@@ -1324,53 +1309,112 @@ async function executeFindMyAccount() {
     if (res.error || !res.data || res.data.length === 0) {
       alert("No account found matching this mobile number.");
       btn.disabled = false;
-      btn.innerText = 'Find My ID & Reset Password →';
+      btn.innerText = 'Find My ID →';
       return;
     }
 
-    var account = res.data[0];
-
-    if (!account.gmail || (account.gmail.toLowerCase() !== recoveryVerifiedUser.email)) {
-      alert("Verification Failed!\nThe verified Google Gmail (" + recoveryVerifiedUser.email + ") does not match the Gmail registered with this mobile number.");
-      btn.disabled = false;
-      btn.innerText = 'Find My ID & Reset Password →';
-      return;
-    }
+    recoveryFoundUser = res.data[0];
 
     resultBox.style.display = 'block';
-    resultBox.innerHTML = '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:12px; margin-bottom:10px;">' +
-      '<div style="font-size:10px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">✓ ACCOUNT VERIFIED SUCCESSFULLY!</div>' +
-      '<div style="font-size:13px; font-weight:900; color:#0F172A; margin:4px 0;">Your User ID is: <span style="color:#044E3B; font-size:15px;">' + cleanText(account.uid) + '</span></div>' +
-      '<div style="font-size:10.5px; color:#64748B;">Registered Name: ' + cleanText(account.name) + '</div>' +
+    resultBox.innerHTML = '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:12px; margin-bottom:12px;">' +
+      '<div style="font-size:10px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">✓ ACCOUNT FOUND</div>' +
+      '<div style="font-size:13px; font-weight:900; color:#0F172A; margin:4px 0;">Your User ID: <span style="color:#044E3B; font-size:16px;">' + cleanText(recoveryFoundUser.uid) + '</span></div>' +
+      '<div style="font-size:10.5px; color:#64748B;">Registered Name: ' + cleanText(recoveryFoundUser.name) + '</div>' +
     '</div>' +
-    '<div class="field-box" style="margin-bottom:8px;">' +
-      '<label class="field-label">Set New Secure Password *</label>' +
-      '<div class="pwd-wrap">' +
-        '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter new strong password" minlength="6" autocomplete="new-password">' +
-        '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
+
+    '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:14px; padding:12px;">' +
+      '<div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">Want to Reset Password?</div>' +
+      '<div style="font-size:10.5px; color:#64748B; margin-bottom:10px;">Verify your linked Google Gmail below to unlock password reset.</div>' +
+      
+      '<button type="button" class="google-auth-btn" id="btnGoogleVerifyRecov" onclick="triggerRecoveryGoogleAuth()" style="margin-bottom:6px;">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+        '<span id="txtGoogleRecovLabel">Verify with Google Gmail</span>' +
+      '</button>' +
+      '<span id="recovEmailStatus" style="font-size:10px; font-weight:700; color:#64748B;">Tap above to verify linked email.</span>' +
+      
+      '<div id="resetPasswordInputArea" style="display:none; margin-top:10px;">' +
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Set New Password * (6 to 12 characters)</label>' +
+          '<div class="pwd-wrap">' +
+            '<input id="newResetPwd" type="password" class="pill-input" placeholder="6 to 12 characters" minlength="6" maxlength="12" autocomplete="new-password">' +
+            '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
+          '</div>' +
+        '</div>' +
+        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + recoveryFoundUser.uid + '\')">Save New Password & Login →</button>' +
       '</div>' +
-    '</div>' +
-    '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + account.uid + '\')">Set New Password & Login →</button>';
+    '</div>';
 
   } catch(err) {
-    alert("Recovery lookup error: " + err.message);
+    alert("Lookup error: " + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerText = 'Find My ID & Reset Password →';
+    btn.innerText = 'Find My ID →';
+  }
+}
+
+async function triggerRecoveryGoogleAuth() {
+  if (!recoveryFoundUser) {
+    alert("Please find your ID first.");
+    return;
+  }
+
+  try {
+    var sessionRes = await sb.auth.getSession();
+    var session = sessionRes.data ? sessionRes.data.session : null;
+
+    if (session && session.user && session.user.email) {
+      evaluateRecoveryGoogleMatch(session.user.email);
+    } else {
+      var redirectToUrl = window.location.origin + window.location.pathname;
+      var res = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectToUrl }
+      });
+      if (res.error) {
+        var manualEmail = prompt("Please enter your registered Google Gmail to verify:");
+        if (manualEmail) evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
+      }
+    }
+  } catch(e) {
+    var manualEmailFallback = prompt("Enter your registered Google Gmail to verify:");
+    if (manualEmailFallback) evaluateRecoveryGoogleMatch(manualEmailFallback.trim().toLowerCase());
+  }
+}
+
+function evaluateRecoveryGoogleMatch(email) {
+  var cleanEmail = email.toLowerCase().trim();
+  var label = document.getElementById('txtGoogleRecovLabel');
+  var status = document.getElementById('recovEmailStatus');
+  var resetArea = document.getElementById('resetPasswordInputArea');
+
+  if (recoveryFoundUser.gmail && recoveryFoundUser.gmail.toLowerCase() === cleanEmail) {
+    if (label) label.innerText = '✓ Verified: ' + cleanEmail;
+    if (status) {
+      status.innerText = '✓ Google Verified! You can now set a new password.';
+      status.style.color = '#15803D';
+    }
+    if (resetArea) resetArea.style.display = 'block';
+    recoveryGoogleVerified = true;
+  } else {
+    alert("Verification Failed!\nThe Google account (" + cleanEmail + ") does not match the registered Gmail for User ID " + recoveryFoundUser.uid);
+    if (status) {
+      status.innerText = '✕ Email mismatch with registered profile.';
+      status.style.color = '#DC2626';
+    }
   }
 }
 
 async function saveNewResetPassword(uid) {
   var newPwd = document.getElementById('newResetPwd').value;
-  if (!newPwd || newPwd.length < 6) {
-    alert("Password must be at least 6 characters long.");
+  if (!newPwd || newPwd.length < 6 || newPwd.length > 12) {
+    alert("Password must be between 6 and 12 characters only!");
     return;
   }
 
   var hashedPwd = await hashPassword(newPwd);
   var res = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', uid).select().single();
   if (!res.error && res.data) {
-    alert("Password updated successfully! Logging you in...");
+    alert("Password updated successfully! Logging you in as " + cleanText(res.data.name));
     DB.currentUser = res.data;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
