@@ -138,6 +138,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .status-cancel-pending { background: #FEF3C7; color: #B45309; }
 .status-owner-accepted { background: #DBEAFE; color: #1D4ED8; }
 
+/* Action Buttons */
 .action-row-mini { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .btn-action-large { padding: 6px 14px; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; font-size: 11px; font-weight: 800; color: #1E293B; cursor: pointer; text-align: center; }
 .btn-action-large.danger { color: #DC2626; border-color: #FCA5A5; }
@@ -1053,23 +1054,7 @@ function setLoginInputMode(mode) {
   }
 }
 
-async function startRealGoogleOAuth() {
-  try {
-    var redirectToUrl = window.location.origin + window.location.pathname;
-    var res = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: redirectToUrl }
-    });
-    if (res.error) {
-      alert("Google login notice: Opening direct registration form.");
-      openRegistrationModal();
-    }
-  } catch(e) {
-    openRegistrationModal();
-  }
-}
-
-// REVISED REGISTRATION MODAL (NARROW & TALL, FULL NAME & CONTACT NO IN 1 ROW, PREFIX DROPDOWN RZ, RE, HR, ZO, OE)
+// REVISED REGISTRATION MODAL
 function openRegistrationModal(prefillData, callbackAction) {
   var pName = (prefillData && prefillData.name) ? prefillData.name : '';
   var pGmail = (prefillData && prefillData.gmail) ? prefillData.gmail : '';
@@ -1086,8 +1071,8 @@ function openRegistrationModal(prefillData, callbackAction) {
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
-            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
-          '</div>' +
+            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>
+          </div>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
@@ -1181,23 +1166,23 @@ function hidePwdWarning() {
   if (fb) fb.style.display = 'none';
 }
 
+// FIXED: ALWAYS FORCES ACCOUNT SELECTION INSTEAD OF AUTO-PICKING OLD EMAIL
 async function triggerRegisterGoogleAuth() {
   try {
-    var sessionRes = await sb.auth.getSession();
-    var session = sessionRes.data ? sessionRes.data.session : null;
-
-    if (session && session.user && session.user.email) {
-      applyRegisterGoogleVerification(session.user.email);
-    } else {
-      var redirectToUrl = window.location.origin + window.location.pathname;
-      var res = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: redirectToUrl }
-      });
-      if (res.error) {
-        var manualEmail = prompt("Please enter your Google Gmail to verify:");
-        if (manualEmail) applyRegisterGoogleVerification(manualEmail.trim().toLowerCase());
+    await sb.auth.signOut(); // Purani session clear taaki fresh account select ho sake
+    var redirectToUrl = window.location.origin + window.location.pathname;
+    var res = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectToUrl,
+        queryParams: {
+          prompt: 'select_account'
+        }
       }
+    });
+    if (res.error) {
+      var manualEmail = prompt("Please enter your Google Gmail to verify:");
+      if (manualEmail) applyRegisterGoogleVerification(manualEmail.trim().toLowerCase());
     }
   } catch(e) {
     var manualEmailFallback = prompt("Enter your Google Gmail to verify:");
@@ -1531,6 +1516,7 @@ async function executeFindMyIdOnly() {
   }
 }
 
+// FIXED: ALWAYS FORCES ACCOUNT SELECTION INSTEAD OF AUTO-PICKING OLD EMAIL
 async function triggerRecoveryGoogleAuth() {
   if (!recoveryFoundUser) {
     alert("Please find your ID first.");
@@ -1538,21 +1524,20 @@ async function triggerRecoveryGoogleAuth() {
   }
 
   try {
-    var sessionRes = await sb.auth.getSession();
-    var session = sessionRes.data ? sessionRes.data.session : null;
-
-    if (session && session.user && session.user.email) {
-      evaluateRecoveryGoogleMatch(session.user.email);
-    } else {
-      var redirectToUrl = window.location.origin + window.location.pathname;
-      var res = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: redirectToUrl }
-      });
-      if (res.error) {
-        var manualEmail = prompt("Please enter your registered Google Gmail to verify:");
-        if (manualEmail) evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
+    await sb.auth.signOut(); // Purani session clear
+    var redirectToUrl = window.location.origin + window.location.pathname;
+    var res = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectToUrl,
+        queryParams: {
+          prompt: 'select_account'
+        }
       }
+    });
+    if (res.error) {
+      var manualEmail = prompt("Please enter your registered Google Gmail to verify:");
+      if (manualEmail) evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
     }
   } catch(e) {
     var manualEmailFallback = prompt("Enter your registered Google Gmail to verify:");
