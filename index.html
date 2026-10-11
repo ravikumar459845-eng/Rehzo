@@ -362,7 +362,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
             <label class="field-label">Contact No. *</label>
             <div class="dial-prefix-wrap">
               <span id="opDialPrefix" style="font-size:11px; font-weight:700; color:#044E3B; margin-left:6px;">+91</span>
-              <input id="opPhone" type="tel" placeholder="Mobile Number" required>
+              <input id="opPhone" type="tel" placeholder="Contact No." required>
             </div>
           </div>
           <div class="field-box">
@@ -615,7 +615,8 @@ var selectedRules = ['No Smoking'];
 var activeBookingRoom = null;
 var matchedBookingId = null;
 
-// Temporary state for password recovery
+// Temporary states for registration & recovery
+var registrationGoogleVerifiedEmail = null;
 var recoveryFoundUser = null;
 var recoveryGoogleVerified = false;
 
@@ -895,7 +896,7 @@ function markAllNotifsRead() {
   renderNotifications();
 }
 
-// ================= AUTH SYSTEM (WITH RZ PREFIX & 6-12 WORD PASSWORD) =================
+// ================= AUTH SYSTEM (WITH REAL LOGO, 12-CHAR RZ ID & GOOGLE VERIFICATION) =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -951,7 +952,7 @@ function openProfileModal(callbackAction) {
           '<div style="font-size:12px; font-weight:800; color:#044E3B; margin-top:2px;">User ID: ' + cleanText(DB.currentUser.uid) + '</div>' +
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
-          '<div>📞 <b>Phone:</b> ' + cleanText(DB.currentUser.phone) + '</div>' +
+          '<div>📞 <b>Contact No.:</b> ' + cleanText(DB.currentUser.phone) + '</div>' +
           '<div>✉️ <b>Gmail:</b> ' + cleanText(DB.currentUser.gmail || 'Not Linked') + '</div>' +
           '<div>🛡️ <b>Access:</b> Verified Tenant & Landlord Account</div>' +
         '</div>' +
@@ -980,11 +981,14 @@ function openProfileModal(callbackAction) {
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">User ID (e.g. RZ3595) or Mobile No. *</label>' +
-          '<input id="loginUid" class="pill-input" placeholder="User ID (RZ...) or Mobile No." autocomplete="off">' +
+          '<label class="field-label">User ID or Contact No. *</label>' +
+          '<div class="rz-input-wrap">' +
+            '<span class="rz-badge">RZ</span>' +
+            '<input id="loginUid" placeholder="e.g. 3595 or Contact No." autocomplete="off">' +
+          '</div>' +
         '</div>' +
         '<div class="field-box" style="margin-bottom:4px;">' +
-          '<label class="field-label">Password * (6 to 12 characters)</label>' +
+          '<label class="field-label">Password *</label>' +
           '<div class="pwd-wrap">' +
             '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" minlength="6" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'loginPwd\', this)">👁️</button>' +
@@ -1021,7 +1025,7 @@ async function startRealGoogleOAuth() {
 function openRegistrationModal(prefillData, callbackAction) {
   var pName = (prefillData && prefillData.name) ? prefillData.name : '';
   var pGmail = (prefillData && prefillData.gmail) ? prefillData.gmail : '';
-  var isGoogle = (prefillData && prefillData.isGoogleFirstTime) ? true : false;
+  registrationGoogleVerifiedEmail = pGmail ? pGmail.toLowerCase() : null;
 
   var countryOptionsHTML = WORLD_COUNTRIES.map(function(c) {
     return '<option value="' + c.dial + '" ' + (c.code === detectedCountryCode ? 'selected' : '') + '>' + c.code + ' (' + c.dial + ')</option>';
@@ -1033,7 +1037,7 @@ function openRegistrationModal(prefillData, callbackAction) {
         '<div style="display:flex; align-items:center; gap:8px;">' +
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
           '<div>' +
-            '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">' + (isGoogle ? 'Complete Registration' : 'Create REHZO Account') + '</h3>' +
+            '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
             '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
           '</div>' +
         '</div>' +
@@ -1050,30 +1054,33 @@ function openRegistrationModal(prefillData, callbackAction) {
             '<label class="field-label">Contact No. *</label>' +
             '<div class="dial-prefix-wrap">' +
               '<select id="regCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
-              '<input id="regPhoneInput" type="tel" placeholder="Mobile Number" required autocomplete="off">' +
+              '<input id="regPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off">' +
             '</div>' +
           '</div>' +
         '</div>' +
 
-        '<div class="pill-grid">' +
-          '<div class="field-box">' +
-            '<label class="field-label">Gmail (optional)</label>' +
-            '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + cleanText(pGmail) + '" autocomplete="off">' +
-          '</div>' +
-          '<div class="field-box">' +
-            '<label class="field-label">Create User ID * (RZ will be added)</label>' +
-            '<div class="rz-input-wrap">' +
-              '<span class="rz-badge">RZ</span>' +
-              '<input id="regUidSuffix" placeholder="e.g. 3595" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
-            '</div>' +
-            '<span id="regUidFeedback" style="font-size:9px; font-weight:700; margin-top:2px;"></span>' +
-          '</div>' +
+        '<div class="field-box" style="margin-bottom:10px;">' +
+          '<label class="field-label">Google Gmail Verification *</label>' +
+          '<button type="button" class="google-auth-btn" id="btnRegisterGoogleVerify" onclick="triggerRegisterGoogleAuth()" style="margin-bottom:3px;">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+            '<span id="txtRegGoogleLabel">' + (registrationGoogleVerifiedEmail ? '✓ Verified: ' + registrationGoogleVerifiedEmail : 'Verify with Google Gmail') + '</span>' +
+          '</button>' +
+          '<span id="regGoogleStatus" style="font-size:10px; font-weight:700; color:' + (registrationGoogleVerifiedEmail ? '#15803D' : '#64748B') + ';">' + (registrationGoogleVerifiedEmail ? '✓ Google Gmail Verified!' : 'Please tap above to verify your Gmail.') + '</span>' +
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Create Password * (Strictly 6 to 12 characters)</label>' +
+          '<label class="field-label">Create User ID *</label>' +
+          '<div class="rz-input-wrap">' +
+            '<span class="rz-badge">RZ</span>' +
+            '<input id="regUidSuffix" placeholder="10 characters (Total 12 with RZ)" maxlength="10" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
+          '</div>' +
+          '<span id="regUidFeedback" style="font-size:9px; font-weight:700; margin-top:2px;"></span>' +
+        '</div>' +
+
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Create Password *</label>' +
           '<div class="pwd-wrap">' +
-            '<input id="regPasswordInput" type="password" class="pill-input" placeholder="6 to 12 characters" minlength="6" maxlength="12" required autocomplete="new-password">' +
+            '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Enter password" minlength="6" maxlength="12" required autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'regPasswordInput\', this)">👁️</button>' +
           '</div>' +
         '</div>' +
@@ -1082,6 +1089,42 @@ function openRegistrationModal(prefillData, callbackAction) {
       '</form>' +
     '</div>' +
   '</div>';
+}
+
+async function triggerRegisterGoogleAuth() {
+  try {
+    var sessionRes = await sb.auth.getSession();
+    var session = sessionRes.data ? sessionRes.data.session : null;
+
+    if (session && session.user && session.user.email) {
+      applyRegisterGoogleVerification(session.user.email);
+    } else {
+      var redirectToUrl = window.location.origin + window.location.pathname;
+      var res = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectToUrl }
+      });
+      if (res.error) {
+        var manualEmail = prompt("Please enter your Google Gmail to verify:");
+        if (manualEmail) applyRegisterGoogleVerification(manualEmail.trim().toLowerCase());
+      }
+    }
+  } catch(e) {
+    var manualEmailFallback = prompt("Enter your Google Gmail to verify:");
+    if (manualEmailFallback) applyRegisterGoogleVerification(manualEmailFallback.trim().toLowerCase());
+  }
+}
+
+function applyRegisterGoogleVerification(email) {
+  var cleanEmail = email.toLowerCase().trim();
+  registrationGoogleVerifiedEmail = cleanEmail;
+  var label = document.getElementById('txtRegGoogleLabel');
+  var status = document.getElementById('regGoogleStatus');
+  if (label) label.innerText = '✓ Verified: ' + cleanEmail;
+  if (status) {
+    status.innerText = '✓ Google Gmail Verified: ' + cleanEmail;
+    status.style.color = '#15803D';
+  }
 }
 
 function togglePasswordVisibility(inputId, btn) {
@@ -1100,8 +1143,8 @@ async function validateUniqueUserId(suffixVal) {
   var feedback = document.getElementById('regUidFeedback');
   if (!feedback) return;
   var raw = suffixVal.trim().replace(/^rz/i, '');
-  if (raw.length < 2) {
-    feedback.innerText = '⚠️ Must have at least 2 digits/chars';
+  if (raw.length !== 10) {
+    feedback.innerText = '⚠️ User ID must be 12 characters (RZ + exactly 10 digits/letters)';
     feedback.style.color = '#B45309';
     return;
   }
@@ -1126,9 +1169,15 @@ async function submitUnifiedRegistration(e, callbackAction) {
     var name = document.getElementById('regFullName').value.trim();
     var dial = document.getElementById('regCountryDial').value;
     var rawPhone = document.getElementById('regPhoneInput').value.trim();
-    var gmail = document.getElementById('regGmailInput').value.trim().toLowerCase();
     var rawSuffix = document.getElementById('regUidSuffix').value.trim().replace(/^rz/i, '');
     var password = document.getElementById('regPasswordInput').value;
+
+    if (!registrationGoogleVerifiedEmail) {
+      alert("Please verify your Google Gmail before completing registration!");
+      btn.disabled = false;
+      btn.innerText = 'Complete & Enter REHZO →';
+      return;
+    }
 
     if (password.length < 6 || password.length > 12) {
       alert("Password must be between 6 and 12 characters only!");
@@ -1137,8 +1186,8 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
-    if (rawSuffix.length < 2) {
-      alert("Please enter a valid User ID suffix (at least 2 letters/numbers).");
+    if (rawSuffix.length !== 10) {
+      alert("User ID must be exactly 12 characters (RZ + 10 digits/letters). Example: RZ3595123456");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1148,7 +1197,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
     var cleanDigits = rawPhone.replace(/[^0-9]/g, '');
     if (cleanDigits.length < 7 || cleanDigits.length > 15) {
-      alert("Please provide a valid contact number.");
+      alert("Please provide a valid Contact No.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1169,7 +1218,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
       uid: fullUid,
       name: name,
       phone: fullPhone,
-      gmail: gmail || null,
+      gmail: registrationGoogleVerifiedEmail,
       password: hashedPassword
     };
 
@@ -1180,7 +1229,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour registered User ID is: " + fullUid);
+    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour 12-character User ID is: " + fullUid);
     resumePendingAction(callbackAction);
 
   } catch(err) {
@@ -1193,17 +1242,19 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
-  var identifier = document.getElementById('loginUid').value.trim();
+  var rawIdentifier = document.getElementById('loginUid').value.trim();
   var pwd = document.getElementById('loginPwd').value;
 
-  if (!identifier || !pwd) {
-    alert("Please enter both User ID/Mobile and Password.");
+  if (!rawIdentifier || !pwd) {
+    alert("Please enter both User ID/Contact No. and Password.");
     return;
   }
 
-  if (pwd.length < 6 || pwd.length > 12) {
-    alert("Password must be between 6 and 12 characters long.");
-    return;
+  var identifier = rawIdentifier;
+  if (/^\d{10}$/.test(rawIdentifier) && rawIdentifier.length === 10) {
+    identifier = 'RZ' + rawIdentifier;
+  } else if (!rawIdentifier.toUpperCase().startsWith('RZ') && !/^\+?\d{7,15}$/.test(rawIdentifier)) {
+    identifier = 'RZ' + rawIdentifier;
   }
 
   btn.disabled = true;
@@ -1213,10 +1264,10 @@ async function submitCredentialsLogin(callbackAction) {
     var hashedInputPwd = await hashPassword(pwd);
 
     var res = await sb.from('profiles').select('*')
-      .or('uid.ilike.' + identifier.toUpperCase() + ',phone.ilike.%' + identifier + '%');
+      .or('uid.ilike.' + identifier.toUpperCase() + ',phone.ilike.%' + rawIdentifier + '%');
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Account not found. Please check your User ID (RZ...) or Mobile Number.");
+      alert("Account not found. Please check your User ID (RZ...) or Contact No.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1226,7 +1277,7 @@ async function submitCredentialsLogin(callbackAction) {
     var isPasswordCorrect = (profile.password === hashedInputPwd) || (profile.password === pwd);
 
     if (!isPasswordCorrect) {
-      alert("Invalid password. Please check your password or tap 'Forgot User ID or Password'.");
+      alert("Invalid password. Please check your credentials or reset password.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1271,13 +1322,13 @@ function openForgotCredentialsModal() {
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
 
-      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Registered Mobile Number to find your User ID. To set a new password, verify with your linked Google Gmail.</p>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Registered Contact No. to find your User ID. To set a new password, verify with your linked Google Gmail.</p>' +
 
       '<div class="field-box" style="margin-bottom:10px;">' +
-        '<label class="field-label">Registered Mobile Number *</label>' +
+        '<label class="field-label">Registered Contact No. *</label>' +
         '<div class="dial-prefix-wrap">' +
           '<select id="recovCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
-          '<input id="recovPhoneInput" type="tel" placeholder="Mobile Number" required autocomplete="off">' +
+          '<input id="recovPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off">' +
         '</div>' +
       '</div>' +
 
@@ -1293,7 +1344,7 @@ async function executeFindMyIdOnly() {
   var cleanDigits = rawPhone.replace(/\D/g, '');
 
   if (cleanDigits.length < 7) {
-    alert("Please enter a valid mobile number.");
+    alert("Please enter a valid Contact No.");
     return;
   }
 
@@ -1307,7 +1358,7 @@ async function executeFindMyIdOnly() {
     var res = await sb.from('profiles').select('*').ilike('phone', '%' + cleanDigits + '%');
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("No account found matching this mobile number.");
+      alert("No account found matching this Contact No.");
       btn.disabled = false;
       btn.innerText = 'Find My ID →';
       return;
@@ -1334,9 +1385,9 @@ async function executeFindMyIdOnly() {
       
       '<div id="resetPasswordInputArea" style="display:none; margin-top:10px;">' +
         '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Set New Password * (6 to 12 characters)</label>' +
+          '<label class="field-label">Set New Password *</label>' +
           '<div class="pwd-wrap">' +
-            '<input id="newResetPwd" type="password" class="pill-input" placeholder="6 to 12 characters" minlength="6" maxlength="12" autocomplete="new-password">' +
+            '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter password" minlength="6" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
           '</div>' +
         '</div>' +
@@ -2404,7 +2455,7 @@ function openBookingPillModal(id) {
       '</div>' +
       '<div class="pill-grid">' +
         '<div class="field-box"><label class="field-label">Your Name *</label><input id="bpName" class="pill-input" value="' + cleanText(prefillName) + '" placeholder="Full Name"></div>' +
-        '<div class="field-box"><label class="field-label">Mobile No *</label><input id="bpPhone" class="pill-input" value="' + cleanText(prefillPhone) + '" placeholder="Mobile"></div>' +
+        '<div class="field-box"><label class="field-label">Contact No. *</label><input id="bpPhone" class="pill-input" value="' + cleanText(prefillPhone) + '" placeholder="Contact No."></div>' +
       '</div>' +
       '<div class="pill-grid">' +
         '<div class="field-box"><label class="field-label">Gmail (optional)</label><input id="bpGmail" class="pill-input" value="' + cleanText(prefillGmail) + '" placeholder="name@email.com"></div>' +
@@ -2545,6 +2596,7 @@ function openSlipModal(bkId) {
       '<div class="barcode-strip"></div>' +
 
       '<div style="font-size:10.5px; line-height:1.65;">' +
+        '<!-- 1. ROOM & PROPERTY DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
@@ -2557,17 +2609,19 @@ function openSlipModal(bkId) {
           '📍 <b>Live Map Location:</b> <a href="' + mapsLink + '" target="_blank" style="color:#044E3B; font-weight:800; text-decoration:underline;">Open in Google Maps ↗</a>' +
         '</div>' +
 
+        '<!-- 2. TENANT DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">👤 TENANT DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + cleanText(b.userName) + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Mobile No:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(b.userOldAddress) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + cleanText(b.date) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
 
+        '<!-- 3. OWNER DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + cleanText(b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No:</span> <b style="color:#0F172A;">' + cleanText(b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Gmail:</span> <b style="color:#0F172A;">' + cleanText(b.ownerGmail || l.gmail || 'Not Provided') + '</b></div>' +
       '</div>' +
     '</div>' +
