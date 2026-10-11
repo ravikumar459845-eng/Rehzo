@@ -138,7 +138,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .status-cancel-pending { background: #FEF3C7; color: #B45309; }
 .status-owner-accepted { background: #DBEAFE; color: #1D4ED8; }
 
-/* Action Buttons */
 .action-row-mini { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .btn-action-large { padding: 6px 14px; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; font-size: 11px; font-weight: 800; color: #1E293B; cursor: pointer; text-align: center; }
 .btn-action-large.danger { color: #DC2626; border-color: #FCA5A5; }
@@ -1054,7 +1053,28 @@ function setLoginInputMode(mode) {
   }
 }
 
-// REVISED REGISTRATION MODAL
+// FRESH GOOGLE AUTH WITH ACCOUNT SELECTOR
+async function startRealGoogleOAuth() {
+  try {
+    var redirectToUrl = window.location.origin + window.location.pathname;
+    await sb.auth.signOut(); // Fresh auth state
+    var res = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { 
+        redirectTo: redirectToUrl,
+        queryParams: { prompt: 'select_account' }
+      }
+    });
+    if (res.error) {
+      alert("Google login notice: Opening direct registration form.");
+      openRegistrationModal();
+    }
+  } catch(e) {
+    openRegistrationModal();
+  }
+}
+
+// REGISTRATION MODAL
 function openRegistrationModal(prefillData, callbackAction) {
   var pName = (prefillData && prefillData.name) ? prefillData.name : '';
   var pGmail = (prefillData && prefillData.gmail) ? prefillData.gmail : '';
@@ -1071,8 +1091,8 @@ function openRegistrationModal(prefillData, callbackAction) {
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
-            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>
-          </div>' +
+            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
+          '</div>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
@@ -1166,18 +1186,16 @@ function hidePwdWarning() {
   if (fb) fb.style.display = 'none';
 }
 
-// FIXED: ALWAYS FORCES ACCOUNT SELECTION INSTEAD OF AUTO-PICKING OLD EMAIL
+// FRESH GOOGLE VERIFICATION WITH ACCOUNT CHOOSER
 async function triggerRegisterGoogleAuth() {
   try {
-    await sb.auth.signOut(); // Purani session clear taaki fresh account select ho sake
     var redirectToUrl = window.location.origin + window.location.pathname;
+    await sb.auth.signOut(); // Clear previous cached session
     var res = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: {
+      options: { 
         redirectTo: redirectToUrl,
-        queryParams: {
-          prompt: 'select_account'
-        }
+        queryParams: { prompt: 'select_account' }
       }
     });
     if (res.error) {
@@ -1329,7 +1347,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// LOGIN SUBMISSION (HANDLES BOTH USER ID AND REGISTER CONTACT NO)
+// LOGIN SUBMISSION
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
   var pwd = document.getElementById('loginPwd').value;
@@ -1416,7 +1434,7 @@ async function submitCredentialsLogin(callbackAction) {
   }
 }
 
-// ================= STEP-BY-STEP RECOVERY: FIND ID FIRST, GOOGLE VERIFY FOR PASSWORD =================
+// ================= RECOVERY FLOW WITH ACCOUNT CHOOSER =================
 function openForgotCredentialsModal() {
   recoveryFoundUser = null;
   recoveryGoogleVerified = false;
@@ -1494,13 +1512,13 @@ async function executeFindMyIdOnly() {
         '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
         '<span id="txtGoogleRecovLabel">Verify with Google Gmail</span>' +
       '</button>' +
-      '<span id="recovEmailStatus" style="font-size:10px; font-weight:700; color:#64748B;">Tap above to verify linked email.</span>' +
+      '<span id="recovEmailStatus" style="font-size:10px; font-weight:700; color:#64748B;">Tap above to choose and verify your email.</span>' +
       
       '<div id="resetPasswordInputArea" style="display:none; margin-top:10px;">' +
         '<div class="field-box" style="margin-bottom:8px;">' +
           '<label class="field-label">Set New Password *</label>' +
           '<div class="pwd-wrap">' +
-            '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter 4 to 12 characters" minlength="4" maxlength="12" autocomplete="new-password">' +
+            '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter password" minlength="4" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
           '</div>' +
         '</div>' +
@@ -1516,7 +1534,7 @@ async function executeFindMyIdOnly() {
   }
 }
 
-// FIXED: ALWAYS FORCES ACCOUNT SELECTION INSTEAD OF AUTO-PICKING OLD EMAIL
+// FRESH RECOVERY GOOGLE AUTH WITH ACCOUNT CHOOSER
 async function triggerRecoveryGoogleAuth() {
   if (!recoveryFoundUser) {
     alert("Please find your ID first.");
@@ -1524,15 +1542,13 @@ async function triggerRecoveryGoogleAuth() {
   }
 
   try {
-    await sb.auth.signOut(); // Purani session clear
     var redirectToUrl = window.location.origin + window.location.pathname;
+    await sb.auth.signOut(); // Fresh auth state to avoid old cached email
     var res = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: {
+      options: { 
         redirectTo: redirectToUrl,
-        queryParams: {
-          prompt: 'select_account'
-        }
+        queryParams: { prompt: 'select_account' }
       }
     });
     if (res.error) {
@@ -1997,7 +2013,7 @@ function renderBookingsView() {
   }).join('');
 }
 
-// TENANT FINAL CONFIRMATION (RACE CONDITION CHECK)
+// TENANT FINAL CONFIRMATION
 async function tenantFinalConfirmBooking(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -2213,7 +2229,7 @@ async function ownerRejectRequest(bookingId) {
   }
 }
 
-// FULL OWNER EDIT MODAL WITH PHOTO EDITING
+// FULL OWNER EDIT MODAL
 function openFullEditRoomModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
@@ -2722,7 +2738,6 @@ function openSlipModal(bkId) {
           '📍 <b>Live Map Location:</b> <a href="' + mapsLink + '" target="_blank" style="color:#044E3B; font-weight:800; text-decoration:underline;">Open in Google Maps ↗</a>' +
         '</div>' +
 
-        '<!-- 2. TENANT DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">👤 TENANT DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + cleanText(b.userName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
