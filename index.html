@@ -26,7 +26,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* Header */
 .top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
+.logo-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.logo-modal-header { width: 30px; height: 30px; object-fit: contain; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
 .brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -545,18 +546,17 @@ var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ================= SECURITY & SANITIZATION UTILITIES =================
 function cleanText(str) {
-  if (!str) return '';
+  if (str === null || str === undefined) return '';
   return String(str).replace(/[&<>"']/g, function(m) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
   });
 }
 
 async function hashPassword(plainPassword) {
-  if (!plainPassword) return '';
   var enc = new TextEncoder();
   var hashBuffer = await crypto.subtle.digest('SHA-256', enc.encode(plainPassword + "_rehzo_salt_2026"));
   var hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // ================= EXTENSIVE WORLDWIDE COUNTRIES LIST =================
@@ -730,23 +730,6 @@ async function syncFromSupabase() {
   if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
 }
 
-// ================= SPLASH & AUTO INITIALIZATION =================
-window.addEventListener('DOMContentLoaded', async function() {
-  populateCountryDropdowns();
-  updateUserHeaderChip();
-  await autoDetectUserCountry();
-  await handleOAuthRedirect();
-  await syncFromSupabase();
-
-  setTimeout(function() {
-    var splash = document.getElementById('splashOverlay');
-    if (splash) {
-      splash.style.opacity = '0';
-      setTimeout(function() { splash.style.display = 'none'; }, 500);
-    }
-  }, 1000);
-});
-
 // ================= NOTIFICATIONS ENGINE =================
 function getRelevantNotifications() {
   if (!DB.currentUser) return [];
@@ -792,7 +775,7 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Request Accepted by Owner! ✅',
-          desc: 'Owner accepted your request for ' + cleanText(b.houseName) + '. Please go to My Bookings to confirm.',
+          desc: 'Owner accepted your request for ' + cleanText(b.houseName) + '. Tap to confirm your stay.',
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -800,15 +783,15 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Stay Confirmed & Locked 🏠',
-          desc: 'Your booking for ' + cleanText(b.houseName) + ' is 100% verified. TRL: ' + (b.trl || ''),
+          desc: 'Your booking for ' + cleanText(b.houseName) + ' is verified. TRL: ' + (b.trl || ''),
           time: b.date || 'Recent',
           action: 'bookings'
         });
       } else if (b.status === 'rejected') {
         notifs.push({
           id: 'notif_' + b.id,
-          title: 'Request Declined / Booked ✕',
-          desc: 'Booking for ' + cleanText(b.houseName) + ' could not be processed.',
+          title: 'Request Closed / Booked ✕',
+          desc: 'Booking for ' + cleanText(b.houseName) + ' was not completed or confirmed by someone else.',
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -886,12 +869,12 @@ function markAllNotifsRead() {
   renderNotifications();
 }
 
-// ================= AUTH SYSTEM =================
+// ================= AUTH SYSTEM (WITH LOGO & GOOGLE VERIFIED RECOVERY) =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
     if (DB.currentUser) {
-      chip.innerText = '👤 ' + (DB.currentUser.name ? DB.currentUser.name.split(' ')[0] : 'User') + ' (' + DB.currentUser.uid + ')';
+      chip.innerText = '👤 ' + cleanText(DB.currentUser.name ? DB.currentUser.name.split(' ')[0] : 'User') + ' (' + cleanText(DB.currentUser.uid) + ')';
     } else {
       chip.innerText = '👤 Login';
     }
@@ -904,6 +887,18 @@ async function handleOAuthRedirect() {
     var session = sessionRes.data ? sessionRes.data.session : null;
     if (session && session.user && session.user.email) {
       var googleEmail = session.user.email;
+
+      // Check if user is in forgot password recovery mode
+      var recoveryPending = sessionStorage.getItem('rehzo_recovery_phone');
+      if (recoveryPending) {
+        sessionStorage.removeItem('rehzo_recovery_phone');
+        sessionStorage.setItem('rehzo_verified_recovery_email', googleEmail);
+        setTimeout(function() {
+          openForgotCredentialsModal(recoveryPending, googleEmail);
+        }, 300);
+        return;
+      }
+
       var profRes = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
       if (profRes.data && profRes.data.length > 0) {
         DB.currentUser = profRes.data[0];
@@ -931,7 +926,7 @@ function openProfileModal(callbackAction) {
       '<div class="modal-box">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
-            '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">⌂</div>' +
+            '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
           '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -943,7 +938,7 @@ function openProfileModal(callbackAction) {
         '</div>' +
         '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:12px; font-size:11.5px; line-height:1.7; margin-bottom:12px;">' +
           '<div>📞 <b>Phone:</b> ' + cleanText(DB.currentUser.phone) + '</div>' +
-          '<div>✉️ <b>Gmail:</b> ' + (DB.currentUser.gmail ? cleanText(DB.currentUser.gmail) : 'Not Linked') + '</div>' +
+          '<div>✉️ <b>Gmail:</b> ' + cleanText(DB.currentUser.gmail || 'Not Linked') + '</div>' +
           '<div>🛡️ <b>Access:</b> Country Strictly Locked to GPS/Location</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
@@ -954,7 +949,7 @@ function openProfileModal(callbackAction) {
       '<div class="modal-box">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
-            '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">⌂</div>' +
+            '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Welcome to REHZO</h3>' +
           '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -974,7 +969,7 @@ function openProfileModal(callbackAction) {
           '<label class="field-label">User ID or Mobile No. *</label>' +
           '<input id="loginUid" class="pill-input" placeholder="User ID or Mobile No." autocomplete="off">' +
         '</div>' +
-        '<div class="field-box" style="margin-bottom:8px;">' +
+        '<div class="field-box" style="margin-bottom:4px;">' +
           '<label class="field-label">Password *</label>' +
           '<div class="pwd-wrap">' +
             '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" autocomplete="new-password">' +
@@ -982,7 +977,7 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
         '<div style="text-align:right; margin-bottom:10px;">' +
-          '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openRecoveryModal()">Forgot User ID or Password?</span>' +
+          '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
         '</div>' +
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
         '<div style="text-align:center; margin-top:12px;">' +
@@ -1001,7 +996,7 @@ async function startRealGoogleOAuth() {
       options: { redirectTo: redirectToUrl }
     });
     if (res.error) {
-      alert("Google login setup: Opening direct registration form.");
+      alert("Google login notice: Opening direct registration form.");
       openRegistrationModal();
     }
   } catch(e) {
@@ -1022,7 +1017,7 @@ function openRegistrationModal(prefillData, callbackAction) {
     '<div class="modal-box">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">⌂</div>' +
+          '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">' + (isGoogle ? 'Complete Registration' : 'Create REHZO Account') + '</h3>' +
             '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
@@ -1035,7 +1030,7 @@ function openRegistrationModal(prefillData, callbackAction) {
         '<div class="pill-grid">' +
           '<div class="field-box">' +
             '<label class="field-label">Full Name *</label>' +
-            '<input id="regFullName" class="pill-input" placeholder="Full Name" value="' + pName + '" required autocomplete="off">' +
+            '<input id="regFullName" class="pill-input" placeholder="Full Name" value="' + cleanText(pName) + '" required autocomplete="off">' +
           '</div>' +
           '<div class="field-box">' +
             '<label class="field-label">Contact No. *</label>' +
@@ -1049,7 +1044,7 @@ function openRegistrationModal(prefillData, callbackAction) {
         '<div class="pill-grid">' +
           '<div class="field-box">' +
             '<label class="field-label">Gmail (optional)</label>' +
-            '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + pGmail + '" autocomplete="off">' +
+            '<input id="regGmailInput" type="email" class="pill-input" placeholder="name@gmail.com" value="' + cleanText(pGmail) + '" autocomplete="off">' +
           '</div>' +
           '<div class="field-box">' +
             '<label class="field-label">Create User ID *</label>' +
@@ -1070,127 +1065,6 @@ function openRegistrationModal(prefillData, callbackAction) {
       '</form>' +
     '</div>' +
   '</div>';
-}
-
-// ================= FORGOT USER ID & PASSWORD RECOVERY =================
-function openRecoveryModal() {
-  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-    '<div class="modal-box">' +
-      '<div class="modal-header">' +
-        '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<div class="logo-icon" style="width:26px; height:26px; font-size:14px;">🔑</div>' +
-          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Account Recovery</h3>' +
-        '</div>' +
-        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
-      '</div>' +
-
-      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your registered Contact Number and linked Gmail to find your User ID or reset your password.</p>' +
-
-      '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Registered Mobile Number *</label>' +
-        '<input id="recPhone" type="tel" class="pill-input" placeholder="e.g. 7707064294">' +
-      '</div>' +
-
-      '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Linked Gmail (optional)</label>' +
-        '<input id="recGmail" type="email" class="pill-input" placeholder="e.g. name@gmail.com">' +
-      '</div>' +
-
-      '<div style="display:flex; gap:8px; margin-top:10px;">' +
-        '<button class="btn-action-large" style="flex:1;" onclick="findMyUserId()">Find My User ID</button>' +
-      '</div>' +
-
-      '<div style="border-top:1px solid #E2E8F0; margin:14px 0 10px; padding-top:10px;">' +
-        '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Set New Password</label>' +
-          '<input id="recNewPassword" type="password" class="pill-input" placeholder="Enter new strong password" minlength="6">' +
-        '</div>' +
-        '<button class="big-action-btn" id="btnResetPassword" onclick="resetMyPassword()">Update Password →</button>' +
-      '</div>' +
-
-      '<div id="recoveryStatusBox" style="margin-top:10px; font-size:11px; font-weight:700; text-align:center;"></div>' +
-    '</div>' +
-  '</div>';
-}
-
-async function findMyUserId() {
-  var phone = document.getElementById('recPhone').value.trim().replace(/\D/g, '');
-  var gmail = document.getElementById('recGmail').value.trim().toLowerCase();
-  var statusBox = document.getElementById('recoveryStatusBox');
-
-  if (!phone && !gmail) {
-    statusBox.innerText = 'Please provide mobile number or gmail.';
-    statusBox.style.color = '#DC2626';
-    return;
-  }
-
-  statusBox.innerText = 'Searching account...';
-  statusBox.style.color = '#044E3B';
-
-  var query = sb.from('profiles').select('uid, name, phone, gmail');
-  if (phone) query = query.ilike('phone', '%' + phone + '%');
-  if (gmail) query = query.ilike('gmail', gmail);
-
-  var res = await query;
-  if (res.data && res.data.length > 0) {
-    var p = res.data[0];
-    statusBox.innerHTML = '<span style="color:#15803D;">Account Found!<br>Hello ' + cleanText(p.name) + ', your <b>User ID is: ' + cleanText(p.uid) + '</b></span>';
-  } else {
-    statusBox.innerText = 'No account found matching these details.';
-    statusBox.style.color = '#DC2626';
-  }
-}
-
-async function resetMyPassword() {
-  var phone = document.getElementById('recPhone').value.trim().replace(/\D/g, '');
-  var gmail = document.getElementById('recGmail').value.trim().toLowerCase();
-  var newPwd = document.getElementById('recNewPassword').value;
-  var statusBox = document.getElementById('recoveryStatusBox');
-
-  if (!phone && !gmail) {
-    statusBox.innerText = 'Please provide mobile number or gmail first.';
-    statusBox.style.color = '#DC2626';
-    return;
-  }
-
-  if (!newPwd || newPwd.length < 6) {
-    statusBox.innerText = 'New password must be at least 6 characters.';
-    statusBox.style.color = '#DC2626';
-    return;
-  }
-
-  var btn = document.getElementById('btnResetPassword');
-  btn.disabled = true;
-  btn.innerText = 'Updating...';
-
-  var query = sb.from('profiles').select('uid');
-  if (phone) query = query.ilike('phone', '%' + phone + '%');
-  if (gmail) query = query.ilike('gmail', gmail);
-
-  var check = await query;
-  if (!check.data || check.data.length === 0) {
-    statusBox.innerText = 'Verification failed. No matching account.';
-    statusBox.style.color = '#DC2626';
-    btn.disabled = false;
-    btn.innerText = 'Update Password →';
-    return;
-  }
-
-  var uid = check.data[0].uid;
-  var hashed = await hashPassword(newPwd);
-
-  var updateRes = await sb.from('profiles').update({ password: hashed }).eq('uid', uid);
-  btn.disabled = false;
-  btn.innerText = 'Update Password →';
-
-  if (!updateRes.error) {
-    alert("Password updated successfully! Please login with your new password.");
-    closeModal();
-    openProfileModal();
-  } else {
-    statusBox.innerText = 'Failed to reset password: ' + updateRes.error.message;
-    statusBox.style.color = '#DC2626';
-  }
 }
 
 function togglePasswordVisibility(inputId, btn) {
@@ -1228,7 +1102,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
   e.preventDefault();
   var btn = document.getElementById('btnRegisterSubmit');
   btn.disabled = true;
-  btn.innerText = 'Creating Profile...';
+  btn.innerText = 'Securing & Creating Profile...';
 
   try {
     var name = document.getElementById('regFullName').value.trim();
@@ -1255,14 +1129,14 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
-    var secureHashedPassword = await hashPassword(password);
+    var hashedPassword = await hashPassword(password);
 
     var newProfile = {
       uid: uid,
       name: name,
       phone: fullPhone,
       gmail: gmail || null,
-      password: secureHashedPassword
+      password: hashedPassword
     };
 
     var insertRes = await sb.from('profiles').insert([newProfile]).select().single();
@@ -1272,7 +1146,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour Account is secured & ready.");
+    alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour Account is secured.");
     resumePendingAction(callbackAction);
 
   } catch(err) {
@@ -1294,37 +1168,37 @@ async function submitCredentialsLogin(callbackAction) {
   }
 
   btn.disabled = true;
-  btn.innerText = 'Verifying...';
+  btn.innerText = 'Authenticating...';
 
   try {
-    var hashedPwd = await hashPassword(pwd);
+    var hashedInputPwd = await hashPassword(pwd);
 
-    // Backward-compatible verification: supports both hashed and pre-existing plain text passwords
     var res = await sb.from('profiles').select('*')
       .or('uid.eq.' + identifier.toLowerCase() + ',phone.ilike.%' + identifier + '%');
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Invalid User ID/Phone or Password.");
+      alert("Account not found. Please check your User ID or phone number.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
     }
 
-    var user = res.data[0];
-    if (user.password !== hashedPwd && user.password !== pwd) {
-      alert("Invalid User ID/Phone or Password.");
+    var profile = res.data[0];
+    var isPasswordCorrect = (profile.password === hashedInputPwd) || (profile.password === pwd);
+
+    if (!isPasswordCorrect) {
+      alert("Invalid password. Please check your credentials or reset password.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
     }
 
-    // Auto-migrate legacy plain text password to secure hash on login
-    if (user.password === pwd) {
-      await sb.from('profiles').update({ password: hashedPwd }).eq('uid', user.uid);
-      user.password = hashedPwd;
+    if (profile.password === pwd) {
+      await sb.from('profiles').update({ password: hashedInputPwd }).eq('uid', profile.uid);
+      profile.password = hashedInputPwd;
     }
 
-    DB.currentUser = user;
+    DB.currentUser = profile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
@@ -1336,6 +1210,146 @@ async function submitCredentialsLogin(callbackAction) {
   } finally {
     btn.disabled = false;
     btn.innerText = 'Login with REHZO ID →';
+  }
+}
+
+// ================= FORGOT RECOVERY WITH GOOGLE VERIFICATION & DIAL PREFIX =================
+var verifiedGoogleRecoveryEmail = null;
+
+function openForgotCredentialsModal(prefillPhone, prefillEmail) {
+  var cObj = WORLD_COUNTRIES.find(function(c){ return c.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
+  verifiedGoogleRecoveryEmail = prefillEmail || sessionStorage.getItem('rehzo_verified_recovery_email') || null;
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box">' +
+      '<div class="modal-header">' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<img src="logo.png" class="logo-modal-header" alt="REHZO">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Account Recovery</h3>' +
+        '</div>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+
+      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your registered mobile number and verify your linked Google Account to recover your REHZO ID.</p>' +
+
+      '<div class="field-box" style="margin-bottom:10px;">' +
+        '<label class="field-label">Registered Mobile Number *</label>' +
+        '<div class="dial-prefix-wrap">' +
+          '<span id="recovDialPrefix" style="font-size:11px; font-weight:700; color:#044E3B; margin-left:6px;">' + cObj.dial + '</span>' +
+          '<input id="recovPhone" type="tel" placeholder="Mobile Number" value="' + (prefillPhone || '') + '" required>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="field-box" style="margin-bottom:10px;">' +
+        '<label class="field-label">Linked Google Account *</label>' +
+        (verifiedGoogleRecoveryEmail 
+          ? '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:30px; padding:9px 12px; font-size:11.5px; font-weight:700; color:#044E3B; display:flex; justify-content:space-between; align-items:center;">' +
+              '<span>✓ ' + cleanText(verifiedGoogleRecoveryEmail) + '</span>' +
+              '<span style="font-size:10px; color:#15803D; font-weight:800;">VERIFIED</span>' +
+            '</div>'
+          : '<button type="button" class="google-auth-btn" style="margin-bottom:0;" onclick="startGoogleRecoveryVerification()">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
+              '<span>Verify Linked Google Gmail</span>' +
+            '</button>'
+        ) +
+      '</div>' +
+
+      '<button class="big-action-btn" id="btnVerifyRecovery" onclick="verifyRecoveryDetails()">Find My Account →</button>' +
+      '<div id="recoveryResultBox" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:12px;"></div>' +
+    '</div>' +
+  '</div>';
+}
+
+async function startGoogleRecoveryVerification() {
+  var rawPhone = document.getElementById('recovPhone').value.trim();
+  if (!rawPhone) {
+    alert("Please enter your registered mobile number first.");
+    return;
+  }
+  sessionStorage.setItem('rehzo_recovery_phone', rawPhone);
+  var redirectToUrl = window.location.origin + window.location.pathname;
+  await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: redirectToUrl }
+  });
+}
+
+async function verifyRecoveryDetails() {
+  var rawPhone = document.getElementById('recovPhone').value.trim();
+  var btn = document.getElementById('btnVerifyRecovery');
+  var resultBox = document.getElementById('recoveryResultBox');
+
+  var cleanDigits = rawPhone.replace(/\D/g, '');
+  if (cleanDigits.length < 7) {
+    alert("Please enter a valid mobile number.");
+    return;
+  }
+
+  if (!verifiedGoogleRecoveryEmail) {
+    alert("Please verify your Linked Google Gmail account first using the button above.");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = 'Locating Account...';
+
+  try {
+    var res = await sb.from('profiles').select('*').ilike('phone', '%' + cleanDigits + '%');
+    if (res.error || !res.data || res.data.length === 0) {
+      alert("No account found matching this mobile number.");
+      btn.disabled = false;
+      btn.innerText = 'Find My Account →';
+      return;
+    }
+
+    var account = res.data[0];
+    if (!account.gmail || account.gmail.toLowerCase() !== verifiedGoogleRecoveryEmail.toLowerCase()) {
+      alert("Verification Failed:\nThe Google email you verified does not match the linked account with this phone number.");
+      btn.disabled = false;
+      btn.innerText = 'Find My Account →';
+      return;
+    }
+
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:12px; padding:10px; margin-bottom:10px;">' +
+      '<div style="font-size:10px; font-weight:800; color:#044E3B;">ACCOUNT VERIFIED SUCCESSFULLY!</div>' +
+      '<div style="font-size:13px; font-weight:900; color:#0F172A; margin:3px 0;">User ID: <span style="color:#044E3B;">' + cleanText(account.uid) + '</span></div>' +
+      '<div style="font-size:10px; color:#64748B;">Linked Name: ' + cleanText(account.name) + '</div>' +
+    '</div>' +
+    '<div class="field-box" style="margin-bottom:8px;">' +
+      '<label class="field-label">Set New Secure Password *</label>' +
+      '<input id="newResetPwd" type="password" class="pill-input" placeholder="Min 6 characters" minlength="6">' +
+    '</div>' +
+    '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + account.uid + '\')">Update Password & Login →</button>';
+
+  } catch(e) {
+    alert("Recovery error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'Find My Account →';
+  }
+}
+
+async function saveNewResetPassword(uid) {
+  var newPwd = document.getElementById('newResetPwd').value;
+  if (!newPwd || newPwd.length < 6) {
+    alert("Password must be at least 6 characters long.");
+    return;
+  }
+
+  var hashedPwd = await hashPassword(newPwd);
+  var res = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', uid).select().single();
+  if (!res.error && res.data) {
+    alert("Password updated successfully! Logging you in...");
+    DB.currentUser = res.data;
+    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    updateUserHeaderChip();
+    sessionStorage.removeItem('rehzo_verified_recovery_email');
+    verifiedGoogleRecoveryEmail = null;
+    closeModal();
+    await syncFromSupabase();
+  } else {
+    alert("Failed to update password: " + (res.error ? res.error.message : 'Unknown error'));
   }
 }
 
@@ -1398,20 +1412,20 @@ function checkAdminAccess() {
   else if (pass !== null) alert("Incorrect passcode.");
 }
 
-// ================= RENDER LISTINGS (CONFIRMED BOOKINGS REMOVED FROM HOME) =================
+// ================= RENDER LISTINGS =================
 function renderHomeGrid(items) {
   var confirmedRoomIds = DB.bookings
     .filter(function(b){ return b.status === 'confirmed'; })
     .map(function(b){ return b.listingId; });
 
   var list = items || DB.listings.filter(function(x){ 
-    var isAlreadyConfirmed = confirmedRoomIds.indexOf(x.id) !== -1;
-    return (x.status === 'available') && (!isAlreadyConfirmed) && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
+    var isConfirmed = confirmedRoomIds.indexOf(x.id) !== -1;
+    return (x.status === 'available') && (!isConfirmed) && (x.daysLeft > 0) && (x.country === detectedCountryCode); 
   });
 
   var container = document.getElementById('homeRoomsGrid');
   if (!list.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:28px; font-size:11.5px; color:#64748B;">No available rooms found in your detected location (' + detectedCountryCode + ').</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:28px; font-size:11.5px; color:#64748B;">No available rooms found in your detected location (' + cleanText(detectedCountryCode) + ').</div>';
     return;
   }
   container.innerHTML = list.map(function(r) {
@@ -1519,8 +1533,11 @@ function handleSearch(val) {
   }
   alertBox.style.display = 'none';
 
-  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
   var sLow = q.toLowerCase();
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
+
   var filtered = DB.listings.filter(function(l) {
     var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
     return (l.status === 'available') && (!isConfirmed) && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (
@@ -1535,7 +1552,9 @@ function handleSearch(val) {
 function applyFilters() {
   var c = document.getElementById('countryFilter').value || detectedCountryCode;
   var t = document.getElementById('typeFilter').value;
-  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
 
   var filtered = DB.listings.filter(function(l) {
     var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
@@ -1550,7 +1569,10 @@ function filterChip(cat, el) {
   el.classList.add('active');
   if (cat === 'all') renderHomeGrid();
   else {
-    var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
+    var confirmedRoomIds = DB.bookings
+      .filter(function(b){ return b.status === 'confirmed'; })
+      .map(function(b){ return b.listingId; });
+
     var filtered = DB.listings.filter(function(l){
       var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
       return (l.status === 'available') && (!isConfirmed) && (l.daysLeft > 0) && (l.country === detectedCountryCode) && (l.suitableFor.indexOf(cat) !== -1 || l.suitableFor.indexOf(cat+'s') !== -1);
@@ -1576,9 +1598,11 @@ function getDistKm(lat1, lon1, lat2, lon2) {
 }
 
 function renderNearGrid() {
-  var near = [];
-  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
 
+  var near = [];
   for (var i = 0; i < DB.listings.length; i++) {
     var l = DB.listings[i];
     var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
@@ -1635,9 +1659,11 @@ function detectGPS(isManual) {
 
 function renderSearchGrid() {
   var container = document.getElementById('searchRoomsGrid');
-  var confirmedRoomIds = DB.bookings.filter(function(x){ return x.status === 'confirmed'; }).map(function(x){ return x.listingId; });
-  var list = DB.listings.filter(function(x){ return x.status === 'available' && (confirmedRoomIds.indexOf(x.id) === -1) && x.daysLeft > 0 && x.country === detectedCountryCode; });
+  var confirmedRoomIds = DB.bookings
+    .filter(function(b){ return b.status === 'confirmed'; })
+    .map(function(b){ return b.listingId; });
 
+  var list = DB.listings.filter(function(x){ return x.status === 'available' && (confirmedRoomIds.indexOf(x.id) === -1) && x.daysLeft > 0 && x.country === detectedCountryCode; });
   container.innerHTML = list.map(function(r) {
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
@@ -1653,7 +1679,7 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS =================
+// ================= MY BOOKINGS (CURRENT, CONFIRM, CANCELLED) =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
@@ -1691,7 +1717,7 @@ function renderBookingsView() {
   });
 
   if (!list.length) {
-    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11.5px; color:#64748B;">No ' + currentBookingsTab + ' bookings found.</div>';
+    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11.5px; color:#64748B;">No ' + cleanText(currentBookingsTab) + ' bookings found.</div>';
     return;
   }
 
@@ -1716,8 +1742,8 @@ function renderBookingsView() {
           '<span class="status-pill ' + pillClass + '">● ' + statusText + '</span>' +
         '</div>' +
         '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ₹' + Number(totalRent).toLocaleString() + '</div>' +
-        '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + b.date + '</div>' +
-        (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + b.trl + '</div>' : '') +
+        '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + cleanText(b.date) + '</div>' +
+        (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
         '<div class="action-row-mini">' +
           (isOwnerAccepted ? '<button class="btn-action-large success" onclick="tenantFinalConfirmBooking(\'' + b.id + '\')">✓ Final Confirm & Book</button>' : '') +
           (isConfirmed ? '<button class="btn-action-large" onclick="openSlipModal(\'' + b.id + '\')">📄 Official Slip</button>' : '') +
@@ -1732,7 +1758,7 @@ function renderBookingsView() {
   }).join('');
 }
 
-// TENANT FINAL CONFIRMATION
+// TENANT FINAL CONFIRMATION (RACE CONDITION CHECK)
 async function tenantFinalConfirmBooking(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -1913,7 +1939,7 @@ function renderOwnerView() {
           '<div style="font-size:10.5px; color:#334155; margin-top:3px; line-height:1.4;">' +
             '<div><b>Guest:</b> ' + cleanText(b.userName) + ' (' + b.duration + ' mo)</div>' +
             '<div>📞 ' + cleanText(b.userPhone) + ' • Total: ₹' + Number(totalRent).toLocaleString() + '</div>' +
-            (b.trl ? '<div style="font-weight:700; color:#044E3B; margin-top:2px;">TRL: ' + b.trl + '</div>' : '') +
+            (b.trl ? '<div style="font-weight:700; color:#044E3B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
           '</div>' +
           '<div class="action-row-mini" style="margin-top:8px;">' +
             (isPending ? '<button class="btn-action-large success" onclick="ownerAcceptRequest(\'' + b.id + '\')">✓ Accept Request</button>' : '') +
@@ -2263,7 +2289,7 @@ async function handlePublishProperty(e) {
     var insertRes = await sb.from('listings').insert([newListing]);
     if (insertRes.error) throw insertRes.error;
 
-    alert("Room successfully published to Supabase Cloud for 90 Days in " + detectedCountryCode + "!");
+    alert("Room successfully published to Supabase Cloud for 90 Days in " + cleanText(detectedCountryCode) + "!");
     e.target.reset();
     uploadedPhotoFiles = [];
     toggleOwnerForm(false);
@@ -2431,7 +2457,7 @@ function openSlipModal(bkId) {
 
       '<div style="text-align:center; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:12px; padding:8px;">' +
         '<div style="font-size:8px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">OFFICIAL 12-DIGIT TRL NUMBER</div>' +
-        '<div style="font-size:18px; font-weight:900; letter-spacing:1.5px; color:#0F172A; margin:2px 0;">' + (b.trl || 'PENDING CONFIRM') + '</div>' +
+        '<div style="font-size:18px; font-weight:900; letter-spacing:1.5px; color:#0F172A; margin:2px 0;">' + cleanText(b.trl || 'PENDING CONFIRM') + '</div>' +
         '<div style="font-size:8px; color:#64748B;">🔒 Verified Cloud Database Record</div>' +
       '</div>' +
 
@@ -2454,7 +2480,7 @@ function openSlipModal(bkId) {
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + cleanText(b.userName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Mobile No:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(b.userOldAddress) + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + b.date + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + cleanText(b.date) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
 
