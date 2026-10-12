@@ -943,7 +943,7 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // RECOVERY REDIRECT: Seedhe Password Reset Form open karo bina "Find My ID" par redirect kare
+      // RECOVERY REDIRECT: Direct Password Reset form kholna bina find-id loop ke
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -969,6 +969,7 @@ async function handleOAuthRedirect() {
   }
 }
 
+// RESET PASSWORD MODAL MEIN PREFIX (RZ, RE, HR, ZO, OE) SELECTION ADD KIYA GAYA HAI
 function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
   var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
   var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
@@ -992,10 +993,18 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
       (isMatch ? (
         '<div class="field-box" style="margin-bottom:8px;">' +
           '<label class="field-label">Set New Password *</label>' +
-          '<div class="pwd-wrap">' +
-            '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter 4 to 12 characters" minlength="4" maxlength="12" autocomplete="new-password">' +
-            '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
+          '<div class="prefix-input-wrap">' +
+            '<select id="resetPwdPrefix" class="prefix-select-inline">' +
+              '<option value="RZ">RZ</option>' +
+              '<option value="RE">RE</option>' +
+              '<option value="HR">HR</option>' +
+              '<option value="ZO">ZO</option>' +
+              '<option value="OE">OE</option>' +
+            '</select>' +
+            '<input id="newResetPwd" type="password" placeholder="Password" minlength="2" maxlength="10" autocomplete="new-password">' +
+            '<button type="button" class="pwd-toggle-btn" style="position:static; margin-left:auto;" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
           '</div>' +
+          '<span style="font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Prefix mila kar kul 4 se 12 characters ka hona chahiye.</span>' +
         '</div>' +
         '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + userObj.uid + '\')">Save New Password & Login →</button>'
       ) : (
@@ -1627,14 +1636,21 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
+// SAVE RESET PASSWORD: PREFIX + SUFFIX VALIDATION LOGIC ADDED
 async function saveNewResetPassword(uid) {
-  var newPwd = document.getElementById('newResetPwd').value;
-  if (!newPwd || newPwd.length < 4 || newPwd.length > 12) {
-    alert("Password must be between 4 and 12 characters only!");
+  var prefixElem = document.getElementById('resetPwdPrefix');
+  var prefix = prefixElem ? prefixElem.value : 'RZ';
+  var rawSuffix = document.getElementById('newResetPwd').value.trim().replace(/^(rz|re|hr|zo|oe)/i, '');
+
+  var totalLen = 2 + rawSuffix.length;
+  if (totalLen < 4 || totalLen > 12) {
+    alert("Password (" + prefix + " ke sath) strictly 4 se 12 characters ka hona chahiye!");
     return;
   }
 
-  var hashedPwd = await hashPassword(newPwd);
+  var fullPassword = prefix + rawSuffix;
+  var hashedPwd = await hashPassword(fullPassword);
+
   var res = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', uid).select().single();
   if (!res.error && res.data) {
     alert("Password updated successfully! Logging you in as " + cleanText(res.data.name));
@@ -2131,7 +2147,6 @@ async function rejectCancelBooking(id) {
   }
 }
 
-// OWNER FORM OPEN: DUPLICATE PHONE STRIP & AUTO-DETECT COUNTRY SYNC
 function toggleOwnerForm(show) {
   if (show && !DB.currentUser) {
     alert("Please sign in or create an account to list your property.");
@@ -2144,7 +2159,6 @@ function toggleOwnerForm(show) {
   if (show) {
     var cObj = WORLD_COUNTRIES.find(function(item){ return item.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
     
-    // Auto sync country display and hidden input with current detected country
     var opDisplay = document.getElementById('opCountryDisplay');
     var opHidden = document.getElementById('opCountry');
     if (opDisplay) opDisplay.value = cObj.name + ' (' + cObj.dial + ')';
@@ -2155,7 +2169,7 @@ function toggleOwnerForm(show) {
       document.getElementById('opName').value = DB.currentUser.name || '';
       if (DB.currentUser.gmail) document.getElementById('opGmail').value = DB.currentUser.gmail;
 
-      // STRIP DUPLICATE DIAL CODE FROM USER PHONE
+      // Duplicate phone dial prefix ko automatically strip karke populate karna
       var rawPhone = DB.currentUser.phone || '';
       var cleanPhone = rawPhone;
       WORLD_COUNTRIES.forEach(function(c) {
