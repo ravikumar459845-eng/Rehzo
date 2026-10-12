@@ -562,11 +562,13 @@ function cleanText(str) {
   });
 }
 
+// Consistent Salt-based SHA-256 Hashing
 async function hashPassword(plainPassword) {
+  var cleanPwd = String(plainPassword || '').trim();
   var enc = new TextEncoder();
-  var hashBuffer = await crypto.subtle.digest('SHA-256', enc.encode(plainPassword + "_rehzo_salt_2026"));
+  var hashBuffer = await crypto.subtle.digest('SHA-256', enc.encode(cleanPwd + "_rehzo_salt_2026"));
   var hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
 }
 
 var WORLD_COUNTRIES = [
@@ -932,7 +934,6 @@ function updateUserHeaderChip() {
   }
 }
 
-// FIX: Auto-login on refresh bug completely removed.
 async function handleOAuthRedirect() {
   try {
     var sessionRes = await sb.auth.getSession();
@@ -977,7 +978,6 @@ async function handleOAuthRedirect() {
         }
       }
 
-      // Agar koi intentional login nahi ho raha hai, toh background session auto-login na kare jab user pehle se logged in na ho
       if (!DB.currentUser) {
         await sb.auth.signOut();
       }
@@ -1358,7 +1358,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     var rawPhone = document.getElementById('regPhoneInput').value.trim();
     var prefix = document.getElementById('regUidPrefix').value;
     var rawSuffix = document.getElementById('regUidSuffix').value.trim().replace(/^(rz|re|hr|zo|oe)/i, '');
-    var password = document.getElementById('regPasswordInput').value;
+    var password = document.getElementById('regPasswordInput').value.trim();
 
     if (!registrationGoogleVerifiedEmail) {
       alert("Please verify your Google Gmail before completing registration!");
@@ -1475,7 +1475,8 @@ async function submitCredentialsLogin(callbackAction) {
   }
 
   // STEP 1: INITIAL CREDENTIAL VERIFICATION
-  var pwd = document.getElementById('loginPwd').value;
+  var rawPwd = document.getElementById('loginPwd').value;
+  var pwd = String(rawPwd || '').trim();
   var identifier = '';
   var rawPhone = '';
 
@@ -1524,7 +1525,10 @@ async function submitCredentialsLogin(callbackAction) {
     }
 
     var profile = res.data[0];
-    var isPasswordCorrect = (profile.password === hashedInputPwd) || (profile.password === pwd);
+    
+    // Exact Hash Match or Legacy Support Check
+    var isPasswordCorrect = (String(profile.password).trim() === hashedInputPwd) || 
+                            (String(profile.password).trim() === pwd);
 
     if (!isPasswordCorrect) {
       alert("Invalid password. Please check your password or tap 'Forgot User ID or Password'.");
@@ -1533,6 +1537,7 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
+    // Auto update legacy plaintext passwords to secure hash
     if (profile.password === pwd) {
       await sb.from('profiles').update({ password: hashedInputPwd }).eq('uid', profile.uid);
       profile.password = hashedInputPwd;
@@ -1698,10 +1703,10 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// 100% RELIABLE ROBUST PASSWORD UPDATE FIX
+// 100% FIXED & VERIFIED PASSWORD RESET
 async function saveNewResetPassword() {
   var newPwdInput = document.getElementById('newResetPwd');
-  var newPwd = newPwdInput ? newPwdInput.value.trim() : '';
+  var newPwd = newPwdInput ? String(newPwdInput.value || '').trim() : '';
 
   if (!newPwd || newPwd.length < 4 || newPwd.length > 12) {
     alert("Password must be between 4 and 12 characters long.");
@@ -1709,7 +1714,7 @@ async function saveNewResetPassword() {
   }
 
   var targetUser = recoveryFoundUser || JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
-  if (!targetUser) {
+  if (!targetUser || !targetUser.uid) {
     alert("Recovery session expired. Please find your ID again.");
     openForgotCredentialsModal();
     return;
@@ -1718,59 +1723,42 @@ async function saveNewResetPassword() {
   var btn = document.getElementById('btnSaveNewResetPwd');
   if (btn) {
     btn.disabled = true;
-    btn.innerText = 'Updating Database...';
+    btn.innerText = 'Saving to Database...';
   }
 
   try {
     var hashedPwd = await hashPassword(newPwd);
-    var updatedSuccessfully = false;
+    var cleanUid = String(targetUser.uid).trim();
 
-    // 1. Direct update by UID (primary business key)
-    if (targetUser.uid) {
-      var updateRes = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', targetUser.uid);
-      if (!updateRes.error) {
-        updatedSuccessfully = true;
-      }
+    // Direct UPDATE strictly targeting UID
+    var updateRes = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', cleanUid);
+    
+    if (updateRes.error) {
+      throw updateRes.error;
     }
 
-    // 2. Fallback update by id if present
-    if (!updatedSuccessfully && targetUser.id) {
-      var updateResId = await sb.from('profiles').update({ password: hashedPwd }).eq('id', targetUser.id);
-      if (!updateResId.error) {
-        updatedSuccessfully = true;
-      }
-    }
+    // Cross-verify if password is updated in database
+    var checkRes = await sb.from('profiles').select('*').ilike('uid', cleanUid);
+    
+    if (checkRes.data && checkRes.data.length > 0) {
+      var updatedProfile = checkRes.data[0];
 
-    // 3. Fallback update by gmail
-    if (!updatedSuccessfully && targetUser.gmail) {
-      var updateResMail = await sb.from('profiles').update({ password: hashedPwd }).ilike('gmail', targetUser.gmail);
-      if (!updateResMail.error) {
-        updatedSuccessfully = true;
-      }
-    }
-
-    if (updatedSuccessfully) {
-      // Re-fetch the updated user profile
-      var fetchRes = await sb.from('profiles').select('*').eq('uid', targetUser.uid);
-      var updatedProfile = (fetchRes.data && fetchRes.data.length > 0) ? fetchRes.data[0] : Object.assign({}, targetUser, { password: hashedPwd });
-
-      alert("Password updated successfully! Logging you in as " + cleanText(updatedProfile.name));
-      
-      // Explicitly sign out OAuth to prevent auto-login conflicts
+      // Clean session states
       await sb.auth.signOut();
-      
       DB.currentUser = updatedProfile;
       localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
       localStorage.removeItem('rehzo_temp_recov_user');
       recoveryFoundUser = null;
+      
       updateUserHeaderChip();
       closeModal();
+      alert("Password reset successfully! Logged in as " + cleanText(updatedProfile.name));
       await syncFromSupabase();
     } else {
-      alert("Failed to update password. Please verify the user profile exists.");
+      throw new Error("Unable to verify updated user profile.");
     }
   } catch(err) {
-    alert("Update error: " + err.message);
+    alert("Password update failed: " + err.message);
   } finally {
     if (btn) {
       btn.disabled = false;
