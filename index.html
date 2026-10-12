@@ -637,7 +637,6 @@ var recoveryFoundUser = null;
 var recoveryGoogleVerified = false;
 var currentLoginMode = 'uid';
 
-// 2-Step Verification state for login
 var pendingLoginUser = null;
 var generatedLoginOtp = null;
 var pendingLoginCallback = null;
@@ -957,6 +956,7 @@ async function handleOAuthRedirect() {
         return;
       }
 
+      // RECOVERY REDIRECT: Direct Password Reset form kholna bina find-id loop ke
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -986,6 +986,9 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
   var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
   var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
 
+  // Active user memory ko state me bind karna
+  recoveryFoundUser = userObj;
+
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box-narrow">' +
       '<div class="modal-header">' +
@@ -1011,7 +1014,7 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
           '</div>' +
           '<span style="font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password must be 4 to 12 characters.</span>' +
         '</div>' +
-        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + cleanText(userObj.uid) + '\', \'' + cleanText(userObj.gmail) + '\', ' + (userObj.id ? '\'' + userObj.id + '\'' : 'null') + ')">Save New Password & Login →</button>'
+        '<button class="big-action-btn" id="btnSaveNewResetPwd" onclick="saveNewResetPassword()">Save New Password & Login →</button>'
       ) : (
         '<div style="color:#DC2626; font-size:11px; font-weight:700; margin-bottom:10px;">✕ Selected Google account does not match the registered Gmail for this User ID.</div>' +
         '<button class="big-action-btn" onclick="openForgotCredentialsModal()">Try Again with Correct Account</button>'
@@ -1453,7 +1456,6 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    // OTP Verified! Update device ID in database
     await sb.from('profiles').update({ last_device_id: getDeviceId() }).eq('uid', pendingLoginUser.uid);
     DB.currentUser = pendingLoginUser;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
@@ -1540,14 +1542,13 @@ async function submitCredentialsLogin(callbackAction) {
       pendingLoginUser = profile;
       pendingLoginCallback = callbackAction;
 
-      // Show OTP field in Modal
       if (otpBox) otpBox.style.display = 'block';
       if (otpInput) otpInput.focus();
 
       btn.disabled = false;
       btn.innerText = 'Verify & Enter REHZO →';
 
-      alert("New device detected! A 4-digit security code (" + generatedLoginOtp + ") has been dispatched to your Gmail (" + cleanText(profile.gmail) + ").\nPlease enter it below to login.");
+      alert("New device detected! A 4-digit security code (" + generatedLoginOtp + ") has been sent to your Gmail (" + cleanText(profile.gmail) + ").\nPlease enter it below to login.");
       return;
     }
 
@@ -1694,8 +1695,8 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// 100% RELIABLE MULTI-MATCH PASSWORD UPDATE
-async function saveNewResetPassword(uid, registeredGmail, profileId) {
+// 100% RELIABLE ROBUST PASSWORD UPDATE
+async function saveNewResetPassword() {
   var newPwdInput = document.getElementById('newResetPwd');
   var newPwd = newPwdInput ? newPwdInput.value.trim() : '';
 
@@ -1704,38 +1705,68 @@ async function saveNewResetPassword(uid, registeredGmail, profileId) {
     return;
   }
 
-  var hashedPwd = await hashPassword(newPwd);
-  var cleanUid = String(uid || '').trim().toUpperCase();
-  var updateQuery = sb.from('profiles').update({ password: hashedPwd });
-
-  // Use primary key ID if available, otherwise fallback to UID or Gmail
-  if (profileId) {
-    updateQuery = updateQuery.eq('id', profileId);
-  } else if (cleanUid) {
-    updateQuery = updateQuery.ilike('uid', cleanUid);
-  } else if (registeredGmail) {
-    updateQuery = updateQuery.ilike('gmail', registeredGmail.trim().toLowerCase());
+  var targetUser = recoveryFoundUser || JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
+  if (!targetUser) {
+    alert("Recovery session expired. Please find your ID again.");
+    openForgotCredentialsModal();
+    return;
   }
 
-  var res = await updateQuery.select();
-
-  // If case-insensitive UID didn't match, fallback by Gmail
-  if ((!res.data || res.data.length === 0) && registeredGmail) {
-    res = await sb.from('profiles').update({ password: hashedPwd }).ilike('gmail', registeredGmail.trim().toLowerCase()).select();
+  var btn = document.getElementById('btnSaveNewResetPwd');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Updating Database...';
   }
-  
-  if (!res.error && res.data && res.data.length > 0) {
-    var updatedProfile = res.data[0];
-    alert("Password updated successfully! Logging you in as " + cleanText(updatedProfile.name));
-    DB.currentUser = updatedProfile;
-    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
-    localStorage.removeItem('rehzo_temp_recov_user');
-    updateUserHeaderChip();
-    closeModal();
-    await syncFromSupabase();
-  } else {
-    var errorMsg = res.error ? res.error.message : 'User profile not found in database.';
-    alert("Failed to update password: " + errorMsg);
+
+  try {
+    var hashedPwd = await hashPassword(newPwd);
+    var updatedProfile = null;
+
+    // Step 1: Update by primary key ID if available
+    if (targetUser.id) {
+      var resId = await sb.from('profiles').update({ password: hashedPwd }).eq('id', targetUser.id).select();
+      if (!resId.error && resId.data && resId.data.length > 0) {
+        updatedProfile = resId.data[0];
+      }
+    }
+
+    // Step 2: Fallback update by clean UID
+    if (!updatedProfile && targetUser.uid) {
+      var cleanUid = String(targetUser.uid).trim();
+      var resUid = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', cleanUid).select();
+      if (!resUid.error && resUid.data && resUid.data.length > 0) {
+        updatedProfile = resUid.data[0];
+      }
+    }
+
+    // Step 3: Fallback update by registered Gmail
+    if (!updatedProfile && targetUser.gmail) {
+      var cleanGmail = String(targetUser.gmail).trim().toLowerCase();
+      var resMail = await sb.from('profiles').update({ password: hashedPwd }).ilike('gmail', cleanGmail).select();
+      if (!resMail.error && resMail.data && resMail.data.length > 0) {
+        updatedProfile = resMail.data[0];
+      }
+    }
+
+    if (updatedProfile) {
+      alert("Password updated successfully! Logging you in as " + cleanText(updatedProfile.name));
+      DB.currentUser = updatedProfile;
+      localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+      localStorage.removeItem('rehzo_temp_recov_user');
+      recoveryFoundUser = null;
+      updateUserHeaderChip();
+      closeModal();
+      await syncFromSupabase();
+    } else {
+      alert("Failed to update password. Please verify the user profile exists.");
+    }
+  } catch(err) {
+    alert("Update error: " + err.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = 'Save New Password & Login →';
+    }
   }
 }
 
