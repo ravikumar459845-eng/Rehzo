@@ -1101,11 +1101,10 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<!-- 2-Step OTP Verification Box -->' +
-        '<div id="boxLoginOtp" class="field-box" style="display:none; margin-bottom:8px; margin-top:8px; padding:10px; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:14px;">' +
-          '<label class="field-label" style="color:#044E3B;">Enter 4-Digit Security Code sent to your Gmail *</label>' +
-          '<input id="loginOtpInput" maxlength="4" class="pill-input" placeholder="e.g. 6498" style="font-weight:900; letter-spacing:3px; text-align:center; font-size:16px;">' +
-          '<div style="font-size:9px; color:#15803D; margin-top:3px;">Security verification required for new phone/browser.</div>' +
+        '<!-- GMAIL OTP Box: strictly 4 digits only -->' +
+        '<div id="boxLoginOtp" class="field-box" style="display:none; margin-bottom:8px; margin-top:8px;">' +
+          '<label class="field-label">GMAIL OTP</label>' +
+          '<input id="loginOtpInput" type="tel" maxlength="4" class="pill-input" placeholder="GMAIL OTP" style="font-weight:900; letter-spacing:4px; text-align:center; font-size:16px;" oninput="this.value = this.value.replace(/[^0-9]/g, \'\').slice(0, 4);">' +
         '</div>' +
 
         '<div style="text-align:right; margin-bottom:12px;">' +
@@ -1447,17 +1446,17 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// 100% BULLETPROOF LOGIN LOGIC
+// 100% FIXED LOGIN LOGIC (SEAMLESS DIRECT LOGIN WITHOUT FAKE OTP ALERT)
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
   var otpBox = document.getElementById('boxLoginOtp');
   var otpInput = document.getElementById('loginOtpInput');
 
-  // STEP 2: OTP VERIFICATION
+  // STEP 2: VERIFY OTP AGAR BOX ACTIVE HO
   if (otpBox && otpBox.style.display !== 'none' && pendingLoginUser) {
     var enteredOtp = otpInput ? otpInput.value.trim() : '';
     if (enteredOtp !== String(generatedLoginOtp)) {
-      alert("Incorrect OTP. Please enter the 4-digit code sent to your registered Gmail.");
+      alert("Invalid GMAIL OTP! Please check the code.");
       return;
     }
 
@@ -1466,7 +1465,7 @@ async function submitCredentialsLogin(callbackAction) {
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
-    alert("Verification successful! Logged in as " + cleanText(DB.currentUser.name));
+    alert("Logged in successfully as " + cleanText(DB.currentUser.name) + "!");
     pendingLoginUser = null;
     generatedLoginOtp = null;
     await syncFromSupabase();
@@ -1488,7 +1487,6 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    // Auto-detect agar user ne suffix box me pura ID daal diya ho
     var strippedSuffix = rawSuffix.replace(/^(rz|re|hr|zo|oe)/i, '').trim();
     identifier = (pfx + (strippedSuffix || rawSuffix)).toUpperCase().trim();
   } else {
@@ -1512,7 +1510,6 @@ async function submitCredentialsLogin(callbackAction) {
     var query = sb.from('profiles').select('*');
 
     if (currentLoginMode === 'uid') {
-      // Direct ilike check with trimmed identifier
       query = query.ilike('uid', identifier);
     } else {
       var digits = rawPhone.replace(/\D/g, '');
@@ -1521,7 +1518,6 @@ async function submitCredentialsLogin(callbackAction) {
 
     var res = await query;
 
-    // Fallback: Agar identifier direct prefix match na hua ho, suffix ke sath try karein
     if ((!res.data || res.data.length === 0) && currentLoginMode === 'uid') {
       var fallbackSuffix = document.getElementById('loginUidSuffix').value.trim();
       var fallbackRes = await sb.from('profiles').select('*').ilike('uid', '%' + fallbackSuffix + '%');
@@ -1539,11 +1535,8 @@ async function submitCredentialsLogin(callbackAction) {
 
     var profile = res.data[0];
     var storedPwd = String(profile.password || '').trim();
-    
-    // Triple comparison:
-    // 1. Lowercase hash match
-    // 2. Direct plaintext match (purane accounts ke liye)
-    // 3. Normalized case-insensitive match
+
+    // Verify Password (hashed or direct plaintext fallback)
     var isPasswordCorrect = (storedPwd.toLowerCase() === hashedInputPwd.toLowerCase()) || 
                             (storedPwd === pwd) ||
                             (storedPwd.toLowerCase() === pwd.toLowerCase());
@@ -1555,29 +1548,15 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    // Agar database me password plain text bacha ho, toh usko hashed se auto-upgrade karein
-    if (storedPwd !== hashedInputPwd) {
-      await sb.from('profiles').update({ password: hashedInputPwd }).eq('uid', profile.uid);
-      profile.password = hashedInputPwd;
-    }
-
+    // Direct Login (Update current device token automatically taaki baar-baar fake warning na aaye)
     var currentDev = getDeviceId();
-    var isSameDevice = profile.last_device_id && profile.last_device_id === currentDev;
+    await sb.from('profiles').update({ 
+      last_device_id: currentDev,
+      password: hashedInputPwd 
+    }).eq('uid', profile.uid);
 
-    if (!isSameDevice && profile.gmail) {
-      generatedLoginOtp = Math.floor(1000 + Math.random() * 9000);
-      pendingLoginUser = profile;
-      pendingLoginCallback = callbackAction;
-
-      if (otpBox) otpBox.style.display = 'block';
-      if (otpInput) otpInput.focus();
-
-      btn.disabled = false;
-      btn.innerText = 'Verify & Enter REHZO →';
-
-      alert("New device detected! A 4-digit security code (" + generatedLoginOtp + ") has been sent to your Gmail (" + cleanText(profile.gmail) + ").\nPlease enter it below to login.");
-      return;
-    }
+    profile.password = hashedInputPwd;
+    profile.last_device_id = currentDev;
 
     DB.currentUser = profile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
@@ -1748,14 +1727,12 @@ async function saveNewResetPassword() {
     var hashedPwd = await hashPassword(newPwd);
     var cleanUid = String(targetUser.uid).trim();
 
-    // Direct update to Supabase
     var updateRes = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', cleanUid);
     
     if (updateRes.error) {
       throw updateRes.error;
     }
 
-    // Verify row update
     var checkRes = await sb.from('profiles').select('*').ilike('uid', cleanUid);
     
     if (checkRes.data && checkRes.data.length > 0) {
