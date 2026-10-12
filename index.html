@@ -943,7 +943,7 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // RECOVERY REDIRECT: Seedhe Password Reset Form open karo bina "Find My ID" par redirect kare
+      // RECOVERY REDIRECT: Direct Password Reset form kholna bina find-id loop ke
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -969,6 +969,7 @@ async function handleOAuthRedirect() {
   }
 }
 
+// RESET PASSWORD MODAL: Dropdown prefix hata kar simple password field
 function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
   var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
   var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
@@ -996,6 +997,7 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
             '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter 4 to 12 characters" minlength="4" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
           '</div>' +
+          '<span style="font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password 4 se 12 characters ka hona chahiye.</span>' +
         '</div>' +
         '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + userObj.uid + '\')">Save New Password & Login →</button>'
       ) : (
@@ -1627,25 +1629,33 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
+// FIXED: UPDATE PASSWORD WITHOUT SINGLE() ERROR CRASH
 async function saveNewResetPassword(uid) {
-  var newPwd = document.getElementById('newResetPwd').value;
+  var newPwdInput = document.getElementById('newResetPwd');
+  var newPwd = newPwdInput ? newPwdInput.value.trim() : '';
+
   if (!newPwd || newPwd.length < 4 || newPwd.length > 12) {
-    alert("Password must be between 4 and 12 characters only!");
+    alert("Password strictly 4 se 12 characters ka hona chahiye!");
     return;
   }
 
   var hashedPwd = await hashPassword(newPwd);
-  var res = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', uid).select().single();
-  if (!res.error && res.data) {
-    alert("Password updated successfully! Logging you in as " + cleanText(res.data.name));
-    DB.currentUser = res.data;
+
+  // ilike aur select() bina .single() ke taaki "Cannot coerce" error na aaye
+  var res = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', uid).select();
+  
+  if (!res.error && res.data && res.data.length > 0) {
+    var updatedProfile = res.data[0];
+    alert("Password updated successfully! Logging you in as " + cleanText(updatedProfile.name));
+    DB.currentUser = updatedProfile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     localStorage.removeItem('rehzo_temp_recov_user');
     updateUserHeaderChip();
     closeModal();
     await syncFromSupabase();
   } else {
-    alert("Failed to update password: " + (res.error ? res.error.message : 'Unknown error'));
+    var errorMsg = res.error ? res.error.message : 'User profile not found in database.';
+    alert("Failed to update password: " + errorMsg);
   }
 }
 
@@ -2131,7 +2141,6 @@ async function rejectCancelBooking(id) {
   }
 }
 
-// OWNER FORM OPEN: DUPLICATE PHONE STRIP & AUTO-DETECT COUNTRY SYNC
 function toggleOwnerForm(show) {
   if (show && !DB.currentUser) {
     alert("Please sign in or create an account to list your property.");
@@ -2144,7 +2153,6 @@ function toggleOwnerForm(show) {
   if (show) {
     var cObj = WORLD_COUNTRIES.find(function(item){ return item.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
     
-    // Auto sync country display and hidden input with current detected country
     var opDisplay = document.getElementById('opCountryDisplay');
     var opHidden = document.getElementById('opCountry');
     if (opDisplay) opDisplay.value = cObj.name + ' (' + cObj.dial + ')';
@@ -2155,7 +2163,6 @@ function toggleOwnerForm(show) {
       document.getElementById('opName').value = DB.currentUser.name || '';
       if (DB.currentUser.gmail) document.getElementById('opGmail').value = DB.currentUser.gmail;
 
-      // STRIP DUPLICATE DIAL CODE FROM USER PHONE
       var rawPhone = DB.currentUser.phone || '';
       var cleanPhone = rawPhone;
       WORLD_COUNTRIES.forEach(function(c) {
