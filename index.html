@@ -198,7 +198,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <!-- TOP HEADER -->
 <header class="top-header">
-  <div class="brand" ondblclick="checkAdminAccess()" onclick="goView('home')">
+<div class="brand" onclick="handleBrandLogoTap()">
     <img src="logo.png" alt="REHZO" style="height: 34px; width: auto; object-fit: contain;" onerror="this.style.display='none'">
     <div class="brand-text">
       <h1>REHZO</h1>
@@ -1813,16 +1813,64 @@ function goView(viewId) {
   window.scrollTo(0, 0);
 }
 
+// 5 Tap Tracker & 24 Hour Security Lockout
+var adminTapCount = 0;
+var adminTapTimer = null;
+
+function handleBrandLogoTap() {
+  adminTapCount++;
+
+  if (adminTapTimer) clearTimeout(adminTapTimer);
+  adminTapTimer = setTimeout(function() {
+    if (adminTapCount < 5) {
+      goView('home');
+    }
+    adminTapCount = 0;
+  }, 2000);
+
+  if (adminTapCount >= 5) {
+    adminTapCount = 0;
+    if (adminTapTimer) clearTimeout(adminTapTimer);
+    checkAdminAccess();
+  }
+}
+
 function checkAdminAccess() {
+  var lockUntil = parseInt(localStorage.getItem('rehzo_admin_lock_until') || '0');
+  var now = Date.now();
+
+  // 24 ghante lockout check
+  if (lockUntil && now < lockUntil) {
+    var remainingMs = lockUntil - now;
+    var hours = Math.floor(remainingMs / (1000 * 60 * 60));
+    var mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+    alert("Security Alert: 3 baar galat password enter karne ke karan Admin access locked hai!\nKripya " + hours + " ghante " + mins + " minute baad koshish karein.");
+    return;
+  }
+
   var pass = prompt("Enter Admin Passcode:");
   if (pass === null) return;
-  
-  var cleanPass = String(pass).trim().toLowerCase();
-  
-  if (cleanPass === 'Rehzo4598@') {
+
+  // Har tarah ke spaces aur casing ko clean karna
+  var cleanPass = String(pass).replace(/\s+/g, '').trim().toLowerCase();
+
+  if (cleanPass === 'rehzo123') {
+    localStorage.removeItem('rehzo_admin_failed_attempts');
+    localStorage.removeItem('rehzo_admin_lock_until');
     goView('admin');
   } else {
-    alert("Incorrect passcode.");
+    var attempts = parseInt(localStorage.getItem('rehzo_admin_failed_attempts') || '0') + 1;
+
+    if (attempts >= 3) {
+      var lockTime = Date.now() + (24 * 60 * 60 * 1000); // 24 Ghante
+      localStorage.setItem('rehzo_admin_lock_until', String(lockTime));
+      localStorage.removeItem('rehzo_admin_failed_attempts');
+      alert("Galat passcode! 3 baar galat password daala gaya hai. Admin access agle 24 ghante ke liye band kar diya gaya hai.");
+    } else {
+      localStorage.setItem('rehzo_admin_failed_attempts', String(attempts));
+      var bacheHue = 3 - attempts;
+      alert("Incorrect passcode. " + bacheHue + " koshish baaki hai. 3 galat attempts par 24 ghante ke liye lock ho jayega.");
+    }
   }
 }
 
