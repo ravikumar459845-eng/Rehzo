@@ -27,7 +27,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* Header */
 .top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; width: 100%; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #044E3B, #006A4E); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: bold; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
 .brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -99,7 +98,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .prefix-select-inline { border: none; background: transparent; font-size: 11.5px; font-weight: 900; color: #044E3B; outline: none; cursor: pointer; padding-right: 4px; }
 .prefix-input-wrap input { flex: 1; min-width: 0; border: none; outline: none; padding: 10px 4px; font-size: 11.5px; font-weight: 600; background: transparent; }
 
-/* Mode Switcher Buttons (USER ID | REGISTER CONTACT NO) */
+/* Mode Switcher Buttons */
 .switch-box-row { display: flex; background: #F1F5F9; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
 .switch-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 8px 4px; font-size: 10.5px; font-weight: 800; color: #64748B; cursor: pointer; text-align: center; transition: all 0.2s; }
 .switch-btn.active { background: #044E3B; color: #fff; }
@@ -156,12 +155,30 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .nav-item.active { color: #044E3B; }
 .nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Modals (Tall & Narrow Layout) */
+/* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
 .modal-box-narrow { background: #fff; border-radius: 22px; width: 100%; max-width: 360px; max-height: 94vh; overflow-y: auto; padding: 18px 16px; box-shadow: 0 14px 35px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
 .modal-box-pdf { background: #fff; border-radius: 20px; width: 100%; max-width: 340px; max-height: 92vh; overflow-y: auto; padding: 16px 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px; }
 .barcode-strip { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 26px; margin: 8px 0; border-radius: 3px; }
+
+/* Added Styles: Missing Drawer, Chips, Map Lock, and Photo Styles */
+.collapsible-trigger { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11px; font-weight: 700; color: #334155; cursor: pointer; }
+.collapsible-drawer { display: none; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 8px; margin-top: 6px; flex-direction: column; gap: 4px; }
+.collapsible-drawer.open { display: flex; }
+.radio-chip { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; transition: background 0.2s; }
+.radio-chip.selected { background: #ECFDF5; color: #044E3B; }
+.circle-indicator { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #CBD5E1; }
+.radio-chip.selected .circle-indicator { border-color: #044E3B; background: #044E3B; }
+
+.map-lock-btn { width: 100%; padding: 10px; border-radius: 30px; border: 1px dashed #044E3B; background: #F0FDF4; color: #044E3B; font-size: 11.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; margin-bottom: 8px; }
+.map-lock-btn.locked { border-style: solid; background: #044E3B; color: #fff; }
+
+.photo-upload-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.photo-preview-item { position: relative; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0; }
+.photo-thumb-preview { width: 100%; height: 100%; object-fit: cover; }
+.photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
 
 @media print {
   body * { visibility: hidden; }
@@ -174,7 +191,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <!-- APP SPLASH / WELCOME SCREEN -->
 <div id="splashOverlay">
-  <img src="logo.png" alt="REHZO" style="width: 72px; height: auto; margin-bottom: 10px;">
+  <img src="logo.png" alt="REHZO" style="width: 72px; height: auto; margin-bottom: 10px;" onerror="this.style.display='none'">
   <div class="splash-title">REHZO</div>
   <div class="splash-sub">Find Your Perfect Room</div>
 </div>
@@ -182,7 +199,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <!-- TOP HEADER -->
 <header class="top-header">
   <div class="brand" ondblclick="checkAdminAccess()" onclick="goView('home')">
-    <img src="logo.png" alt="REHZO" style="height: 34px; width: auto; object-fit: contain;">
+    <img src="logo.png" alt="REHZO" style="height: 34px; width: auto; object-fit: contain;" onerror="this.style.display='none'">
     <div class="brand-text">
       <h1>REHZO</h1>
       <p>Find Your Perfect Room</p>
@@ -383,7 +400,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           <div class="field-box">
             <label class="field-label">Suitable For</label>
             <div class="collapsible-trigger" onclick="toggleDrawer('suitableDrawer')">
-              <span id="suitableSelectedText">Select Suitable For</span>
+              <span id="suitableSelectedText">Family</span>
               <span>▾</span>
             </div>
             <div class="collapsible-drawer" id="suitableDrawer">
@@ -397,7 +414,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           <div class="field-box">
             <label class="field-label">Amenities</label>
             <div class="collapsible-trigger" onclick="toggleDrawer('amenitiesDrawer')">
-              <span id="amenitiesSelectedText">Select Amenities</span>
+              <span id="amenitiesSelectedText">Wi-Fi, Parking</span>
               <span>▾</span>
             </div>
             <div class="collapsible-drawer" id="amenitiesDrawer">
@@ -538,7 +555,6 @@ var SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
 var SUPABASE_KEY = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ================= SECURITY & SANITIZATION UTILITIES =================
 function cleanText(str) {
   if (str === null || str === undefined) return '';
   return String(str).replace(/[&<>"']/g, function(m) {
@@ -553,7 +569,6 @@ async function hashPassword(plainPassword) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// ================= EXTENSIVE WORLDWIDE FAMOUS COUNTRIES LIST =================
 var WORLD_COUNTRIES = [
   { code: 'IN', name: 'India', dial: '+91', sym: '₹' },
   { code: 'US', name: 'United States', dial: '+1', sym: '$' },
@@ -598,7 +613,6 @@ function populateCountryDropdowns() {
   }
 }
 
-// Runtime State
 var DB = {
   currentUser: JSON.parse(localStorage.getItem('rehzo_current_user')) || null,
   listings: [],
@@ -618,13 +632,11 @@ var selectedRules = ['No Smoking'];
 var activeBookingRoom = null;
 var matchedBookingId = null;
 
-// Temporary states for registration & recovery & login mode
 var registrationGoogleVerifiedEmail = null;
 var recoveryFoundUser = null;
 var recoveryGoogleVerified = false;
-var currentLoginMode = 'uid'; // 'uid' or 'phone'
+var currentLoginMode = 'uid';
 
-// ================= AUTOMATIC COUNTRY DETECTION =================
 async function autoDetectUserCountry() {
   try {
     var res = await fetch('https://ipapi.co/json/');
@@ -632,9 +644,7 @@ async function autoDetectUserCountry() {
       var data = await res.json();
       if (data && data.country_code) {
         var found = WORLD_COUNTRIES.find(function(c){ return c.code === data.country_code; });
-        if (found) {
-          detectedCountryCode = found.code;
-        }
+        if (found) detectedCountryCode = found.code;
       }
     }
   } catch(e) {
@@ -643,9 +653,7 @@ async function autoDetectUserCountry() {
 
   var cObj = WORLD_COUNTRIES.find(function(c){ return c.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
   var badge = document.getElementById('userDetectedCountryBadge');
-  if (badge) {
-    badge.innerText = '📍 Live Country: ' + cObj.name + ' (' + cObj.code + ')';
-  }
+  if (badge) badge.innerText = '📍 Live Country: ' + cObj.name + ' (' + cObj.code + ')';
 
   var cf = document.getElementById('countryFilter');
   if (cf) cf.value = detectedCountryCode;
@@ -657,7 +665,6 @@ async function autoDetectUserCountry() {
   if (opHidden) opHidden.value = cObj.code;
 }
 
-// ================= SYNC WITH SUPABASE =================
 async function syncFromSupabase() {
   try {
     var resListings = await sb.from('listings').select('*').order('created_at', { ascending: false });
@@ -744,7 +751,6 @@ async function syncFromSupabase() {
   if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
 }
 
-// ================= SPLASH & AUTO INITIALIZATION =================
 window.addEventListener('DOMContentLoaded', async function() {
   populateCountryDropdowns();
   updateUserHeaderChip();
@@ -761,7 +767,6 @@ window.addEventListener('DOMContentLoaded', async function() {
   }, 1000);
 });
 
-// ================= NOTIFICATIONS ENGINE =================
 function getRelevantNotifications() {
   if (!DB.currentUser) return [];
   var notifs = [];
@@ -771,7 +776,6 @@ function getRelevantNotifications() {
     var cleanTenantPhone = (b.userPhone || '').replace(/\D/g, '');
     var cleanOwnerPhone = (b.ownerPhone || '').replace(/\D/g, '');
 
-    // Owner notifications
     if (cleanOwnerPhone && cleanOwnerPhone === cleanUserPhone) {
       if (b.status === 'pending') {
         notifs.push({
@@ -800,7 +804,6 @@ function getRelevantNotifications() {
       }
     }
 
-    // Tenant notifications
     if (b.userUid === DB.currentUser.uid || (cleanTenantPhone && cleanTenantPhone === cleanUserPhone)) {
       if (b.status === 'owner_accepted') {
         notifs.push({
@@ -900,7 +903,6 @@ function markAllNotifsRead() {
   renderNotifications();
 }
 
-// ================= AUTH SYSTEM =================
 function updateUserHeaderChip() {
   var chip = document.getElementById('userHeaderChip');
   if (chip) {
@@ -916,18 +918,14 @@ async function handleOAuthRedirect() {
   try {
     var sessionRes = await sb.auth.getSession();
     var session = sessionRes.data ? sessionRes.data.session : null;
-    
-    // Check if user came back from OAuth specifically for registration verification
     var pendingOAuthReg = localStorage.getItem('rehzo_pending_reg_oauth');
     var pendingOAuthRecov = localStorage.getItem('rehzo_pending_recov_oauth');
 
     if (session && session.user && session.user.email) {
       var googleEmail = session.user.email;
       
-      // REGISTRATION HANDLER
       if (pendingOAuthReg === 'true') {
         localStorage.removeItem('rehzo_pending_reg_oauth');
-        
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
         if (profCheck.data && profCheck.data.length > 0) {
           alert("Your account already exists with this Gmail (" + googleEmail + ")!\nPlease login with your existing account.");
@@ -945,7 +943,6 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // RECOVERY HANDLER (AUTO MATCH WITH FOUND USER GMAIL)
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -962,7 +959,6 @@ async function handleOAuthRedirect() {
         }
       }
 
-      // Normal session check
       var profRes = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
       if (profRes.data && profRes.data.length > 0) {
         DB.currentUser = profRes.data[0];
@@ -975,14 +971,13 @@ async function handleOAuthRedirect() {
   }
 }
 
-// LOGIN MODAL
 function openProfileModal(callbackAction) {
   if (DB.currentUser) {
     document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
       '<div class="modal-box-narrow">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
-            '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
+            '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Your REHZO Account</h3>' +
           '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1010,7 +1005,7 @@ function openProfileModal(callbackAction) {
       '<div class="modal-box-narrow">' +
         '<div class="modal-header">' +
           '<div style="display:flex; align-items:center; gap:8px;">' +
-            '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
+            '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Welcome to REHZO</h3>' +
           '</div>' +
           '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1086,7 +1081,6 @@ function setLoginInputMode(mode) {
   }
 }
 
-// REGISTRATION MODAL
 function openRegistrationModal(prefillData, callbackAction) {
   var pName = (prefillData && prefillData.name) ? prefillData.name : '';
   var pGmail = (prefillData && prefillData.gmail) ? prefillData.gmail : '';
@@ -1100,7 +1094,7 @@ function openRegistrationModal(prefillData, callbackAction) {
     '<div class="modal-box-narrow">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
+          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
             '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
@@ -1223,7 +1217,6 @@ async function triggerRegisterGoogleAuth() {
 
 async function checkAndApplyRegisterEmail(email) {
   var cleanEmail = email.toLowerCase().trim();
-  
   var res = await sb.from('profiles').select('uid').ilike('gmail', cleanEmail);
   if (res.data && res.data.length > 0) {
     alert("Your account already exists with this Gmail (" + cleanEmail + ")!\nPlease login with your existing account.");
@@ -1326,7 +1319,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
 
     var fullUid = (prefix + rawSuffix).toUpperCase();
-
     var cleanDigits = rawPhone.replace(/[^0-9]/g, '');
     var fullContactWithDial = (dial + cleanDigits).replace(/[^0-9]/g, '');
 
@@ -1339,7 +1331,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
     var fullPhone = dial + ' ' + cleanDigits;
 
-    // CHECK IF CONTACT NO ALREADY EXISTS
     var phoneCheck = await sb.from('profiles').select('uid').ilike('phone', '%' + cleanDigits + '%');
     if (phoneCheck.data && phoneCheck.data.length > 0) {
       alert("Your account already exists with this Contact No. (" + fullPhone + ")!\nPlease login with your existing account.");
@@ -1348,7 +1339,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
-    // CHECK IF GMAIL ALREADY EXISTS
     var gmailCheck = await sb.from('profiles').select('uid').ilike('gmail', registrationGoogleVerifiedEmail);
     if (gmailCheck.data && gmailCheck.data.length > 0) {
       alert("Your account already exists with this Gmail (" + registrationGoogleVerifiedEmail + ")!\nPlease login with your existing account.");
@@ -1357,7 +1347,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
-    // CHECK IF USER ID ALREADY EXISTS
     var uidCheck = await sb.from('profiles').select('uid').ilike('uid', fullUid);
     if (uidCheck.data && uidCheck.data.length > 0) {
       alert("User ID " + fullUid + " is already taken. Please choose another suffix.");
@@ -1367,7 +1356,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
 
     var hashedPassword = await hashPassword(password);
-
     var newProfile = {
       uid: fullUid,
       name: name,
@@ -1394,7 +1382,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// LOGIN SUBMISSION
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
   var pwd = document.getElementById('loginPwd').value;
@@ -1410,7 +1397,6 @@ async function submitCredentialsLogin(callbackAction) {
     }
     identifier = (pfx + sfx).toUpperCase();
   } else {
-    var dial = document.getElementById('loginCountryDial').value;
     rawPhone = document.getElementById('loginPhoneInput').value.trim();
     if (!rawPhone) {
       alert("Please enter your Register Contact No.");
@@ -1481,7 +1467,6 @@ async function submitCredentialsLogin(callbackAction) {
   }
 }
 
-// STEP-BY-STEP RECOVERY: DIRECT SAME-GMAIL VERIFICATION
 function openForgotCredentialsModal() {
   recoveryFoundUser = null;
   recoveryGoogleVerified = false;
@@ -1494,7 +1479,7 @@ function openForgotCredentialsModal() {
     '<div class="modal-box-narrow">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;">' +
+          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Account Recovery</h3>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1511,7 +1496,6 @@ function openForgotCredentialsModal() {
       '</div>' +
 
       '<button class="big-action-btn" id="btnFindMyIdOnly" onclick="executeFindMyIdOnly()">Find My ID →</button>' +
-
       '<div id="recoveryIdResultBox" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:12px;"></div>' +
     '</div>' +
   '</div>';
@@ -1582,7 +1566,6 @@ async function executeFindMyIdOnly() {
   }
 }
 
-// PASSES EXACT REGISTERED GMAIL AS LOGIN_HINT TO GOOGLE
 async function triggerRecoveryGoogleAuth() {
   if (!recoveryFoundUser) {
     alert("Please find your ID first.");
@@ -1594,13 +1577,9 @@ async function triggerRecoveryGoogleAuth() {
     localStorage.setItem('rehzo_pending_recov_oauth', 'true');
 
     var redirectToUrl = window.location.origin + window.location.pathname;
-    
-    // Pass login_hint so Google pre-selects the EXACT registered Gmail
     var oauthOptions = {
       redirectTo: redirectToUrl,
-      queryParams: {
-        prompt: 'select_account'
-      }
+      queryParams: { prompt: 'select_account' }
     };
 
     if (recoveryFoundUser.gmail) {
@@ -1615,9 +1594,7 @@ async function triggerRecoveryGoogleAuth() {
     if (res.error) {
       localStorage.removeItem('rehzo_pending_recov_oauth');
       var manualEmail = prompt("Please enter your registered Google Gmail to verify:");
-      if (manualEmail) {
-        evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
-      }
+      if (manualEmail) evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
     }
   } catch(e) {
     localStorage.removeItem('rehzo_pending_recov_oauth');
@@ -1701,7 +1678,6 @@ function checkOwnerAddAction() {
   }
 }
 
-// ================= NAVIGATION =================
 function goView(viewId) {
   var views = document.querySelectorAll('.view');
   for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
@@ -1730,7 +1706,6 @@ function checkAdminAccess() {
   else if (pass !== null) alert("Incorrect passcode.");
 }
 
-// ================= RENDER LISTINGS =================
 function renderHomeGrid(items) {
   var confirmedRoomIds = DB.bookings
     .filter(function(b){ return b.status === 'confirmed'; })
@@ -1815,7 +1790,7 @@ function openRoomDetailsModal(roomId) {
     '<div class="modal-box-narrow" style="max-width:420px;">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;">' +
+          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Property Overview</h3>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1909,7 +1884,6 @@ function resetAllFilters() {
   renderHomeGrid();
 }
 
-// ================= NEAR ME =================
 function getDistKm(lat1, lon1, lat2, lon2) {
   var R = 6371;
   var dLat = (lat2 - lat1) * Math.PI / 180;
@@ -2000,7 +1974,6 @@ function renderSearchGrid() {
   }).join('');
 }
 
-// ================= MY BOOKINGS =================
 function switchBookingsTab(tab) {
   currentBookingsTab = tab;
   document.getElementById('tabBookingsCurrent').className = 'sub-tab-btn ' + (tab==='current'?'active':'');
@@ -2033,7 +2006,7 @@ function renderBookingsView() {
 
   list = list.filter(function(b){ 
     var cleanBookingUserPhone = (b.userPhone || '').replace(/\D/g, '');
-    var cleanCurrentPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+    var cleanCurrentPhone = (DB.currentUser && DB.currentUser.phone ? DB.currentUser.phone : '').replace(/\D/g, '');
     return b.userUid === DB.currentUser.uid || (cleanCurrentPhone && cleanBookingUserPhone === cleanCurrentPhone); 
   });
 
@@ -2048,7 +2021,6 @@ function renderBookingsView() {
     var isConfirmed = (b.status === 'confirmed');
     var isOwnerAccepted = (b.status === 'owner_accepted');
     var isPending = (b.status === 'pending');
-    var isCancelled = (b.status === 'cancelled' || b.status === 'rejected');
     var isCancelPending = (b.status === 'cancel_pending');
 
     var pillClass = isConfirmed ? 'status-confirmed' : (isOwnerAccepted ? 'status-owner-accepted' : (isPending ? 'status-pending' : (isCancelPending ? 'status-cancel-pending' : 'status-cancelled')));
@@ -2079,7 +2051,6 @@ function renderBookingsView() {
   }).join('');
 }
 
-// TENANT FINAL CONFIRMATION (RACE CONDITION CHECK)
 async function tenantFinalConfirmBooking(bookingId) {
   var b = DB.bookings.find(function(x){ return x.id === bookingId; });
   if (!b) return;
@@ -2159,7 +2130,6 @@ async function rejectCancelBooking(id) {
   }
 }
 
-// ================= OWNER VIEW =================
 function toggleOwnerForm(show) {
   if (show && !DB.currentUser) {
     alert("Please sign in or create an account to list your property.");
@@ -2295,7 +2265,6 @@ async function ownerRejectRequest(bookingId) {
   }
 }
 
-// FULL OWNER EDIT MODAL WITH PHOTO EDITING
 function openFullEditRoomModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
@@ -2307,7 +2276,7 @@ function openFullEditRoomModal(roomId) {
     '<div class="modal-box-narrow" style="max-width:420px;">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;">' +
+          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Edit Room Details</h3>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -2487,7 +2456,6 @@ async function saveFullRoomEdit(roomId) {
   }
 }
 
-// ================= PUBLISH WITH SUPABASE STORAGE =================
 function toggleDrawer(id) {
   document.getElementById(id).classList.toggle('open');
 }
@@ -2628,7 +2596,6 @@ async function handlePublishProperty(e) {
   }
 }
 
-// ================= BOOKING FLOW =================
 function openBookingPillModal(id) {
   var l = DB.listings.find(function(x){ return x.id === id; });
   if (!l) return;
@@ -2643,7 +2610,7 @@ function openBookingPillModal(id) {
     '<div class="modal-box-narrow" style="max-width:420px;">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;">' +
+          '<img src="logo.png" alt="REHZO" style="height:24px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Request Room Booking</h3>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -2745,7 +2712,6 @@ async function submitBookingRequest() {
   goView('bookings');
 }
 
-// ================= OFFICIAL TRL SLIP WITH LOGO =================
 function openSlipModal(bkId) {
   var b = DB.bookings.find(function(x){ return x.id === bkId; });
   if (!b) return;
@@ -2773,7 +2739,7 @@ function openSlipModal(bkId) {
     '<div class="modal-box-pdf" id="printableSlip">' +
       '<div class="modal-header">' +
         '<div style="display:flex; align-items:center; gap:6px;">' +
-          '<img src="logo.png" alt="REHZO" style="width:24px; height:auto; object-fit:contain;">' +
+          '<img src="logo.png" alt="REHZO" style="width:24px; height:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<b style="font-size:13px; color:#0F172A;">Rehzo Official Slip</b>' +
         '</div>' +
         '<div style="display:flex; gap:6px; align-items:center;">' +
@@ -2791,7 +2757,6 @@ function openSlipModal(bkId) {
       '<div class="barcode-strip"></div>' +
 
       '<div style="font-size:10.5px; line-height:1.65;">' +
-        '<!-- 1. ROOM & PROPERTY DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
@@ -2804,7 +2769,6 @@ function openSlipModal(bkId) {
           '📍 <b>Live Map Location:</b> <a href="' + mapsLink + '" target="_blank" style="color:#044E3B; font-weight:800; text-decoration:underline;">Open in Google Maps ↗</a>' +
         '</div>' +
 
-        '<!-- 2. TENANT DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">👤 TENANT DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Name:</span> <b style="color:#0F172A;">' + cleanText(b.userName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.userPhone) + '</b></div>' +
@@ -2813,7 +2777,6 @@ function openSlipModal(bkId) {
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
 
-        '<!-- 3. OWNER DETAILS ONLY -->' +
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + cleanText(b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Contact No.:</span> <b style="color:#0F172A;">' + cleanText(b.ownerPhone || l.phone || 'N/A') + '</b></div>' +
@@ -2827,7 +2790,6 @@ function closeModal() {
   document.getElementById('modalSlot').innerHTML = '';
 }
 
-// ================= ADMIN PANEL =================
 function renderAdminModeration() {
   var container = document.getElementById('adminListingsControl');
   if (!DB.listings.length) {
