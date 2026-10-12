@@ -80,7 +80,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .back-arrow { font-size: 18px; font-weight: 800; color: #0F172A; }
 .sub-title { font-size: 16.5px; font-weight: 800; color: #0F172A; }
 
-/* Balanced Pill Form Fields */
+/* Form Fields */
 .form-section-title { font-size: 12.5px; font-weight: 800; color: #0F172A; margin: 12px 0 6px; border-top: 1px solid #F1F5F9; padding-top: 10px; }
 .pill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 8px; }
 .field-box { display: flex; flex-direction: column; gap: 4px; min-width: 0; position: relative; }
@@ -600,6 +600,11 @@ var WORLD_COUNTRIES = [
 
 var detectedCountryCode = 'IN';
 
+function getCurrencySymbol(cCode) {
+  var c = WORLD_COUNTRIES.find(function(item){ return item.code === cCode; });
+  return c ? c.sym : '₹';
+}
+
 function populateCountryDropdowns() {
   var cf = document.getElementById('countryFilter');
   if (cf) {
@@ -927,6 +932,7 @@ function updateUserHeaderChip() {
   }
 }
 
+// FIX: Auto-login on refresh bug completely removed.
 async function handleOAuthRedirect() {
   try {
     var sessionRes = await sb.auth.getSession();
@@ -937,6 +943,7 @@ async function handleOAuthRedirect() {
     if (session && session.user && session.user.email) {
       var googleEmail = session.user.email;
       
+      // REGISTRATION FLOW
       if (pendingOAuthReg === 'true') {
         localStorage.removeItem('rehzo_pending_reg_oauth');
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
@@ -956,7 +963,7 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // RECOVERY REDIRECT: Direct Password Reset form kholna bina find-id loop ke
+      // RECOVERY PASSWORD RESET FLOW
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -965,16 +972,14 @@ async function handleOAuthRedirect() {
           recoveryFoundUser = savedRecovUser;
           setTimeout(function() {
             openResetPasswordDirectModal(savedRecovUser, googleEmail);
-          }, 400);
+          }, 300);
           return;
         }
       }
 
-      var profRes = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
-      if (profRes.data && profRes.data.length > 0) {
-        DB.currentUser = profRes.data[0];
-        localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
-        updateUserHeaderChip();
+      // Agar koi intentional login nahi ho raha hai, toh background session auto-login na kare jab user pehle se logged in na ho
+      if (!DB.currentUser) {
+        await sb.auth.signOut();
       }
     }
   } catch(e) {
@@ -984,9 +989,9 @@ async function handleOAuthRedirect() {
 
 function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
   var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
-  var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
+  var registeredEmail = (userObj && userObj.gmail) ? userObj.gmail.toLowerCase().trim() : '';
+  var isMatch = cleanEmail && registeredEmail && (cleanEmail === registeredEmail);
 
-  // Active user memory ko state me bind karna
   recoveryFoundUser = userObj;
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
@@ -1016,7 +1021,7 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
         '</div>' +
         '<button class="big-action-btn" id="btnSaveNewResetPwd" onclick="saveNewResetPassword()">Save New Password & Login →</button>'
       ) : (
-        '<div style="color:#DC2626; font-size:11px; font-weight:700; margin-bottom:10px;">✕ Selected Google account does not match the registered Gmail for this User ID.</div>' +
+        '<div style="color:#DC2626; font-size:11px; font-weight:700; margin-bottom:10px;">✕ Selected Google account (' + cleanText(cleanEmail) + ') does not match the registered Gmail (' + cleanText(registeredEmail) + ') for this User ID.</div>' +
         '<button class="big-action-btn" onclick="openForgotCredentialsModal()">Try Again with Correct Account</button>'
       )) +
     '</div>' +
@@ -1096,7 +1101,7 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<!-- 2-Step OTP Verification Box (Dynamic) -->' +
+        '<!-- 2-Step OTP Verification Box -->' +
         '<div id="boxLoginOtp" class="field-box" style="display:none; margin-bottom:8px; margin-top:8px; padding:10px; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:14px;">' +
           '<label class="field-label" style="color:#044E3B;">Enter 4-Digit Security Code sent to your Gmail *</label>' +
           '<input id="loginOtpInput" maxlength="4" class="pill-input" placeholder="e.g. 6498" style="font-weight:900; letter-spacing:3px; text-align:center; font-size:16px;">' +
@@ -1442,13 +1447,13 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// LOGIN WITH 2-STEP VERIFICATION OTP FOR NEW PHONE/BROWSER
+// LOGIN WITH CREDENTIALS
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
   var otpBox = document.getElementById('boxLoginOtp');
   var otpInput = document.getElementById('loginOtpInput');
 
-  // STEP 2: VERIFY OTP IF VISIBLE
+  // STEP 2: OTP VERIFICATION
   if (otpBox && otpBox.style.display !== 'none' && pendingLoginUser) {
     var enteredOtp = otpInput ? otpInput.value.trim() : '';
     if (enteredOtp !== String(generatedLoginOtp)) {
@@ -1536,9 +1541,8 @@ async function submitCredentialsLogin(callbackAction) {
     var currentDev = getDeviceId();
     var isSameDevice = profile.last_device_id && profile.last_device_id === currentDev;
 
-    // IF NEW DEVICE: GENERATE 4-DIGIT CODE & TRIGGER OTP BOX
     if (!isSameDevice && profile.gmail) {
-      generatedLoginOtp = Math.floor(1000 + Math.random() * 9000); // 4-digit code (e.g. 6498)
+      generatedLoginOtp = Math.floor(1000 + Math.random() * 9000);
       pendingLoginUser = profile;
       pendingLoginCallback = callbackAction;
 
@@ -1552,7 +1556,6 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    // SAME DEVICE: DIRECT LOGIN
     DB.currentUser = profile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
@@ -1641,7 +1644,7 @@ async function executeFindMyIdOnly() {
 
     '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:14px; padding:12px;">' +
       '<div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">Want to Reset Password?</div>' +
-      '<div style="font-size:10.5px; color:#64748B; margin-bottom:10px;">Tap below to verify your linked Google account (' + (recoveryFoundUser.gmail ? recoveryFoundUser.gmail : 'Registered Gmail') + ').</div>' +
+      '<div style="font-size:10.5px; color:#64748B; margin-bottom:10px;">Tap below to verify your linked Google account (' + (recoveryFoundUser.gmail ? cleanText(recoveryFoundUser.gmail) : 'Registered Gmail') + ').</div>' +
       
       '<button type="button" class="google-auth-btn" id="btnGoogleVerifyRecov" onclick="triggerRecoveryGoogleAuth()" style="margin-bottom:6px;">' +
         '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>' +
@@ -1695,7 +1698,7 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// 100% RELIABLE ROBUST PASSWORD UPDATE
+// 100% RELIABLE ROBUST PASSWORD UPDATE FIX
 async function saveNewResetPassword() {
   var newPwdInput = document.getElementById('newResetPwd');
   var newPwd = newPwdInput ? newPwdInput.value.trim() : '';
@@ -1720,36 +1723,42 @@ async function saveNewResetPassword() {
 
   try {
     var hashedPwd = await hashPassword(newPwd);
-    var updatedProfile = null;
+    var updatedSuccessfully = false;
 
-    // Step 1: Update by primary key ID if available
-    if (targetUser.id) {
-      var resId = await sb.from('profiles').update({ password: hashedPwd }).eq('id', targetUser.id).select();
-      if (!resId.error && resId.data && resId.data.length > 0) {
-        updatedProfile = resId.data[0];
+    // 1. Direct update by UID (primary business key)
+    if (targetUser.uid) {
+      var updateRes = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', targetUser.uid);
+      if (!updateRes.error) {
+        updatedSuccessfully = true;
       }
     }
 
-    // Step 2: Fallback update by clean UID
-    if (!updatedProfile && targetUser.uid) {
-      var cleanUid = String(targetUser.uid).trim();
-      var resUid = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', cleanUid).select();
-      if (!resUid.error && resUid.data && resUid.data.length > 0) {
-        updatedProfile = resUid.data[0];
+    // 2. Fallback update by id if present
+    if (!updatedSuccessfully && targetUser.id) {
+      var updateResId = await sb.from('profiles').update({ password: hashedPwd }).eq('id', targetUser.id);
+      if (!updateResId.error) {
+        updatedSuccessfully = true;
       }
     }
 
-    // Step 3: Fallback update by registered Gmail
-    if (!updatedProfile && targetUser.gmail) {
-      var cleanGmail = String(targetUser.gmail).trim().toLowerCase();
-      var resMail = await sb.from('profiles').update({ password: hashedPwd }).ilike('gmail', cleanGmail).select();
-      if (!resMail.error && resMail.data && resMail.data.length > 0) {
-        updatedProfile = resMail.data[0];
+    // 3. Fallback update by gmail
+    if (!updatedSuccessfully && targetUser.gmail) {
+      var updateResMail = await sb.from('profiles').update({ password: hashedPwd }).ilike('gmail', targetUser.gmail);
+      if (!updateResMail.error) {
+        updatedSuccessfully = true;
       }
     }
 
-    if (updatedProfile) {
+    if (updatedSuccessfully) {
+      // Re-fetch the updated user profile
+      var fetchRes = await sb.from('profiles').select('*').eq('uid', targetUser.uid);
+      var updatedProfile = (fetchRes.data && fetchRes.data.length > 0) ? fetchRes.data[0] : Object.assign({}, targetUser, { password: hashedPwd });
+
       alert("Password updated successfully! Logging you in as " + cleanText(updatedProfile.name));
+      
+      // Explicitly sign out OAuth to prevent auto-login conflicts
+      await sb.auth.signOut();
+      
       DB.currentUser = updatedProfile;
       localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
       localStorage.removeItem('rehzo_temp_recov_user');
@@ -1845,6 +1854,7 @@ function renderHomeGrid(items) {
   }
   container.innerHTML = list.map(function(r) {
     var cover = (r.photos && r.photos.length) ? r.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
+    var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
         '<img src="' + cover + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
@@ -1852,7 +1862,7 @@ function renderHomeGrid(items) {
       '</div>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
-        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
+        '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
         '<div class="room-city">📍 ' + cleanText(r.city) + ' • ' + cleanText(r.roomType) + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
@@ -1896,6 +1906,8 @@ function openRoomDetailsModal(roomId) {
   if (!r) return;
 
   var cover = (r.photos && r.photos.length) ? r.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
+  var sym = getCurrencySymbol(r.country);
+
   var suitableBadges = (r.suitableFor && r.suitableFor.length)
     ? r.suitableFor.map(function(s){ return '<span style="display:inline-block; padding:3px 9px; background:#E6F3ED; color:#044E3B; border-radius:14px; font-size:10px; font-weight:700; margin:2px;">• ' + cleanText(s) + '</span>'; }).join('')
     : '<span style="font-size:10.5px; color:#64748B;">Anyone</span>';
@@ -1922,11 +1934,11 @@ function openRoomDetailsModal(roomId) {
         '<h2 style="font-size:16px; font-weight:900; color:#0F172A;">' + cleanText(r.houseName) + '</h2>' +
         '<span style="background:#ECFDF5; color:#044E3B; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:800;">' + cleanText(r.roomType) + '</span>' +
       '</div>' +
-      '<div style="font-size:15px; font-weight:900; color:#044E3B; margin-bottom:8px;">₹' + Number(r.rent).toLocaleString() + ' <span style="font-size:10px; color:#64748B; font-weight:normal;">/ month</span></div>' +
+      '<div style="font-size:15px; font-weight:900; color:#044E3B; margin-bottom:8px;">' + sym + Number(r.rent).toLocaleString() + ' <span style="font-size:10px; color:#64748B; font-weight:normal;">/ month</span></div>' +
       '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; margin-bottom:10px; line-height:1.6;">' +
         '<div>📍 <b>Location & Address:</b> ' + cleanText(r.address) + ', ' + cleanText(r.city) + ' (' + cleanText(r.state||'') + ' - ' + cleanText(r.pin||'') + ')</div>' +
         '<div style="margin-top:2px;">👤 <b>Host:</b> ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ')</div>' +
-        '<div>💵 <b>Security Deposit:</b> ₹' + Number(r.deposit || 0).toLocaleString() + '</div>' +
+        '<div>💵 <b>Security Deposit:</b> ' + sym + Number(r.deposit || 0).toLocaleString() + '</div>' +
       '</div>' +
       '<div style="margin-bottom:8px;"><div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">👥 Suitable For:</div><div>' + suitableBadges + '</div></div>' +
       '<div style="margin-bottom:8px;"><div style="font-size:11px; font-weight:800; color:#0F172A; margin-bottom:3px;">✨ Amenities Included:</div><div>' + amenitiesBadges + '</div></div>' +
@@ -2034,6 +2046,7 @@ function renderNearGrid() {
     return;
   }
   container.innerHTML = near.map(function(r) {
+    var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
         '<img src="' + r.photos[0] + '" class="room-thumb">' +
@@ -2041,7 +2054,7 @@ function renderNearGrid() {
       '</div>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
-        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
+        '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
@@ -2082,6 +2095,7 @@ function renderSearchGrid() {
 
   var list = DB.listings.filter(function(x){ return x.status === 'available' && (confirmedRoomIds.indexOf(x.id) === -1) && x.daysLeft > 0 && x.country === detectedCountryCode; });
   container.innerHTML = list.map(function(r) {
+    var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
         '<img src="' + r.photos[0] + '" class="room-thumb">' +
@@ -2089,7 +2103,7 @@ function renderSearchGrid() {
       '</div>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
-        '<div class="room-rent">₹' + Number(r.rent).toLocaleString() + '</div>' +
+        '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
@@ -2148,6 +2162,7 @@ function renderBookingsView() {
     var pillClass = isConfirmed ? 'status-confirmed' : (isOwnerAccepted ? 'status-owner-accepted' : (isPending ? 'status-pending' : (isCancelPending ? 'status-cancel-pending' : 'status-cancelled')));
     var statusText = isConfirmed ? 'CONFIRMED' : (isOwnerAccepted ? 'OWNER ACCEPTED (CONFIRM NOW)' : (isPending ? 'WAITING OWNER' : (isCancelPending ? 'CANCEL PENDING' : b.status.toUpperCase())));
     var totalRent = ((parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1)) + (parseFloat(b.deposit) || 0);
+    var sym = getCurrencySymbol(l ? l.country : 'IN');
 
     return '<div class="compact-h-card">' +
       '<img src="' + cover + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
@@ -2156,7 +2171,7 @@ function renderBookingsView() {
           '<div class="compact-h-title">' + cleanText(b.houseName) + '</div>' +
           '<span class="status-pill ' + pillClass + '">● ' + statusText + '</span>' +
         '</div>' +
-        '<div class="compact-h-rent">₹' + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ₹' + Number(totalRent).toLocaleString() + '</div>' +
+        '<div class="compact-h-rent">' + sym + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ' + sym + Number(totalRent).toLocaleString() + '</div>' +
         '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + cleanText(b.date) + '</div>' +
         (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
         '<div class="action-row-mini">' +
@@ -2334,6 +2349,7 @@ function renderOwnerView() {
       return;
     }
     container.innerHTML = myRooms.map(function(r) {
+      var sym = getCurrencySymbol(r.country);
       return '<div class="compact-h-card">' +
         '<img src="' + r.photos[0] + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
         '<div class="compact-h-content">' +
@@ -2341,7 +2357,7 @@ function renderOwnerView() {
             '<div class="compact-h-title">' + cleanText(r.houseName) + '</div>' +
             '<span class="status-pill ' + (r.status==='available'?'status-confirmed':'status-pending') + '">● ' + r.status.toUpperCase() + '</span>' +
           '</div>' +
-          '<div class="compact-h-rent">₹' + Number(r.rent).toLocaleString() + '/mo</div>' +
+          '<div class="compact-h-rent">' + sym + Number(r.rent).toLocaleString() + '/mo</div>' +
           '<div class="compact-h-sub">' + cleanText(r.city) + ' • <b>' + r.daysLeft + ' days left</b> (Only Owner Visible)</div>' +
           '<div class="action-row-mini">' +
             '<button class="btn-action-large" onclick="openRoomDetailsModal(\'' + r.id + '\')">View</button>' +
@@ -2361,6 +2377,8 @@ function renderOwnerView() {
       var isConfirmed = (b.status === 'confirmed');
       var isCancelPending = (b.status === 'cancel_pending');
       var totalRent = ((parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1)) + (parseFloat(b.deposit) || 0);
+      var l = DB.listings.find(function(x){ return x.id === b.listingId; });
+      var sym = getCurrencySymbol(l ? l.country : 'IN');
 
       return '<div class="compact-h-card" style="align-items:flex-start;">' +
         '<div class="compact-h-content">' +
@@ -2371,7 +2389,7 @@ function renderOwnerView() {
           '</div>' +
           '<div style="font-size:10.5px; color:#334155; margin-top:3px; line-height:1.4;">' +
             '<div><b>Guest:</b> ' + cleanText(b.userName) + ' (' + b.duration + ' mo)</div>' +
-            '<div>📞 ' + cleanText(b.userPhone) + ' • Total: ₹' + Number(totalRent).toLocaleString() + '</div>' +
+            '<div>📞 ' + cleanText(b.userPhone) + ' • Total: ' + sym + Number(totalRent).toLocaleString() + '</div>' +
             (b.trl ? '<div style="font-weight:700; color:#044E3B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
           '</div>' +
           '<div class="action-row-mini" style="margin-top:8px;">' +
@@ -2413,6 +2431,7 @@ function openFullEditRoomModal(roomId) {
 
   currentEditListingPhotos = (r.photos && r.photos.length) ? r.photos.slice() : [];
   editUploadedPhotoFiles = [];
+  var sym = getCurrencySymbol(r.country);
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box-narrow" style="max-width:420px;">' +
@@ -2444,11 +2463,11 @@ function openFullEditRoomModal(roomId) {
 
       '<div class="pill-grid">' +
         '<div class="field-box">' +
-          '<label class="field-label">Monthly Rent (₹) *</label>' +
+          '<label class="field-label">Monthly Rent (' + sym + ') *</label>' +
           '<input id="edRent" type="number" class="pill-input" value="' + r.rent + '">' +
         '</div>' +
         '<div class="field-box">' +
-          '<label class="field-label">Security Deposit (₹)</label>' +
+          '<label class="field-label">Security Deposit (' + sym + ')</label>' +
           '<input id="edDeposit" type="number" class="pill-input" value="' + (r.deposit || 0) + '">' +
         '</div>' +
       '</div>' +
@@ -2743,6 +2762,7 @@ function openBookingPillModal(id) {
   if (!l) return;
   activeBookingRoom = l;
   var today = new Date().toISOString().slice(0, 10);
+  var sym = getCurrencySymbol(l.country);
 
   var prefillName = DB.currentUser ? DB.currentUser.name : '';
   var prefillPhone = DB.currentUser ? DB.currentUser.phone : '';
@@ -2777,9 +2797,9 @@ function openBookingPillModal(id) {
         '</div>' +
       '</div>' +
       '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; flex-direction:column; gap:3px;">' +
-        '<div style="display:flex; justify-content:space-between;"><span>Rent: ₹' + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span><span>₹' + Number(l.rent).toLocaleString() + '</span></div>' +
-        '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ₹' + Number(l.deposit || 0).toLocaleString() + '</span></div>' +
-        '<div style="border-top:1px dashed #A7F3D0; margin-top:4px; padding-top:4px; display:flex; justify-content:space-between; font-weight:900; font-size:13px;" id="calcTotalText"><span>Total Amount:</span><span>₹' + Number((parseFloat(l.rent) || 0) + (parseFloat(l.deposit) || 0)).toLocaleString() + '</span></div>' +
+        '<div style="display:flex; justify-content:space-between;"><span>Rent: ' + sym + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span><span>' + sym + Number(l.rent).toLocaleString() + '</span></div>' +
+        '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ' + sym + Number(l.deposit || 0).toLocaleString() + '</span></div>' +
+        '<div style="border-top:1px dashed #A7F3D0; margin-top:4px; padding-top:4px; display:flex; justify-content:space-between; font-weight:900; font-size:13px;" id="calcTotalText"><span>Total Amount:</span><span>' + sym + Number((parseFloat(l.rent) || 0) + (parseFloat(l.deposit) || 0)).toLocaleString() + '</span></div>' +
       '</div>' +
       '<button class="big-action-btn" id="btnConfirmBooking" onclick="submitBookingRequest()">Send Request to Owner →</button>' +
     '</div>' +
@@ -2792,12 +2812,13 @@ function updateBookingTotalCalculation() {
   var monthlyRent = parseFloat(activeBookingRoom.rent) || 0;
   var deposit = parseFloat(activeBookingRoom.deposit) || 0;
   var totalAmount = (monthlyRent * months) + deposit;
+  var sym = getCurrencySymbol(activeBookingRoom.country);
 
   var box = document.getElementById('bookingCalcBox');
   if (box) {
-    box.innerHTML = '<div style="display:flex; justify-content:space-between;"><span>Rent: ₹' + Number(monthlyRent).toLocaleString() + ' × <b>' + months + ' ' + (months > 1 ? 'Months' : 'Month') + '</b></span><span>₹' + Number(monthlyRent * months).toLocaleString() + '</span></div>' +
-      '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ₹' + Number(deposit).toLocaleString() + '</span></div>' +
-      '<div style="border-top:1px dashed #A7F3D0; margin-top:4px; padding-top:4px; display:flex; justify-content:space-between; font-weight:900; font-size:13px;"><span>Total Amount:</span><span>₹' + Number(totalAmount).toLocaleString() + '</span></div>';
+    box.innerHTML = '<div style="display:flex; justify-content:space-between;"><span>Rent: ' + sym + Number(monthlyRent).toLocaleString() + ' × <b>' + months + ' ' + (months > 1 ? 'Months' : 'Month') + '</b></span><span>' + sym + Number(monthlyRent * months).toLocaleString() + '</span></div>' +
+      '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ' + sym + Number(deposit).toLocaleString() + '</span></div>' +
+      '<div style="border-top:1px dashed #A7F3D0; margin-top:4px; padding-top:4px; display:flex; justify-content:space-between; font-weight:900; font-size:13px;"><span>Total Amount:</span><span>' + sym + Number(totalAmount).toLocaleString() + '</span></div>';
   }
 }
 
@@ -2859,6 +2880,7 @@ function openSlipModal(bkId) {
   if (!b) return;
 
   var l = DB.listings.find(function(x){ return x.id === b.listingId; }) || {};
+  var sym = getCurrencySymbol(l.country || 'IN');
 
   var houseName = b.houseName || l.houseName || 'Raj mahal';
   var roomType = b.roomType || l.roomType || 'Hostel';
@@ -2905,8 +2927,8 @@ function openSlipModal(bkId) {
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(address) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + cleanText(city) + (state ? ' (' + cleanText(state) + ')' : '') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + cleanText(pin) + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">₹' + Number(rent).toLocaleString() + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Security Deposit:</span> <b style="color:#0F172A;">₹' + Number(deposit).toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Monthly Rent:</span> <b style="color:#0F172A;">' + sym + Number(rent).toLocaleString() + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Security Deposit:</span> <b style="color:#0F172A;">' + sym + Number(deposit).toLocaleString() + '</b></div>' +
         '<div style="margin-top:4px; padding:4px 8px; background:#F1F5F9; border-radius:8px; font-size:10px;">' +
           '📍 <b>Live Map Location:</b> <a href="' + mapsLink + '" target="_blank" style="color:#044E3B; font-weight:800; text-decoration:underline;">Open in Google Maps ↗</a>' +
         '</div>' +
@@ -2917,7 +2939,7 @@ function openSlipModal(bkId) {
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(b.userOldAddress) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + cleanText(b.date) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>₹' + Number(totalAmount).toLocaleString() + '</span></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>' + sym + Number(totalAmount).toLocaleString() + '</span></div>' +
 
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Owner Name:</span> <b style="color:#0F172A;">' + cleanText(b.ownerName || l.ownerName || 'Property Owner') + '</b></div>' +
@@ -2939,8 +2961,9 @@ function renderAdminModeration() {
     return;
   }
   container.innerHTML = DB.listings.map(function(r) {
+    var sym = getCurrencySymbol(r.country);
     return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
-      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') - ₹' + r.rent + '</div>' +
+      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') - ' + sym + r.rent + '</div>' +
       '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
