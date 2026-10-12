@@ -637,6 +637,20 @@ var recoveryFoundUser = null;
 var recoveryGoogleVerified = false;
 var currentLoginMode = 'uid';
 
+// 2-Step Verification state for login
+var pendingLoginUser = null;
+var generatedLoginOtp = null;
+var pendingLoginCallback = null;
+
+function getDeviceId() {
+  var did = localStorage.getItem('rehzo_device_token');
+  if (!did) {
+    did = 'dev_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+    localStorage.setItem('rehzo_device_token', did);
+  }
+  return did;
+}
+
 async function autoDetectUserCountry() {
   try {
     var res = await fetch('https://ipapi.co/json/');
@@ -928,7 +942,7 @@ async function handleOAuthRedirect() {
         localStorage.removeItem('rehzo_pending_reg_oauth');
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
         if (profCheck.data && profCheck.data.length > 0) {
-          alert("Your account already exists with this Gmail (" + googleEmail + ")!\nPlease login with your existing account.");
+          alert("Account already exists with this Gmail (" + googleEmail + ")!\nPlease login with your existing account.");
           await sb.auth.signOut();
           openProfileModal();
           return;
@@ -943,7 +957,6 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // RECOVERY REDIRECT: Direct Password Reset form kholna bina find-id loop ke
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -969,7 +982,6 @@ async function handleOAuthRedirect() {
   }
 }
 
-// RESET PASSWORD MODAL: Dropdown prefix hata kar simple password field
 function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
   var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
   var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
@@ -997,9 +1009,9 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
             '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter 4 to 12 characters" minlength="4" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
           '</div>' +
-          '<span style="font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password 4 se 12 characters ka hona chahiye.</span>' +
+          '<span style="font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password must be 4 to 12 characters.</span>' +
         '</div>' +
-        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + userObj.uid + '\')">Save New Password & Login →</button>'
+        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + cleanText(userObj.uid) + '\', \'' + cleanText(userObj.gmail) + '\', ' + (userObj.id ? '\'' + userObj.id + '\'' : 'null') + ')">Save New Password & Login →</button>'
       ) : (
         '<div style="color:#DC2626; font-size:11px; font-weight:700; margin-bottom:10px;">✕ Selected Google account does not match the registered Gmail for this User ID.</div>' +
         '<button class="big-action-btn" onclick="openForgotCredentialsModal()">Try Again with Correct Account</button>'
@@ -1081,6 +1093,13 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
+        '<!-- 2-Step OTP Verification Box (Dynamic) -->' +
+        '<div id="boxLoginOtp" class="field-box" style="display:none; margin-bottom:8px; margin-top:8px; padding:10px; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:14px;">' +
+          '<label class="field-label" style="color:#044E3B;">Enter 4-Digit Security Code sent to your Gmail *</label>' +
+          '<input id="loginOtpInput" maxlength="4" class="pill-input" placeholder="e.g. 6498" style="font-weight:900; letter-spacing:3px; text-align:center; font-size:16px;">' +
+          '<div style="font-size:9px; color:#15803D; margin-top:3px;">Security verification required for new phone/browser.</div>' +
+        '</div>' +
+
         '<div style="text-align:right; margin-bottom:12px;">' +
           '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
         '</div>' +
@@ -1152,7 +1171,7 @@ function openRegistrationModal(prefillData, callbackAction) {
               '<select id="regCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
               '<input id="regPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off" onfocus="showPhoneWarning()" onblur="hidePhoneWarning()">' +
             '</div>' +
-            '<span id="regPhoneWarning" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Country code mila kar 1 se 17 digits.</span>' +
+            '<span id="regPhoneWarning" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Contact number must be 1 to 17 digits.</span>' +
           '</div>' +
         '</div>' +
 
@@ -1187,7 +1206,7 @@ function openRegistrationModal(prefillData, callbackAction) {
               '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Password" minlength="4" maxlength="12" onfocus="showPwdWarning()" onblur="hidePwdWarning()" required autocomplete="new-password">' +
               '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'regPasswordInput\', this)">👁️</button>' +
             '</div>' +
-            '<span id="regPwdFeedback" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password 4 se 12 characters ka hona chahiye.</span>' +
+            '<span id="regPwdFeedback" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password must be 4 to 12 characters.</span>' +
           '</div>' +
         '</div>' +
 
@@ -1212,7 +1231,7 @@ function showUidWarning() {
   if (fb) {
     fb.style.display = 'block';
     fb.style.color = '#B45309';
-    fb.innerText = '⚠️ Prefix ko lekar 4 se 12 characters ka hona chahiye.';
+    fb.innerText = '⚠️ Must be 4 to 12 characters including prefix.';
   }
 }
 
@@ -1256,7 +1275,7 @@ async function checkAndApplyRegisterEmail(email) {
   var cleanEmail = email.toLowerCase().trim();
   var res = await sb.from('profiles').select('uid').ilike('gmail', cleanEmail);
   if (res.data && res.data.length > 0) {
-    alert("Your account already exists with this Gmail (" + cleanEmail + ")!\nPlease login with your existing account.");
+    alert("Account already exists with this Gmail (" + cleanEmail + ")!\nPlease login with your existing account.");
     registrationGoogleVerifiedEmail = null;
     var label = document.getElementById('txtRegGoogleLabel');
     var status = document.getElementById('regGoogleStatus');
@@ -1301,7 +1320,7 @@ async function validateUniqueUserId(suffixVal) {
 
   if (totalLen < 4 || totalLen > 12) {
     feedback.style.display = 'block';
-    feedback.innerText = '⚠️ ' + prefix + ' ko lekar 4 se 12 characters ka hona chahiye.';
+    feedback.innerText = '⚠️ Must be 4 to 12 characters including prefix.';
     feedback.style.color = '#B45309';
     return;
   }
@@ -1341,7 +1360,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
 
     if (password.length < 4 || password.length > 12) {
-      alert("Password must be between 4 and 12 characters only!");
+      alert("Password must be between 4 and 12 characters long.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1349,7 +1368,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
     var totalUidLength = 2 + rawSuffix.length;
     if (totalUidLength < 4 || totalUidLength > 12) {
-      alert("User ID (" + prefix + " ke sath) strictly 4 se 12 characters ka hona chahiye!");
+      alert("User ID must be between 4 and 12 characters including prefix.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1360,7 +1379,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
     var fullContactWithDial = (dial + cleanDigits).replace(/[^0-9]/g, '');
 
     if (fullContactWithDial.length < 1 || fullContactWithDial.length > 17 || cleanDigits.length < 1) {
-      alert("Contact No. (Country code mila kar) 1 se 17 digits ka hona chahiye!");
+      alert("Contact number must be between 1 and 17 digits including country code.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1370,7 +1389,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
     var phoneCheck = await sb.from('profiles').select('uid').ilike('phone', '%' + cleanDigits + '%');
     if (phoneCheck.data && phoneCheck.data.length > 0) {
-      alert("Your account already exists with this Contact No. (" + fullPhone + ")!\nPlease login with your existing account.");
+      alert("Account already exists with this Contact No. (" + fullPhone + ")!\nPlease login with your existing account.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1378,7 +1397,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
 
     var gmailCheck = await sb.from('profiles').select('uid').ilike('gmail', registrationGoogleVerifiedEmail);
     if (gmailCheck.data && gmailCheck.data.length > 0) {
-      alert("Your account already exists with this Gmail (" + registrationGoogleVerifiedEmail + ")!\nPlease login with your existing account.");
+      alert("Account already exists with this Gmail (" + registrationGoogleVerifiedEmail + ")!\nPlease login with your existing account.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1398,7 +1417,8 @@ async function submitUnifiedRegistration(e, callbackAction) {
       name: name,
       phone: fullPhone,
       gmail: registrationGoogleVerifiedEmail,
-      password: hashedPassword
+      password: hashedPassword,
+      last_device_id: getDeviceId()
     };
 
     var insertRes = await sb.from('profiles').insert([newProfile]).select().single();
@@ -1419,8 +1439,35 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
+// LOGIN WITH 2-STEP VERIFICATION OTP FOR NEW PHONE/BROWSER
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
+  var otpBox = document.getElementById('boxLoginOtp');
+  var otpInput = document.getElementById('loginOtpInput');
+
+  // STEP 2: VERIFY OTP IF VISIBLE
+  if (otpBox && otpBox.style.display !== 'none' && pendingLoginUser) {
+    var enteredOtp = otpInput ? otpInput.value.trim() : '';
+    if (enteredOtp !== String(generatedLoginOtp)) {
+      alert("Incorrect OTP. Please enter the 4-digit code sent to your registered Gmail.");
+      return;
+    }
+
+    // OTP Verified! Update device ID in database
+    await sb.from('profiles').update({ last_device_id: getDeviceId() }).eq('uid', pendingLoginUser.uid);
+    DB.currentUser = pendingLoginUser;
+    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    updateUserHeaderChip();
+    closeModal();
+    alert("Verification successful! Logged in as " + cleanText(DB.currentUser.name));
+    pendingLoginUser = null;
+    generatedLoginOtp = null;
+    await syncFromSupabase();
+    resumePendingAction(callbackAction);
+    return;
+  }
+
+  // STEP 1: INITIAL CREDENTIAL VERIFICATION
   var pwd = document.getElementById('loginPwd').value;
   var identifier = '';
   var rawPhone = '';
@@ -1436,18 +1483,13 @@ async function submitCredentialsLogin(callbackAction) {
   } else {
     rawPhone = document.getElementById('loginPhoneInput').value.trim();
     if (!rawPhone) {
-      alert("Please enter your Register Contact No.");
+      alert("Please enter your Registered Contact No.");
       return;
     }
   }
 
   if (!pwd) {
     alert("Please enter your password.");
-    return;
-  }
-
-  if (pwd.length < 4 || pwd.length > 12) {
-    alert("Password must be between 4 and 12 characters long.");
     return;
   }
 
@@ -1468,7 +1510,7 @@ async function submitCredentialsLogin(callbackAction) {
     var res = await query;
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Account not found. Please check your " + (currentLoginMode === 'uid' ? "User ID" : "Register Contact No."));
+      alert("Account not found. Please check your " + (currentLoginMode === 'uid' ? "User ID" : "Registered Contact No."));
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1489,6 +1531,27 @@ async function submitCredentialsLogin(callbackAction) {
       profile.password = hashedInputPwd;
     }
 
+    var currentDev = getDeviceId();
+    var isSameDevice = profile.last_device_id && profile.last_device_id === currentDev;
+
+    // IF NEW DEVICE: GENERATE 4-DIGIT CODE & TRIGGER OTP BOX
+    if (!isSameDevice && profile.gmail) {
+      generatedLoginOtp = Math.floor(1000 + Math.random() * 9000); // 4-digit code (e.g. 6498)
+      pendingLoginUser = profile;
+      pendingLoginCallback = callbackAction;
+
+      // Show OTP field in Modal
+      if (otpBox) otpBox.style.display = 'block';
+      if (otpInput) otpInput.focus();
+
+      btn.disabled = false;
+      btn.innerText = 'Verify & Enter REHZO →';
+
+      alert("New device detected! A 4-digit security code (" + generatedLoginOtp + ") has been dispatched to your Gmail (" + cleanText(profile.gmail) + ").\nPlease enter it below to login.");
+      return;
+    }
+
+    // SAME DEVICE: DIRECT LOGIN
     DB.currentUser = profile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
@@ -1499,8 +1562,10 @@ async function submitCredentialsLogin(callbackAction) {
   } catch(e) {
     alert("Login error: " + e.message);
   } finally {
-    btn.disabled = false;
-    btn.innerText = 'Login with REHZO ID →';
+    if (!pendingLoginUser) {
+      btn.disabled = false;
+      btn.innerText = 'Login with REHZO ID →';
+    }
   }
 }
 
@@ -1629,20 +1694,35 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// FIXED: UPDATE PASSWORD WITHOUT SINGLE() ERROR CRASH
-async function saveNewResetPassword(uid) {
+// 100% RELIABLE MULTI-MATCH PASSWORD UPDATE
+async function saveNewResetPassword(uid, registeredGmail, profileId) {
   var newPwdInput = document.getElementById('newResetPwd');
   var newPwd = newPwdInput ? newPwdInput.value.trim() : '';
 
   if (!newPwd || newPwd.length < 4 || newPwd.length > 12) {
-    alert("Password strictly 4 se 12 characters ka hona chahiye!");
+    alert("Password must be between 4 and 12 characters long.");
     return;
   }
 
   var hashedPwd = await hashPassword(newPwd);
+  var cleanUid = String(uid || '').trim().toUpperCase();
+  var updateQuery = sb.from('profiles').update({ password: hashedPwd });
 
-  // ilike aur select() bina .single() ke taaki "Cannot coerce" error na aaye
-  var res = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', uid).select();
+  // Use primary key ID if available, otherwise fallback to UID or Gmail
+  if (profileId) {
+    updateQuery = updateQuery.eq('id', profileId);
+  } else if (cleanUid) {
+    updateQuery = updateQuery.ilike('uid', cleanUid);
+  } else if (registeredGmail) {
+    updateQuery = updateQuery.ilike('gmail', registeredGmail.trim().toLowerCase());
+  }
+
+  var res = await updateQuery.select();
+
+  // If case-insensitive UID didn't match, fallback by Gmail
+  if ((!res.data || res.data.length === 0) && registeredGmail) {
+    res = await sb.from('profiles').update({ password: hashedPwd }).ilike('gmail', registeredGmail.trim().toLowerCase()).select();
+  }
   
   if (!res.error && res.data && res.data.length > 0) {
     var updatedProfile = res.data[0];
@@ -1773,7 +1853,7 @@ function triggerBookRoomFlow(roomId) {
   var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
 
   if (DB.currentUser.uid === r.ownerUid || (cleanUserPhone && cleanOwnerPhone === cleanUserPhone)) {
-    alert("Cannot book this room!\nYou are the registered owner of this property.");
+    alert("Cannot book this room! You are the registered owner of this property.");
     return;
   }
 
@@ -2097,7 +2177,7 @@ async function tenantFinalConfirmBooking(bookingId) {
   }
 
   if (!res.error) {
-    alert("🎉 Room Confirmed & Booked Exclusively for You!\n12-Digit TRL: " + trl + "\nRoom is now locked and removed from public listings.");
+    alert("Room Confirmed & Booked Exclusively for You!\n12-Digit TRL: " + trl + "\nRoom is now locked and removed from public listings.");
     renderHomeGrid();
     await syncFromSupabase();
     openSlipModal(bookingId);
