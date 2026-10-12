@@ -162,7 +162,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px; }
 .barcode-strip { background: repeating-linear-gradient(90deg, #111, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px); height: 26px; margin: 8px 0; border-radius: 3px; }
 
-/* Added Styles: Missing Drawer, Chips, Map Lock, and Photo Styles */
+/* Drawers & Custom Components */
 .collapsible-trigger { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 30px; border: 1px solid #E2E8F0; background: #fff; font-size: 11px; font-weight: 700; color: #334155; cursor: pointer; }
 .collapsible-drawer { display: none; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 8px; margin-top: 6px; flex-direction: column; gap: 4px; }
 .collapsible-drawer.open { display: flex; }
@@ -943,6 +943,7 @@ async function handleOAuthRedirect() {
         return;
       }
 
+      // RECOVERY REDIRECT: Seedhe Password Reset Form open karo bina "Find My ID" par redirect kare
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -950,10 +951,7 @@ async function handleOAuthRedirect() {
         if (savedRecovUser) {
           recoveryFoundUser = savedRecovUser;
           setTimeout(function() {
-            openForgotCredentialsModal();
-            document.getElementById('recovPhoneInput').value = recoveryFoundUser.phone.replace(/\D/g,'');
-            executeFindMyIdOnly();
-            evaluateRecoveryGoogleMatch(googleEmail);
+            openResetPasswordDirectModal(savedRecovUser, googleEmail);
           }, 400);
           return;
         }
@@ -969,6 +967,43 @@ async function handleOAuthRedirect() {
   } catch(e) {
     console.warn("OAuth Session notice:", e);
   }
+}
+
+function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
+  var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
+  var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
+
+  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
+    '<div class="modal-box-narrow">' +
+      '<div class="modal-header">' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
+          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Reset Password</h3>' +
+        '</div>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
+      '</div>' +
+
+      '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:12px; margin-bottom:12px;">' +
+        '<div style="font-size:10px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">✓ GMAIL VERIFIED</div>' +
+        '<div style="font-size:13px; font-weight:900; color:#0F172A; margin:4px 0;">User ID: <span style="color:#044E3B; font-size:16px;">' + cleanText(userObj.uid) + '</span></div>' +
+        '<div style="font-size:10.5px; color:#15803D;">' + cleanText(cleanEmail) + '</div>' +
+      '</div>' +
+
+      (isMatch ? (
+        '<div class="field-box" style="margin-bottom:8px;">' +
+          '<label class="field-label">Set New Password *</label>' +
+          '<div class="pwd-wrap">' +
+            '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter 4 to 12 characters" minlength="4" maxlength="12" autocomplete="new-password">' +
+            '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
+          '</div>' +
+        '</div>' +
+        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + userObj.uid + '\')">Save New Password & Login →</button>'
+      ) : (
+        '<div style="color:#DC2626; font-size:11px; font-weight:700; margin-bottom:10px;">✕ Selected Google account does not match the registered Gmail for this User ID.</div>' +
+        '<button class="big-action-btn" onclick="openForgotCredentialsModal()">Try Again with Correct Account</button>'
+      )) +
+    '</div>' +
+  '</div>';
 }
 
 function openProfileModal(callbackAction) {
@@ -1545,17 +1580,6 @@ async function executeFindMyIdOnly() {
         '<span id="txtGoogleRecovLabel">Verify with Google Gmail</span>' +
       '</button>' +
       '<span id="recovEmailStatus" style="font-size:10px; font-weight:700; color:#64748B;">Tap above to verify linked email.</span>' +
-      
-      '<div id="resetPasswordInputArea" style="display:none; margin-top:10px;">' +
-        '<div class="field-box" style="margin-bottom:8px;">' +
-          '<label class="field-label">Set New Password *</label>' +
-          '<div class="pwd-wrap">' +
-            '<input id="newResetPwd" type="password" class="pill-input" placeholder="Enter 4 to 12 characters" minlength="4" maxlength="12" autocomplete="new-password">' +
-            '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'newResetPwd\', this)">👁️</button>' +
-          '</div>' +
-        '</div>' +
-        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + recoveryFoundUser.uid + '\')">Save New Password & Login →</button>' +
-      '</div>' +
     '</div>';
 
   } catch(err) {
@@ -1594,36 +1618,12 @@ async function triggerRecoveryGoogleAuth() {
     if (res.error) {
       localStorage.removeItem('rehzo_pending_recov_oauth');
       var manualEmail = prompt("Please enter your registered Google Gmail to verify:");
-      if (manualEmail) evaluateRecoveryGoogleMatch(manualEmail.trim().toLowerCase());
+      if (manualEmail) openResetPasswordDirectModal(recoveryFoundUser, manualEmail.trim().toLowerCase());
     }
   } catch(e) {
     localStorage.removeItem('rehzo_pending_recov_oauth');
     var manualEmailFallback = prompt("Enter your registered Google Gmail to verify:");
-    if (manualEmailFallback) evaluateRecoveryGoogleMatch(manualEmailFallback.trim().toLowerCase());
-  }
-}
-
-function evaluateRecoveryGoogleMatch(email) {
-  var cleanEmail = email.toLowerCase().trim();
-  var label = document.getElementById('txtGoogleRecovLabel');
-  var status = document.getElementById('recovEmailStatus');
-  var resetArea = document.getElementById('resetPasswordInputArea');
-
-  if (recoveryFoundUser && recoveryFoundUser.gmail && recoveryFoundUser.gmail.toLowerCase() === cleanEmail) {
-    if (label) label.innerText = '✓ Verified: ' + cleanEmail;
-    if (status) {
-      status.innerText = '✓ Google Verified! You can now set a new password.';
-      status.style.color = '#15803D';
-    }
-    if (resetArea) resetArea.style.display = 'block';
-    recoveryGoogleVerified = true;
-    localStorage.removeItem('rehzo_temp_recov_user');
-  } else {
-    alert("Verification Failed!\nThe Google account (" + cleanEmail + ") does not match the registered Gmail for User ID " + (recoveryFoundUser ? recoveryFoundUser.uid : ''));
-    if (status) {
-      status.innerText = '✕ Email mismatch with registered profile.';
-      status.style.color = '#DC2626';
-    }
+    if (manualEmailFallback) openResetPasswordDirectModal(recoveryFoundUser, manualEmailFallback.trim().toLowerCase());
   }
 }
 
@@ -1640,6 +1640,7 @@ async function saveNewResetPassword(uid) {
     alert("Password updated successfully! Logging you in as " + cleanText(res.data.name));
     DB.currentUser = res.data;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    localStorage.removeItem('rehzo_temp_recov_user');
     updateUserHeaderChip();
     closeModal();
     await syncFromSupabase();
@@ -2130,6 +2131,7 @@ async function rejectCancelBooking(id) {
   }
 }
 
+// OWNER FORM OPEN: DUPLICATE PHONE STRIP & AUTO-DETECT COUNTRY SYNC
 function toggleOwnerForm(show) {
   if (show && !DB.currentUser) {
     alert("Please sign in or create an account to list your property.");
@@ -2138,10 +2140,32 @@ function toggleOwnerForm(show) {
   }
   document.getElementById('ownerDashboardWrap').style.display = show ? 'none' : 'block';
   document.getElementById('ownerFormWrap').style.display = show ? 'block' : 'none';
-  if (show && DB.currentUser) {
-    document.getElementById('opName').value = DB.currentUser.name;
-    document.getElementById('opPhone').value = DB.currentUser.phone;
-    if (DB.currentUser.gmail) document.getElementById('opGmail').value = DB.currentUser.gmail;
+
+  if (show) {
+    var cObj = WORLD_COUNTRIES.find(function(item){ return item.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
+    
+    // Auto sync country display and hidden input with current detected country
+    var opDisplay = document.getElementById('opCountryDisplay');
+    var opHidden = document.getElementById('opCountry');
+    if (opDisplay) opDisplay.value = cObj.name + ' (' + cObj.dial + ')';
+    if (opHidden) opHidden.value = cObj.code;
+    updateDialPrefix(cObj.code);
+
+    if (DB.currentUser) {
+      document.getElementById('opName').value = DB.currentUser.name || '';
+      if (DB.currentUser.gmail) document.getElementById('opGmail').value = DB.currentUser.gmail;
+
+      // STRIP DUPLICATE DIAL CODE FROM USER PHONE
+      var rawPhone = DB.currentUser.phone || '';
+      var cleanPhone = rawPhone;
+      WORLD_COUNTRIES.forEach(function(c) {
+        var cleanDial = c.dial.replace('+', '');
+        cleanPhone = cleanPhone.replace(c.dial, '').trim();
+        var re = new RegExp('^' + cleanDial);
+        cleanPhone = cleanPhone.replace(re, '').trim();
+      });
+      document.getElementById('opPhone').value = cleanPhone;
+    }
   }
 }
 
