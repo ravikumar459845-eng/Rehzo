@@ -969,7 +969,6 @@ async function handleOAuthRedirect() {
   }
 }
 
-// RESET PASSWORD MODAL MEIN PREFIX (RZ, RE, HR, ZO, OE) SELECTION ADD KIYA GAYA HAI
 function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
   var cleanEmail = (verifiedGoogleEmail || '').toLowerCase().trim();
   var isMatch = userObj && userObj.gmail && userObj.gmail.toLowerCase() === cleanEmail;
@@ -1006,7 +1005,7 @@ function openResetPasswordDirectModal(userObj, verifiedGoogleEmail) {
           '</div>' +
           '<span style="font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Prefix mila kar kul 4 se 12 characters ka hona chahiye.</span>' +
         '</div>' +
-        '<button class="big-action-btn" onclick="saveNewResetPassword(\'' + userObj.uid + '\')">Save New Password & Login →</button>'
+        '<button class="big-action-btn" id="btnSaveNewResetPwd" onclick="saveNewResetPassword(\'' + userObj.uid + '\')">Save New Password & Login →</button>'
       ) : (
         '<div style="color:#DC2626; font-size:11px; font-weight:700; margin-bottom:10px;">✕ Selected Google account does not match the registered Gmail for this User ID.</div>' +
         '<button class="big-action-btn" onclick="openForgotCredentialsModal()">Try Again with Correct Account</button>'
@@ -1492,7 +1491,7 @@ async function submitCredentialsLogin(callbackAction) {
     }
 
     if (profile.password === pwd) {
-      await sb.from('profiles').update({ password: hashedInputPwd }).eq('uid', profile.uid);
+      await sb.from('profiles').update({ password: hashedInputPwd }).ilike('uid', profile.uid);
       profile.password = hashedInputPwd;
     }
 
@@ -1636,32 +1635,59 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// SAVE RESET PASSWORD: PREFIX + SUFFIX VALIDATION LOGIC ADDED
+// SAFE SUPABASE UPDATE: SINGLE JSON OBJECT ERROR PERMANENT FIX
 async function saveNewResetPassword(uid) {
-  var prefixElem = document.getElementById('resetPwdPrefix');
-  var prefix = prefixElem ? prefixElem.value : 'RZ';
-  var rawSuffix = document.getElementById('newResetPwd').value.trim().replace(/^(rz|re|hr|zo|oe)/i, '');
-
-  var totalLen = 2 + rawSuffix.length;
-  if (totalLen < 4 || totalLen > 12) {
-    alert("Password (" + prefix + " ke sath) strictly 4 se 12 characters ka hona chahiye!");
-    return;
+  var btn = document.getElementById('btnSaveNewResetPwd');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Updating Password...';
   }
 
-  var fullPassword = prefix + rawSuffix;
-  var hashedPwd = await hashPassword(fullPassword);
+  try {
+    var prefixElem = document.getElementById('resetPwdPrefix');
+    var prefix = prefixElem ? prefixElem.value : 'RZ';
+    var rawSuffix = document.getElementById('newResetPwd').value.trim().replace(/^(rz|re|hr|zo|oe)/i, '');
 
-  var res = await sb.from('profiles').update({ password: hashedPwd }).eq('uid', uid).select().single();
-  if (!res.error && res.data) {
-    alert("Password updated successfully! Logging you in as " + cleanText(res.data.name));
-    DB.currentUser = res.data;
-    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    var totalLen = 2 + rawSuffix.length;
+    if (totalLen < 4 || totalLen > 12) {
+      alert("Password (" + prefix + " ke sath) strictly 4 se 12 characters ka hona chahiye!");
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'Save New Password & Login →';
+      }
+      return;
+    }
+
+    var fullPassword = prefix + rawSuffix;
+    var hashedPwd = await hashPassword(fullPassword);
+
+    // .single() hata kar safe case-insensitive update query
+    var res = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', uid.trim()).select();
+    
+    if (res.error) {
+      throw res.error;
+    }
+
+    var updatedProfile = (res.data && res.data.length > 0) ? res.data[0] : recoveryFoundUser;
+
+    if (updatedProfile) {
+      updatedProfile.password = hashedPwd;
+      DB.currentUser = updatedProfile;
+      localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
+    }
+    
     localStorage.removeItem('rehzo_temp_recov_user');
     updateUserHeaderChip();
     closeModal();
+    alert("Password updated successfully! Welcome back to REHZO.");
     await syncFromSupabase();
-  } else {
-    alert("Failed to update password: " + (res.error ? res.error.message : 'Unknown error'));
+  } catch(err) {
+    alert("Failed to update password: " + (err.message || 'Error occurred'));
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = 'Save New Password & Login →';
+    }
   }
 }
 
@@ -2169,7 +2195,6 @@ function toggleOwnerForm(show) {
       document.getElementById('opName').value = DB.currentUser.name || '';
       if (DB.currentUser.gmail) document.getElementById('opGmail').value = DB.currentUser.gmail;
 
-      // Duplicate phone dial prefix ko automatically strip karke populate karna
       var rawPhone = DB.currentUser.phone || '';
       var cleanPhone = rawPhone;
       WORLD_COUNTRIES.forEach(function(c) {
