@@ -1815,8 +1815,15 @@ function goView(viewId) {
 
 function checkAdminAccess() {
   var pass = prompt("Enter Admin Passcode:");
-  if (pass === 'rehzo123') goView('admin');
-  else if (pass !== null) alert("Incorrect passcode.");
+  if (pass === null) return;
+  
+  var cleanPass = String(pass).trim().toLowerCase();
+  
+  if (cleanPass === 'Rehzo4598@') {
+    goView('admin');
+  } else {
+    alert("Incorrect passcode.");
+  }
 }
 
 function renderHomeGrid(items) {
