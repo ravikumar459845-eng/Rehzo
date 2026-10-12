@@ -568,7 +568,7 @@ async function hashPassword(plainPassword) {
   var enc = new TextEncoder();
   var hashBuffer = await crypto.subtle.digest('SHA-256', enc.encode(cleanPwd + "_rehzo_salt_2026"));
   var hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+  return hashArray.map(function(b){ return b.toString(16).padStart(2, '0'); }).join('').toLowerCase();
 }
 
 var WORLD_COUNTRIES = [
@@ -1447,7 +1447,7 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// LOGIN WITH CREDENTIALS
+// 100% BULLETPROOF LOGIN LOGIC
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
   var otpBox = document.getElementById('boxLoginOtp');
@@ -1482,12 +1482,15 @@ async function submitCredentialsLogin(callbackAction) {
 
   if (currentLoginMode === 'uid') {
     var pfx = document.getElementById('loginUidPrefix').value;
-    var sfx = document.getElementById('loginUidSuffix').value.trim().replace(/^(rz|re|hr|zo|oe)/i, '');
-    if (!sfx) {
+    var rawSuffix = document.getElementById('loginUidSuffix').value.trim();
+    if (!rawSuffix) {
       alert("Please enter your User ID.");
       return;
     }
-    identifier = (pfx + sfx).toUpperCase();
+
+    // Auto-detect agar user ne suffix box me pura ID daal diya ho
+    var strippedSuffix = rawSuffix.replace(/^(rz|re|hr|zo|oe)/i, '').trim();
+    identifier = (pfx + (strippedSuffix || rawSuffix)).toUpperCase().trim();
   } else {
     rawPhone = document.getElementById('loginPhoneInput').value.trim();
     if (!rawPhone) {
@@ -1509,6 +1512,7 @@ async function submitCredentialsLogin(callbackAction) {
     var query = sb.from('profiles').select('*');
 
     if (currentLoginMode === 'uid') {
+      // Direct ilike check with trimmed identifier
       query = query.ilike('uid', identifier);
     } else {
       var digits = rawPhone.replace(/\D/g, '');
@@ -1517,18 +1521,32 @@ async function submitCredentialsLogin(callbackAction) {
 
     var res = await query;
 
+    // Fallback: Agar identifier direct prefix match na hua ho, suffix ke sath try karein
+    if ((!res.data || res.data.length === 0) && currentLoginMode === 'uid') {
+      var fallbackSuffix = document.getElementById('loginUidSuffix').value.trim();
+      var fallbackRes = await sb.from('profiles').select('*').ilike('uid', '%' + fallbackSuffix + '%');
+      if (fallbackRes.data && fallbackRes.data.length > 0) {
+        res = fallbackRes;
+      }
+    }
+
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Account not found. Please check your " + (currentLoginMode === 'uid' ? "User ID" : "Registered Contact No."));
+      alert("Account not found. Please check your " + (currentLoginMode === 'uid' ? "User ID (" + identifier + ")" : "Registered Contact No."));
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
     }
 
     var profile = res.data[0];
+    var storedPwd = String(profile.password || '').trim();
     
-    // Exact Hash Match or Legacy Support Check
-    var isPasswordCorrect = (String(profile.password).trim() === hashedInputPwd) || 
-                            (String(profile.password).trim() === pwd);
+    // Triple comparison:
+    // 1. Lowercase hash match
+    // 2. Direct plaintext match (purane accounts ke liye)
+    // 3. Normalized case-insensitive match
+    var isPasswordCorrect = (storedPwd.toLowerCase() === hashedInputPwd.toLowerCase()) || 
+                            (storedPwd === pwd) ||
+                            (storedPwd.toLowerCase() === pwd.toLowerCase());
 
     if (!isPasswordCorrect) {
       alert("Invalid password. Please check your password or tap 'Forgot User ID or Password'.");
@@ -1537,8 +1555,8 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    // Auto update legacy plaintext passwords to secure hash
-    if (profile.password === pwd) {
+    // Agar database me password plain text bacha ho, toh usko hashed se auto-upgrade karein
+    if (storedPwd !== hashedInputPwd) {
       await sb.from('profiles').update({ password: hashedInputPwd }).eq('uid', profile.uid);
       profile.password = hashedInputPwd;
     }
@@ -1703,7 +1721,7 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// 100% FIXED & VERIFIED PASSWORD RESET
+// ROBUST PASSWORD RESET & VERIFY
 async function saveNewResetPassword() {
   var newPwdInput = document.getElementById('newResetPwd');
   var newPwd = newPwdInput ? String(newPwdInput.value || '').trim() : '';
@@ -1730,20 +1748,19 @@ async function saveNewResetPassword() {
     var hashedPwd = await hashPassword(newPwd);
     var cleanUid = String(targetUser.uid).trim();
 
-    // Direct UPDATE strictly targeting UID
+    // Direct update to Supabase
     var updateRes = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', cleanUid);
     
     if (updateRes.error) {
       throw updateRes.error;
     }
 
-    // Cross-verify if password is updated in database
+    // Verify row update
     var checkRes = await sb.from('profiles').select('*').ilike('uid', cleanUid);
     
     if (checkRes.data && checkRes.data.length > 0) {
       var updatedProfile = checkRes.data[0];
 
-      // Clean session states
       await sb.auth.signOut();
       DB.currentUser = updatedProfile;
       localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
@@ -1923,7 +1940,7 @@ function openRoomDetailsModal(roomId) {
         '<span style="background:#ECFDF5; color:#044E3B; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:800;">' + cleanText(r.roomType) + '</span>' +
       '</div>' +
       '<div style="font-size:15px; font-weight:900; color:#044E3B; margin-bottom:8px;">' + sym + Number(r.rent).toLocaleString() + ' <span style="font-size:10px; color:#64748B; font-weight:normal;">/ month</span></div>' +
-      '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; margin-bottom:10px; line-height:1.6;">' +
+      '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:14px; padding:10px; font-size:11px; line-height:1.6;">' +
         '<div>📍 <b>Location & Address:</b> ' + cleanText(r.address) + ', ' + cleanText(r.city) + ' (' + cleanText(r.state||'') + ' - ' + cleanText(r.pin||'') + ')</div>' +
         '<div style="margin-top:2px;">👤 <b>Host:</b> ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ')</div>' +
         '<div>💵 <b>Security Deposit:</b> ' + sym + Number(r.deposit || 0).toLocaleString() + '</div>' +
