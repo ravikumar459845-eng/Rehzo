@@ -524,34 +524,53 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <!-- Analytics Cards -->
     <div class="stats-grid-3">
       <div class="stat-card">
-        <div class="stat-num" id="adminStatActive">0</div>
-        <div class="stat-label">Active Listings</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="adminStatConfirmed">0</div>
-        <div class="stat-label">Confirmed Bookings</div>
+        <div class="stat-num" id="adminStatOwners">0</div>
+        <div class="stat-label">Total Owners</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" id="adminStatUsers">0</div>
         <div class="stat-label">Total Users</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-num" id="adminStatActive">0</div>
+        <div class="stat-label">Listings</div>
+      </div>
+    </div>
+
+    <!-- Admin Sub Tabs -->
+    <div class="sub-tabs-row">
+      <button class="sub-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
+      <button class="sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
+      <button class="sub-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
     </div>
 
     <!-- Search in Admin -->
     <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 14px; margin-bottom:12px;">
-      <input id="adminSearchInput" placeholder="Filter listings by City or Owner name…" oninput="filterAdminListings(this.value)" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600;">
+      <input id="adminSearchInput" placeholder="Filter by City, Name, or UID…" oninput="renderCurrentAdminSubTab()" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600;">
     </div>
 
-    <!-- Flagged Reports Section -->
-    <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
-      <div id="adminReportedListingsControl"></div>
+    <!-- Section 1: Total Owners & What Cities They Listed Rooms -->
+    <div id="adminOwnersSection" style="display:block; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">🏢 Registered Owners & Listing Locations</h4>
+      <div id="adminOwnersListContainer"></div>
     </div>
 
-    <!-- All Listings Section -->
-    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">All Platform Listings</h4>
-      <div id="adminListingsControl"></div>
+    <!-- Section 2: Total Users & Where They Booked Rooms -->
+    <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#1D4ED8; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
+      <div id="adminUsersListContainer"></div>
+    </div>
+
+    <!-- Section 3: All Listings & Moderate -->
+    <div id="adminRoomsSection" style="display:none;">
+      <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
+        <div id="adminReportedListingsControl"></div>
+      </div>
+      <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">All Platform Rooms</h4>
+        <div id="adminListingsControl"></div>
+      </div>
     </div>
   </section>
 
@@ -657,6 +676,7 @@ var DB = {
   currentUser: JSON.parse(localStorage.getItem('rehzo_current_user')) || null,
   listings: [],
   bookings: [],
+  profiles: [],
   totalProfilesCount: 0
 };
 
@@ -664,6 +684,7 @@ var userGeo = { lat: 24.9536, lng: 84.0321 };
 var lockedMapCoord = { lat: 24.9536, lng: 84.0321 };
 var currentBookingsTab = 'current';
 var currentOwnerTab = 'rooms';
+var currentAdminSubTab = 'owners';
 var uploadedPhotoFiles = [];
 var editUploadedPhotoFiles = [];
 var currentEditListingPhotos = [];
@@ -750,7 +771,7 @@ async function syncFromSupabase() {
           phone: item.owner_phone,
           gmail: item.owner_gmail,
           status: item.status || 'available',
-          photos: (item.photos && item.photos.length) ? item.photos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'],
+          photos: (item.photos && item.photos.length) ? item.photos : [],
           daysLeft: days
         };
       });
@@ -790,9 +811,10 @@ async function syncFromSupabase() {
       });
     }
 
-    var profCountRes = await sb.from('profiles').select('uid', { count: 'exact', head: true });
-    if (!profCountRes.error) {
-      DB.totalProfilesCount = profCountRes.count || 0;
+    var resProfiles = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+    if (!resProfiles.error && resProfiles.data) {
+      DB.profiles = resProfiles.data;
+      DB.totalProfilesCount = resProfiles.data.length;
     }
   } catch(e) {
     console.error("Supabase load error:", e);
@@ -1412,18 +1434,24 @@ async function submitUnifiedRegistration(e, callbackAction) {
       name: name,
       phone: fullPhone,
       gmail: registrationGoogleVerifiedEmail,
-      password: hashedPassword,
-      last_device_id: getDeviceId()
+      password: hashedPassword
     };
 
     var insertRes = await sb.from('profiles').insert([newProfile]).select().single();
-    if (insertRes.error) throw insertRes.error;
+    if (insertRes.error) {
+      // Graceful fallback if any extra field error happens
+      var fallbackProfile = { uid: fullUid, name: name, phone: fullPhone, password: hashedPassword };
+      var fbRes = await sb.from('profiles').insert([fallbackProfile]).select().single();
+      if (fbRes.error) throw fbRes.error;
+      insertRes = fbRes;
+    }
 
     DB.currentUser = insertRes.data;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
     closeModal();
     alert("Welcome to REHZO, " + cleanText(DB.currentUser.name) + "!\nYour registered User ID is: " + fullUid);
+    await syncFromSupabase();
     resumePendingAction(callbackAction);
 
   } catch(err) {
@@ -1507,15 +1535,6 @@ async function submitCredentialsLogin(callbackAction) {
       btn.innerText = 'Login with REHZO ID →';
       return;
     }
-
-    var currentDev = getDeviceId();
-    await sb.from('profiles').update({ 
-      last_device_id: currentDev,
-      password: hashedInputPwd 
-    }).eq('uid', profile.uid);
-
-    profile.password = hashedInputPwd;
-    profile.last_device_id = currentDev;
 
     DB.currentUser = profile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
@@ -1846,7 +1865,7 @@ function renderHomeGrid(items) {
 
   var container = document.getElementById('homeRoomsGrid');
   if (!list.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:28px; font-size:11.5px; color:#64748B;">No available rooms found in your detected location (' + cleanText(detectedCountryCode) + ').</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:28px; font-size:11.5px; color:#64748B;">No available rooms listed yet. Tap "Owner" & "+ Add" to list a room!</div>';
     return;
   }
   container.innerHTML = list.map(function(r) {
@@ -1874,11 +1893,6 @@ function triggerBookRoomFlow(roomId) {
 
   if (r.status !== 'available') {
     alert("This room is already confirmed and booked by another tenant!");
-    return;
-  }
-
-  if (r.country !== detectedCountryCode) {
-    alert("You can only book rooms in your currently detected location (" + detectedCountryCode + ")!");
     return;
   }
 
@@ -2097,7 +2111,7 @@ function renderSearchGrid() {
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<img src="' + r.photos[0] + '" class="room-thumb">' +
+        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb">' +
         '<span class="avail-badge">Available</span>' +
       '</div>' +
       '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
@@ -2351,7 +2365,7 @@ function renderOwnerView() {
     container.innerHTML = myRooms.map(function(r) {
       var sym = getCurrencySymbol(r.country);
       return '<div class="compact-h-card">' +
-        '<img src="' + r.photos[0] + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
         '<div class="compact-h-content">' +
           '<div class="compact-h-header">' +
             '<div class="compact-h-title">' + cleanText(r.houseName) + '</div>' +
@@ -2584,7 +2598,7 @@ async function saveFullRoomEdit(roomId) {
     }
 
     if (!finalPhotos.length) {
-      finalPhotos = ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+      finalPhotos = [];
     }
 
     var res = await sb.from('listings').update({
@@ -2713,7 +2727,7 @@ async function handlePublishProperty(e) {
     }
 
     if (!photoUrls.length) {
-      photoUrls = ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+      photoUrls = [];
     }
 
     var newListing = {
@@ -2882,14 +2896,14 @@ function openSlipModal(bkId) {
   var l = DB.listings.find(function(x){ return x.id === b.listingId; }) || {};
   var sym = getCurrencySymbol(l.country || 'IN');
 
-  var houseName = b.houseName || l.houseName || 'Raj mahal';
-  var roomType = b.roomType || l.roomType || 'Hostel';
-  var address = b.roomExactAddress || l.address || 'Sasaram bolliya, Sasaram';
-  var city = b.roomCity || l.city || 'Sasaram';
-  var state = b.roomState || l.state || 'Bihar';
-  var pin = b.roomPin || l.pin || '821115';
-  var rent = b.rent || l.rent || 7000;
-  var deposit = (b.deposit !== undefined && b.deposit !== null) ? b.deposit : (l.deposit || 1000);
+  var houseName = b.houseName || l.houseName || 'Room Listing';
+  var roomType = b.roomType || l.roomType || 'Room';
+  var address = b.roomExactAddress || l.address || '';
+  var city = b.roomCity || l.city || '';
+  var state = b.roomState || l.state || '';
+  var pin = b.roomPin || l.pin || '';
+  var rent = b.rent || l.rent || 0;
+  var deposit = (b.deposit !== undefined && b.deposit !== null) ? b.deposit : (l.deposit || 0);
   var duration = b.duration || 1;
   var totalAmount = (parseFloat(rent) * parseInt(duration)) + parseFloat(deposit);
 
@@ -2955,20 +2969,171 @@ function closeModal() {
 }
 
 // ================= ADMIN DASHBOARD FUNCTIONS =================
+function switchAdminSubTab(tab) {
+  currentAdminSubTab = tab;
+  document.getElementById('tabAdminOwners').className = 'sub-tab-btn ' + (tab === 'owners' ? 'active' : '');
+  document.getElementById('tabAdminUsers').className = 'sub-tab-btn ' + (tab === 'users' ? 'active' : '');
+  document.getElementById('tabAdminRooms').className = 'sub-tab-btn ' + (tab === 'rooms' ? 'active' : '');
+
+  document.getElementById('adminOwnersSection').style.display = (tab === 'owners') ? 'block' : 'none';
+  document.getElementById('adminUsersSection').style.display = (tab === 'users') ? 'block' : 'none';
+  document.getElementById('adminRoomsSection').style.display = (tab === 'rooms') ? 'block' : 'none';
+
+  renderCurrentAdminSubTab();
+}
+
+function renderCurrentAdminSubTab() {
+  var q = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value : '';
+  if (currentAdminSubTab === 'owners') renderAdminOwnersSection(q);
+  else if (currentAdminSubTab === 'users') renderAdminUsersSection(q);
+  else filterAdminListings(q);
+}
+
 function renderAdminModeration() {
-  var activeListings = DB.listings.filter(function(l){ return l.status === 'available'; }).length;
-  var confirmedBookings = DB.bookings.filter(function(b){ return b.status === 'confirmed'; }).length;
+  // Identify owners as users who listed at least 1 room, or users with role 'owner'
+  var ownerPhones = {};
+  DB.listings.forEach(function(l) {
+    var p = (l.phone || '').replace(/\D/g, '');
+    if (p) ownerPhones[p] = true;
+    if (l.ownerUid) ownerPhones[l.ownerUid] = true;
+  });
 
-  var statActive = document.getElementById('adminStatActive');
-  var statConfirmed = document.getElementById('adminStatConfirmed');
+  var totalOwnersCount = 0;
+  var totalUsersCount = 0;
+
+  DB.profiles.forEach(function(prof) {
+    var p = (prof.phone || '').replace(/\D/g, '');
+    if (ownerPhones[p] || ownerPhones[prof.uid]) {
+      totalOwnersCount++;
+    } else {
+      totalUsersCount++;
+    }
+  });
+
+  var statOwners = document.getElementById('adminStatOwners');
   var statUsers = document.getElementById('adminStatUsers');
+  var statActive = document.getElementById('adminStatActive');
 
-  if (statActive) statActive.innerText = activeListings;
-  if (statConfirmed) statConfirmed.innerText = confirmedBookings;
-  if (statUsers) statUsers.innerText = DB.totalProfilesCount || 0;
+  if (statOwners) statOwners.innerText = totalOwnersCount;
+  if (statUsers) statUsers.innerText = totalUsersCount;
+  if (statActive) statActive.innerText = DB.listings.length;
 
+  renderCurrentAdminSubTab();
   renderAdminReportedListings();
-  filterAdminListings(document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value : '');
+}
+
+function renderAdminOwnersSection(query) {
+  var container = document.getElementById('adminOwnersListContainer');
+  if (!container) return;
+  var q = (query || '').toLowerCase().trim();
+
+  // Find all owners
+  var ownerMap = {};
+  DB.listings.forEach(function(l) {
+    var key = l.ownerUid || l.phone || l.ownerName;
+    if (!ownerMap[key]) {
+      ownerMap[key] = {
+        name: l.ownerName,
+        phone: l.phone,
+        uid: l.ownerUid,
+        gmail: l.gmail,
+        cities: [],
+        houses: []
+      };
+    }
+    if (l.city && ownerMap[key].cities.indexOf(l.city) === -1) ownerMap[key].cities.push(l.city);
+    ownerMap[key].houses.push(l.houseName + ' (' + l.city + ')');
+  });
+
+  var list = Object.values(ownerMap).filter(function(o) {
+    if (!q) return true;
+    return (o.name && o.name.toLowerCase().indexOf(q) !== -1) ||
+           (o.uid && o.uid.toLowerCase().indexOf(q) !== -1) ||
+           (o.cities.some(function(c){ return c.toLowerCase().indexOf(q) !== -1; }));
+  });
+
+  if (!list.length) {
+    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No owner listings found in database.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function(o) {
+    return '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
+      '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
+        '<span>🏢 ' + cleanText(o.name) + ' (' + cleanText(o.uid || 'Owner') + ')</span>' +
+        '<span style="color:#044E3B;">' + o.houses.length + ' Room(s) Listed</span>' +
+      '</div>' +
+      '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(o.phone) + (o.gmail ? ' • ✉️ ' + cleanText(o.gmail) : '') + '</div>' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#ECFDF5; border-radius:8px; color:#044E3B; font-weight:700;">' +
+        '📍 Listing Locations: ' + cleanText(o.cities.join(', ')) +
+      '</div>' +
+      '<div style="font-size:10px; color:#475569; margin-top:3px;">Houses: ' + cleanText(o.houses.join(' • ')) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderAdminUsersSection(query) {
+  var container = document.getElementById('adminUsersListContainer');
+  if (!container) return;
+  var q = (query || '').toLowerCase().trim();
+
+  // Find all tenants/users from bookings and profiles
+  var userMap = {};
+  DB.bookings.forEach(function(b) {
+    var key = b.userUid || b.userPhone || b.userName;
+    if (!userMap[key]) {
+      userMap[key] = {
+        name: b.userName,
+        phone: b.userPhone,
+        uid: b.userUid,
+        gmail: b.userGmail,
+        bookedCities: [],
+        bookings: []
+      };
+    }
+    if (b.roomCity && userMap[key].bookedCities.indexOf(b.roomCity) === -1) userMap[key].bookedCities.push(b.roomCity);
+    userMap[key].bookings.push(b.houseName + ' (' + b.roomCity + ') - ' + b.status.toUpperCase());
+  });
+
+  // Also include registered profiles who have not booked yet
+  DB.profiles.forEach(function(p) {
+    if (!userMap[p.uid]) {
+      userMap[p.uid] = {
+        name: p.name,
+        phone: p.phone,
+        uid: p.uid,
+        gmail: p.gmail,
+        bookedCities: ['None yet'],
+        bookings: ['No bookings yet']
+      };
+    }
+  });
+
+  var list = Object.values(userMap).filter(function(u) {
+    if (!q) return true;
+    return (u.name && u.name.toLowerCase().indexOf(q) !== -1) ||
+           (u.uid && u.uid.toLowerCase().indexOf(q) !== -1) ||
+           (u.bookedCities.some(function(c){ return c.toLowerCase().indexOf(q) !== -1; }));
+  });
+
+  if (!list.length) {
+    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No registered users or booking records.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function(u) {
+    return '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
+      '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
+        '<span>👤 ' + cleanText(u.name) + ' (' + cleanText(u.uid) + ')</span>' +
+        '<span style="color:#1D4ED8;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
+      '</div>' +
+      '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(u.phone) + (u.gmail ? ' • ✉️ ' + cleanText(u.gmail) : '') + '</div>' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#EFF6FF; border-radius:8px; color:#1D4ED8; font-weight:700;">' +
+        '📍 Booked Locations: ' + cleanText(u.bookedCities.join(', ')) +
+      '</div>' +
+      '<div style="font-size:10px; color:#475569; margin-top:3px;">Bookings: ' + cleanText(u.bookings.join(' • ')) + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function renderAdminReportedListings() {
