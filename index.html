@@ -4,15 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<!-- ================= WORLDWIDE SEO META TAGS ================= -->
+<!-- ================= GLOBAL & INTERNATIONAL SEO ================= -->
 <title>REHZO — Find & Book Verified Rooms, Hostels & PGs Worldwide</title>
 <meta name="title" content="REHZO — Find & Book Verified Rooms, Hostels & PGs Worldwide">
-<meta name="description" content="Find verified rental rooms, 1 RK, 2 BHK flats, student hostels, and PGs globally. Zero broker fees, direct host contact, GPS location, and official 12-digit TRL booking slips.">
+<meta name="description" content="Find verified rental rooms, 1 RK, BHK flats, student hostels, and PGs globally across India, Nepal, UAE, US, and worldwide. Direct owner contact, transparent rent, zero broker fee, and instant 12-digit TRL booking slips.">
 <meta name="keywords" content="rooms for rent, rent room near me, flat for rent, pg for rent, student hostel, 1 rk room, 2 bhk flat, rehzo room booking, rooms without brokerage, room rent India, flat for rent Nepal, room rental UAE, budget stay global">
 <meta name="author" content="REHZO">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <meta name="theme-color" content="#044E3B">
 <link rel="canonical" href="https://rehzo.vercel.app/">
+
+<!-- PWA & Mobile Web App Meta -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="REHZO">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 
 <!-- Multi-Country / Multi-Region Targeting (hreflang) -->
 <link rel="alternate" href="https://rehzo.vercel.app/" hreflang="x-default" />
@@ -40,19 +48,11 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://rehzo.vercel.app/">
-<meta name="twitter:title" content="REHZO — Find & Book Verified Rooms Globally">
+<meta name="twitter:title" content="REHZO — Find & Book Verified Rooms & Hostels Globally">
 <meta name="twitter:description" content="Zero broker fee room rental and hostel search platform with direct owner connection.">
 <meta name="twitter:image" content="https://rehzo.vercel.app/logo.png">
 
-<!-- Favicon & PWA Configuration -->
-<link rel="icon" type="image/png" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="REHZO">
-
-<!-- Google Rich Results / Structured Data (Global JSON-LD) -->
+<!-- Google Rich Results / Schema.org (Global Structured Data) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -95,7 +95,7 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { width: 100%; overflow-x: hidden; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 96px; }
 
 /* Splash Screen */
 #splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; }
@@ -240,11 +240,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .nav-item.active { color: #044E3B; }
 .nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Legal Footer Links */
-.app-footer-links { text-align: center; padding: 16px 8px 12px; font-size: 10px; color: #64748B; font-weight: 700; }
-.app-footer-links a { color: #044E3B; text-decoration: none; margin: 0 6px; }
-.app-footer-links a:hover { text-decoration: underline; }
-
 /* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
 .modal-box-narrow { background: #fff; border-radius: 22px; width: 100%; max-width: 360px; max-height: 94vh; overflow-y: auto; padding: 18px 16px; box-shadow: 0 14px 35px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
@@ -269,6 +264,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .photo-thumb-preview { width: 100%; height: 100%; object-fit: cover; }
 .photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
+
+/* Legal Footer */
+.app-legal-footer { margin-top: 24px; text-align: center; font-size: 10px; color: #94A3B8; padding: 12px 0 20px; border-top: 1px solid #E2E8F0; }
+.app-legal-footer a { color: #044E3B; text-decoration: none; font-weight: 700; margin: 0 6px; }
 
 @media print {
   body * { visibility: hidden; }
@@ -354,6 +353,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     </div>
 
     <div class="room-grid" id="homeRoomsGrid"></div>
+
+    <!-- Legal Footer -->
+    <div class="app-legal-footer">
+      <div>© 2026 REHZO Platform. Verified Housing & Rentals.</div>
+      <div style="margin-top:4px;">
+        <a href="privacy.html">Privacy Policy</a> • 
+        <a href="terms.html">Terms of Service</a>
+      </div>
+    </div>
   </section>
 
   <!-- ================= 2. SEARCH VIEW ================= -->
@@ -663,13 +671,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     </div>
   </section>
 
-  <!-- Legal Footer Links for Google OAuth Verification & Compliance -->
-  <footer class="app-footer-links">
-    © 2026 REHZO Platform • 
-    <a href="privacy.html" target="_blank">Privacy Policy</a> • 
-    <a href="terms.html" target="_blank">Terms of Service</a>
-  </footer>
-
 </div>
 
 <!-- BOTTOM NAVIGATION -->
@@ -699,11 +700,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <div id="modalSlot"></div>
 
 <script>
-// ================= SERVICE WORKER REGISTRATION (PWA) =================
+// ================= PWA SERVICE WORKER REGISTRATION =================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').catch(function(err) {
-      console.warn('PWA ServiceWorker registration failed: ', err);
+    navigator.serviceWorker.register('./sw.js').catch(function(err) {
+      console.log('ServiceWorker registration notice:', err);
     });
   });
 }
@@ -1230,7 +1231,7 @@ function openProfileModal(callbackAction) {
 
         '<div class="switch-box-row">' +
           '<button type="button" class="switch-btn active" id="btnModeUid" onclick="setLoginInputMode(\'uid\')">USER ID</button>' +
-          '<button type="button" class="switch-btn" id="btnModePhone" onclick="setLoginInputMode(\'phone\')">CONTACT NO</button>' +
+          '<button type="button" class="switch-btn" id="btnModePhone" onclick="setLoginInputMode(\'phone\')">CONTACT NO</button>
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:10px;">' +
@@ -1314,8 +1315,8 @@ function openRegistrationModal(prefillData, callbackAction) {
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
-            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Landlords</p>
-          </div>' +
+            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Landlords</p>' +
+          '</div>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
@@ -2165,7 +2166,7 @@ function renderNearGrid() {
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<img src="' + r.photos[0] + '" class="room-thumb">' +
+        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb">' +
         '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
       '</div>' +
       '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
