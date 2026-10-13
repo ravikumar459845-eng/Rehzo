@@ -26,7 +26,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 /* Header */
 .top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; width: 100%; }
-.brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.brand { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
 .brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -63,11 +63,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .section-title h3 { font-size: 14px; font-weight: 800; color: #0F172A; }
 .section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
 .room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+.room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
 .room-thumb-wrap { position: relative; width: 100%; height: 110px; cursor: pointer; }
 .room-thumb { width: 100%; height: 100%; object-fit: cover; }
 .avail-badge { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
 .avail-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
+.report-flag-btn { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 9px; padding: 2px 6px; border-radius: 10px; cursor: pointer; font-weight: bold; }
 .room-details { padding: 8px; }
 .room-title { font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0F172A; cursor: pointer; }
 .room-rent { font-size: 12.5px; font-weight: 800; color: #044E3B; margin-top: 1px; }
@@ -117,10 +118,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .sub-tabs-row { display: flex; background: #fff; border: 1px solid #E2E8F0; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
 .sub-tab-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 7px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; text-align: center; }
 .sub-tab-btn.active { background: #044E3B; color: #fff; }
-.owner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.stat-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 8px; text-align: center; }
-.stat-num { font-size: 17px; font-weight: 900; color: #044E3B; }
-.stat-label { font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 2px; }
+.stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.stat-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.stat-num { font-size: 18px; font-weight: 900; color: #044E3B; }
+.stat-label { font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-top: 3px; }
 
 /* Compact Cards */
 .compact-h-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; margin-bottom: 8px; display: flex; gap: 10px; padding: 8px; align-items: center; }
@@ -198,7 +199,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <!-- TOP HEADER -->
 <header class="top-header">
-<div class="brand" onclick="handleBrandLogoTap()">
+  <div class="brand" onclick="handleBrandLogoTap()">
     <img src="logo.png" alt="REHZO" style="height: 34px; width: auto; object-fit: contain;" onerror="this.style.display='none'">
     <div class="brand-text">
       <h1>REHZO</h1>
@@ -317,7 +318,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         <button onclick="checkOwnerAddAction()" style="background:#044E3B; color:#fff; border:none; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; cursor:pointer;">+ Add</button>
       </div>
 
-      <div class="owner-stats-grid">
+      <div class="stats-grid-3">
         <div class="stat-card">
           <div class="stat-num" id="statActiveCount">0</div>
           <div class="stat-label">Active</div>
@@ -460,11 +461,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         <div class="pill-grid">
           <div class="field-box">
             <label class="field-label">Area Code *</label>
-            <input id="opPin" class="pill-input" placeholder="Pin code" required>
+            <input id="opPin" class="pill-input" placeholder="Area Code" required>
           </div>
           <div class="field-box">
             <label class="field-label">Full Address *</label>
-            <input id="opAddr" class="pill-input" placeholder="House No, Landmark" required>
+            <input id="opAddr" class="pill-input" placeholder="Full Address" required>
           </div>
         </div>
 
@@ -486,7 +487,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
           </div>
           <div class="field-box">
             <label class="field-label">Owner Conditions & Rules</label>
-            <div class="collapsible-drawer open">
+            <div class="collapsible-trigger" onclick="toggleDrawer('rulesDrawer')">
+              <span id="rulesSelectedText">Rules List</span>
+              <span>▾</span>
+            </div>
+            <div class="collapsible-drawer" id="rulesDrawer">
               <div class="radio-chip selected" onclick="toggleSelectChip(this, 'rule', 'No Smoking')"><div class="circle-indicator"></div> No Smoking</div>
               <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'No Pets')"><div class="circle-indicator"></div> No Pets</div>
               <div class="radio-chip" onclick="toggleSelectChip(this, 'rule', 'No Loud Music')"><div class="circle-indicator"></div> No Loud Music</div>
@@ -515,8 +520,37 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       <h3 class="sub-title">Admin Moderation 🔐</h3>
       <button onclick="goView('home')" style="padding:4px 10px; border:1px solid #E2E8F0; border-radius:14px; background:#fff; font-size:11px; cursor:pointer;">Exit</button>
     </div>
+
+    <!-- Analytics Cards -->
+    <div class="stats-grid-3">
+      <div class="stat-card">
+        <div class="stat-num" id="adminStatActive">0</div>
+        <div class="stat-label">Active Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="adminStatConfirmed">0</div>
+        <div class="stat-label">Confirmed Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="adminStatUsers">0</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+
+    <!-- Search in Admin -->
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 14px; margin-bottom:12px;">
+      <input id="adminSearchInput" placeholder="Filter listings by City or Owner name…" oninput="filterAdminListings(this.value)" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600;">
+    </div>
+
+    <!-- Flagged Reports Section -->
+    <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
+      <div id="adminReportedListingsControl"></div>
+    </div>
+
+    <!-- All Listings Section -->
     <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">Live Platform Listings (Supabase)</h4>
+      <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">All Platform Listings</h4>
       <div id="adminListingsControl"></div>
     </div>
   </section>
@@ -562,7 +596,6 @@ function cleanText(str) {
   });
 }
 
-// Consistent Salt-based SHA-256 Hashing
 async function hashPassword(plainPassword) {
   var cleanPwd = String(plainPassword || '').trim();
   var enc = new TextEncoder();
@@ -623,7 +656,8 @@ function populateCountryDropdowns() {
 var DB = {
   currentUser: JSON.parse(localStorage.getItem('rehzo_current_user')) || null,
   listings: [],
-  bookings: []
+  bookings: [],
+  totalProfilesCount: 0
 };
 
 var userGeo = { lat: 24.9536, lng: 84.0321 };
@@ -641,12 +675,7 @@ var matchedBookingId = null;
 
 var registrationGoogleVerifiedEmail = null;
 var recoveryFoundUser = null;
-var recoveryGoogleVerified = false;
 var currentLoginMode = 'uid';
-
-var pendingLoginUser = null;
-var generatedLoginOtp = null;
-var pendingLoginCallback = null;
 
 function getDeviceId() {
   var did = localStorage.getItem('rehzo_device_token');
@@ -668,12 +697,12 @@ async function autoDetectUserCountry() {
       }
     }
   } catch(e) {
-    console.warn("IP Geolocation fallback to IN:", e);
+    console.warn("IP Geolocation fallback:", e);
   }
 
   var cObj = WORLD_COUNTRIES.find(function(c){ return c.code === detectedCountryCode; }) || WORLD_COUNTRIES[0];
   var badge = document.getElementById('userDetectedCountryBadge');
-  if (badge) badge.innerText = '📍 Live Country: ' + cObj.name + ' (' + cObj.code + ')';
+  if (badge) badge.innerText = '📍 Live Country: ' + cObj.name;
 
   var cf = document.getElementById('countryFilter');
   if (cf) cf.value = detectedCountryCode;
@@ -681,7 +710,7 @@ async function autoDetectUserCountry() {
   updateDialPrefix(detectedCountryCode);
   var opDisplay = document.getElementById('opCountryDisplay');
   var opHidden = document.getElementById('opCountry');
-  if (opDisplay) opDisplay.value = cObj.name + ' (' + cObj.dial + ')';
+  if (opDisplay) opDisplay.value = cObj.name;
   if (opHidden) opHidden.value = cObj.code;
 }
 
@@ -760,6 +789,11 @@ async function syncFromSupabase() {
         };
       });
     }
+
+    var profCountRes = await sb.from('profiles').select('uid', { count: 'exact', head: true });
+    if (!profCountRes.error) {
+      DB.totalProfilesCount = profCountRes.count || 0;
+    }
   } catch(e) {
     console.error("Supabase load error:", e);
   }
@@ -769,6 +803,7 @@ async function syncFromSupabase() {
   if (document.getElementById('view-bookings').classList.contains('active')) renderBookingsView();
   if (document.getElementById('view-owner').classList.contains('active')) renderOwnerView();
   if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
+  if (document.getElementById('view-admin').classList.contains('active')) renderAdminModeration();
 }
 
 window.addEventListener('DOMContentLoaded', async function() {
@@ -944,7 +979,6 @@ async function handleOAuthRedirect() {
     if (session && session.user && session.user.email) {
       var googleEmail = session.user.email;
       
-      // REGISTRATION FLOW
       if (pendingOAuthReg === 'true') {
         localStorage.removeItem('rehzo_pending_reg_oauth');
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
@@ -964,7 +998,6 @@ async function handleOAuthRedirect() {
         return;
       }
 
-      // RECOVERY PASSWORD RESET FLOW
       if (pendingOAuthRecov === 'true') {
         localStorage.removeItem('rehzo_pending_recov_oauth');
         var savedRecovUser = JSON.parse(localStorage.getItem('rehzo_temp_recov_user') || 'null');
@@ -1070,7 +1103,7 @@ function openProfileModal(callbackAction) {
 
         '<div class="switch-box-row">' +
           '<button type="button" class="switch-btn active" id="btnModeUid" onclick="setLoginInputMode(\'uid\')">USER ID</button>' +
-          '<button type="button" class="switch-btn" id="btnModePhone" onclick="setLoginInputMode(\'phone\')">REGISTER CONTACT NO</button>' +
+          '<button type="button" class="switch-btn" id="btnModePhone" onclick="setLoginInputMode(\'phone\')">CONTACT NO</button>' +
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:10px;">' +
@@ -1099,12 +1132,6 @@ function openProfileModal(callbackAction) {
             '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" minlength="4" maxlength="12" autocomplete="new-password">' +
             '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'loginPwd\', this)">👁️</button>' +
           '</div>' +
-        '</div>' +
-
-        '<!-- GMAIL OTP Box: strictly 4 digits only -->' +
-        '<div id="boxLoginOtp" class="field-box" style="display:none; margin-bottom:8px; margin-top:8px;">' +
-          '<label class="field-label">GMAIL OTP</label>' +
-          '<input id="loginOtpInput" type="tel" maxlength="4" class="pill-input" placeholder="GMAIL OTP" style="font-weight:900; letter-spacing:4px; text-align:center; font-size:16px;" oninput="this.value = this.value.replace(/[^0-9]/g, \'\').slice(0, 4);">' +
         '</div>' +
 
         '<div style="text-align:right; margin-bottom:12px;">' +
@@ -1140,7 +1167,7 @@ function setLoginInputMode(mode) {
     if (btnPhone) btnPhone.className = 'switch-btn active';
     if (boxUid) boxUid.style.display = 'none';
     if (boxPhone) boxPhone.style.display = 'flex';
-    if (lbl) lbl.innerText = 'Register Contact No *';
+    if (lbl) lbl.innerText = 'Contact No *';
   }
 }
 
@@ -1160,7 +1187,7 @@ function openRegistrationModal(prefillData, callbackAction) {
           '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
           '<div>' +
             '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Create REHZO Account</h3>' +
-            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Property Owners</p>' +
+            '<p style="font-size:9.5px; color:#044E3B; font-weight:700;">Unified Profile for Tenants & Landlords</p>' +
           '</div>' +
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
@@ -1176,9 +1203,8 @@ function openRegistrationModal(prefillData, callbackAction) {
             '<label class="field-label">CONTACT NO *</label>' +
             '<div class="dial-prefix-wrap">' +
               '<select id="regCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
-              '<input id="regPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off" onfocus="showPhoneWarning()" onblur="hidePhoneWarning()">' +
+              '<input id="regPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off">' +
             '</div>' +
-            '<span id="regPhoneWarning" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Contact number must be 1 to 17 digits.</span>' +
           '</div>' +
         '</div>' +
 
@@ -1202,7 +1228,7 @@ function openRegistrationModal(prefillData, callbackAction) {
                 '<option value="ZO">ZO</option>' +
                 '<option value="OE">OE</option>' +
               '</select>' +
-              '<input id="regUidSuffix" placeholder="Unique ID" minlength="2" maxlength="10" onfocus="showUidWarning()" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
+              '<input id="regUidSuffix" placeholder="Unique ID" minlength="2" maxlength="10" onblur="validateUniqueUserId(this.value)" required autocomplete="off">' +
             '</div>' +
             '<span id="regUidFeedback" style="display:none; font-size:9px; font-weight:700; margin-top:2px;"></span>' +
           '</div>' +
@@ -1210,10 +1236,9 @@ function openRegistrationModal(prefillData, callbackAction) {
           '<div class="field-box">' +
             '<label class="field-label">Create Password *</label>' +
             '<div class="pwd-wrap">' +
-              '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Password" minlength="4" maxlength="12" onfocus="showPwdWarning()" onblur="hidePwdWarning()" required autocomplete="new-password">' +
+              '<input id="regPasswordInput" type="password" class="pill-input" placeholder="Password" minlength="4" maxlength="12" required autocomplete="new-password">' +
               '<button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility(\'regPasswordInput\', this)">👁️</button>' +
             '</div>' +
-            '<span id="regPwdFeedback" style="display:none; font-size:9px; font-weight:700; color:#B45309; margin-top:2px;">⚠️ Password must be 4 to 12 characters.</span>' +
           '</div>' +
         '</div>' +
 
@@ -1221,35 +1246,6 @@ function openRegistrationModal(prefillData, callbackAction) {
       '</form>' +
     '</div>' +
   '</div>';
-}
-
-function showPhoneWarning() {
-  var w = document.getElementById('regPhoneWarning');
-  if (w) w.style.display = 'block';
-}
-
-function hidePhoneWarning() {
-  var w = document.getElementById('regPhoneWarning');
-  if (w) w.style.display = 'none';
-}
-
-function showUidWarning() {
-  var fb = document.getElementById('regUidFeedback');
-  if (fb) {
-    fb.style.display = 'block';
-    fb.style.color = '#B45309';
-    fb.innerText = '⚠️ Must be 4 to 12 characters including prefix.';
-  }
-}
-
-function showPwdWarning() {
-  var fb = document.getElementById('regPwdFeedback');
-  if (fb) fb.style.display = 'block';
-}
-
-function hidePwdWarning() {
-  var fb = document.getElementById('regPwdFeedback');
-  if (fb) fb.style.display = 'none';
 }
 
 async function triggerRegisterGoogleAuth() {
@@ -1373,20 +1369,12 @@ async function submitUnifiedRegistration(e, callbackAction) {
       return;
     }
 
-    var totalUidLength = 2 + rawSuffix.length;
-    if (totalUidLength < 4 || totalUidLength > 12) {
-      alert("User ID must be between 4 and 12 characters including prefix.");
-      btn.disabled = false;
-      btn.innerText = 'Complete & Enter REHZO →';
-      return;
-    }
-
     var fullUid = (prefix + rawSuffix).toUpperCase();
     var cleanDigits = rawPhone.replace(/[^0-9]/g, '');
     var fullContactWithDial = (dial + cleanDigits).replace(/[^0-9]/g, '');
 
     if (fullContactWithDial.length < 1 || fullContactWithDial.length > 17 || cleanDigits.length < 1) {
-      alert("Contact number must be between 1 and 17 digits including country code.");
+      alert("Contact number must be between 1 and 17 digits.");
       btn.disabled = false;
       btn.innerText = 'Complete & Enter REHZO →';
       return;
@@ -1446,34 +1434,8 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// 100% FIXED LOGIN LOGIC (SEAMLESS DIRECT LOGIN WITHOUT FAKE OTP ALERT)
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
-  var otpBox = document.getElementById('boxLoginOtp');
-  var otpInput = document.getElementById('loginOtpInput');
-
-  // STEP 2: VERIFY OTP AGAR BOX ACTIVE HO
-  if (otpBox && otpBox.style.display !== 'none' && pendingLoginUser) {
-    var enteredOtp = otpInput ? otpInput.value.trim() : '';
-    if (enteredOtp !== String(generatedLoginOtp)) {
-      alert("Invalid GMAIL OTP! Please check the code.");
-      return;
-    }
-
-    await sb.from('profiles').update({ last_device_id: getDeviceId() }).eq('uid', pendingLoginUser.uid);
-    DB.currentUser = pendingLoginUser;
-    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
-    updateUserHeaderChip();
-    closeModal();
-    alert("Logged in successfully as " + cleanText(DB.currentUser.name) + "!");
-    pendingLoginUser = null;
-    generatedLoginOtp = null;
-    await syncFromSupabase();
-    resumePendingAction(callbackAction);
-    return;
-  }
-
-  // STEP 1: INITIAL CREDENTIAL VERIFICATION
   var rawPwd = document.getElementById('loginPwd').value;
   var pwd = String(rawPwd || '').trim();
   var identifier = '';
@@ -1486,13 +1448,12 @@ async function submitCredentialsLogin(callbackAction) {
       alert("Please enter your User ID.");
       return;
     }
-
     var strippedSuffix = rawSuffix.replace(/^(rz|re|hr|zo|oe)/i, '').trim();
     identifier = (pfx + (strippedSuffix || rawSuffix)).toUpperCase().trim();
   } else {
     rawPhone = document.getElementById('loginPhoneInput').value.trim();
     if (!rawPhone) {
-      alert("Please enter your Registered Contact No.");
+      alert("Please enter your Contact No.");
       return;
     }
   }
@@ -1527,7 +1488,7 @@ async function submitCredentialsLogin(callbackAction) {
     }
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Account not found. Please check your " + (currentLoginMode === 'uid' ? "User ID (" + identifier + ")" : "Registered Contact No."));
+      alert("Account not found. Please check your " + (currentLoginMode === 'uid' ? "User ID (" + identifier + ")" : "Contact No."));
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
@@ -1536,19 +1497,17 @@ async function submitCredentialsLogin(callbackAction) {
     var profile = res.data[0];
     var storedPwd = String(profile.password || '').trim();
 
-    // Verify Password (hashed or direct plaintext fallback)
     var isPasswordCorrect = (storedPwd.toLowerCase() === hashedInputPwd.toLowerCase()) || 
                             (storedPwd === pwd) ||
                             (storedPwd.toLowerCase() === pwd.toLowerCase());
 
     if (!isPasswordCorrect) {
-      alert("Invalid password. Please check your password or tap 'Forgot User ID or Password'.");
+      alert("Invalid password. Please check your credentials or reset your password.");
       btn.disabled = false;
       btn.innerText = 'Login with REHZO ID →';
       return;
     }
 
-    // Direct Login (Update current device token automatically taaki baar-baar fake warning na aaye)
     var currentDev = getDeviceId();
     await sb.from('profiles').update({ 
       last_device_id: currentDev,
@@ -1568,16 +1527,13 @@ async function submitCredentialsLogin(callbackAction) {
   } catch(e) {
     alert("Login error: " + e.message);
   } finally {
-    if (!pendingLoginUser) {
-      btn.disabled = false;
-      btn.innerText = 'Login with REHZO ID →';
-    }
+    btn.disabled = false;
+    btn.innerText = 'Login with REHZO ID →';
   }
 }
 
 function openForgotCredentialsModal() {
   recoveryFoundUser = null;
-  recoveryGoogleVerified = false;
 
   var countryOptionsHTML = WORLD_COUNTRIES.map(function(c) {
     return '<option value="' + c.dial + '" ' + (c.code === detectedCountryCode ? 'selected' : '') + '>' + c.code + ' (' + c.dial + ')</option>';
@@ -1593,10 +1549,10 @@ function openForgotCredentialsModal() {
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
 
-      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Registered Contact No. to find your User ID. To set a new password, verify with your linked Google Gmail.</p>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:12px;">Enter your Contact No. to find your User ID. To set a new password, verify with your linked Google Gmail.</p>' +
 
       '<div class="field-box" style="margin-bottom:10px;">' +
-        '<label class="field-label">Registered Contact No. *</label>' +
+        '<label class="field-label">Contact No. *</label>' +
         '<div class="dial-prefix-wrap">' +
           '<select id="recovCountryDial" class="dial-select-inline">' + countryOptionsHTML + '</select>' +
           '<input id="recovPhoneInput" type="tel" placeholder="Contact No." required autocomplete="off">' +
@@ -1700,7 +1656,6 @@ async function triggerRecoveryGoogleAuth() {
   }
 }
 
-// ROBUST PASSWORD RESET & VERIFY
 async function saveNewResetPassword() {
   var newPwdInput = document.getElementById('newResetPwd');
   var newPwd = newPwdInput ? String(newPwdInput.value || '').trim() : '';
@@ -1728,16 +1683,11 @@ async function saveNewResetPassword() {
     var cleanUid = String(targetUser.uid).trim();
 
     var updateRes = await sb.from('profiles').update({ password: hashedPwd }).ilike('uid', cleanUid);
-    
-    if (updateRes.error) {
-      throw updateRes.error;
-    }
+    if (updateRes.error) throw updateRes.error;
 
     var checkRes = await sb.from('profiles').select('*').ilike('uid', cleanUid);
-    
     if (checkRes.data && checkRes.data.length > 0) {
       var updatedProfile = checkRes.data[0];
-
       await sb.auth.signOut();
       DB.currentUser = updatedProfile;
       localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
@@ -1749,7 +1699,7 @@ async function saveNewResetPassword() {
       alert("Password reset successfully! Logged in as " + cleanText(updatedProfile.name));
       await syncFromSupabase();
     } else {
-      throw new Error("Unable to verify updated user profile.");
+      throw new Error("Unable to verify profile update.");
     }
   } catch(err) {
     alert("Password update failed: " + err.message);
@@ -1813,7 +1763,7 @@ function goView(viewId) {
   window.scrollTo(0, 0);
 }
 
-// 5 Tap Tracker & 24 Hour Security Lockout
+// ================= ADMIN 5-TAP TRACKER & LOCKOUT =================
 var adminTapCount = 0;
 var adminTapTimer = null;
 
@@ -1826,7 +1776,7 @@ function handleBrandLogoTap() {
       goView('home');
     }
     adminTapCount = 0;
-  }, 2000);
+  }, 1800);
 
   if (adminTapCount >= 5) {
     adminTapCount = 0;
@@ -1839,20 +1789,18 @@ function checkAdminAccess() {
   var lockUntil = parseInt(localStorage.getItem('rehzo_admin_lock_until') || '0');
   var now = Date.now();
 
-  // 24 ghante lockout check
   if (lockUntil && now < lockUntil) {
     var remainingMs = lockUntil - now;
     var hours = Math.floor(remainingMs / (1000 * 60 * 60));
     var mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-    alert("Security Alert: 3 baar galat password enter karne ke karan Admin access locked hai!\nKripya " + hours + " ghante " + mins + " minute baad koshish karein.");
+    alert("Security Alert: Admin access locked due to 3 failed attempts!\nPlease try again after " + hours + " hours and " + mins + " minutes.");
     return;
   }
 
   var pass = prompt("Enter Admin Passcode:");
   if (pass === null) return;
 
-  // Har tarah ke spaces aur casing ko clean karna
-  var cleanPass = String(pass).replace(/\s+/g, '').trim().toLowerCase();
+  var cleanPass = String(pass).replace(/[\s\u200B-\u200D\uFEFF]/g, '').trim().toLowerCase();
 
   if (cleanPass === 'rehzo4598@') {
     localStorage.removeItem('rehzo_admin_failed_attempts');
@@ -1862,15 +1810,27 @@ function checkAdminAccess() {
     var attempts = parseInt(localStorage.getItem('rehzo_admin_failed_attempts') || '0') + 1;
 
     if (attempts >= 3) {
-      var lockTime = Date.now() + (24 * 60 * 60 * 1000); // 24 Ghante
+      var lockTime = Date.now() + (24 * 60 * 60 * 1000);
       localStorage.setItem('rehzo_admin_lock_until', String(lockTime));
       localStorage.removeItem('rehzo_admin_failed_attempts');
-      alert("Galat passcode! 3 baar galat password daala gaya hai. Admin access agle 24 ghante ke liye band kar diya gaya hai.");
+      alert("Incorrect passcode! 3 failed attempts reached. Admin access locked for 24 hours.");
     } else {
       localStorage.setItem('rehzo_admin_failed_attempts', String(attempts));
       var bacheHue = 3 - attempts;
-      alert("Incorrect passcode. " + bacheHue + " koshish baaki hai. 3 galat attempts par 24 ghante ke liye lock ho jayega.");
+      alert("Incorrect passcode. " + bacheHue + " attempt(s) remaining.");
     }
+  }
+}
+
+// ================= REPORT / FLAG LISTING =================
+function reportListing(listingId) {
+  if (confirm("Report this property listing for review?")) {
+    var reported = JSON.parse(localStorage.getItem('rehzo_flagged_listings') || '[]');
+    if (reported.indexOf(listingId) === -1) {
+      reported.push(listingId);
+      localStorage.setItem('rehzo_flagged_listings', JSON.stringify(reported));
+    }
+    alert("Listing reported successfully. Our team will review it.");
   }
 }
 
@@ -1897,6 +1857,7 @@ function renderHomeGrid(items) {
         '<img src="' + cover + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
         '<span class="avail-badge">Available</span>' +
       '</div>' +
+      '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
@@ -2089,6 +2050,7 @@ function renderNearGrid() {
         '<img src="' + r.photos[0] + '" class="room-thumb">' +
         '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
       '</div>' +
+      '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
@@ -2138,6 +2100,7 @@ function renderSearchGrid() {
         '<img src="' + r.photos[0] + '" class="room-thumb">' +
         '<span class="avail-badge">Available</span>' +
       '</div>' +
+      '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
@@ -2318,7 +2281,7 @@ function toggleOwnerForm(show) {
     
     var opDisplay = document.getElementById('opCountryDisplay');
     var opHidden = document.getElementById('opCountry');
-    if (opDisplay) opDisplay.value = cObj.name + ' (' + cObj.dial + ')';
+    if (opDisplay) opDisplay.value = cObj.name;
     if (opHidden) opHidden.value = cObj.code;
     updateDialPrefix(cObj.code);
 
@@ -2395,7 +2358,7 @@ function renderOwnerView() {
             '<span class="status-pill ' + (r.status==='available'?'status-confirmed':'status-pending') + '">● ' + r.status.toUpperCase() + '</span>' +
           '</div>' +
           '<div class="compact-h-rent">' + sym + Number(r.rent).toLocaleString() + '/mo</div>' +
-          '<div class="compact-h-sub">' + cleanText(r.city) + ' • <b>' + r.daysLeft + ' days left</b> (Only Owner Visible)</div>' +
+          '<div class="compact-h-sub">' + cleanText(r.city) + ' • <b>' + r.daysLeft + ' days left</b></div>' +
           '<div class="action-row-mini">' +
             '<button class="btn-action-large" onclick="openRoomDetailsModal(\'' + r.id + '\')">View</button>' +
             '<button class="btn-action-large success" onclick="openFullEditRoomModal(\'' + r.id + '\')">✏️ Edit</button>' +
@@ -2991,16 +2954,75 @@ function closeModal() {
   document.getElementById('modalSlot').innerHTML = '';
 }
 
+// ================= ADMIN DASHBOARD FUNCTIONS =================
 function renderAdminModeration() {
-  var container = document.getElementById('adminListingsControl');
-  if (!DB.listings.length) {
-    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#64748B;">No listings found.</div>';
+  var activeListings = DB.listings.filter(function(l){ return l.status === 'available'; }).length;
+  var confirmedBookings = DB.bookings.filter(function(b){ return b.status === 'confirmed'; }).length;
+
+  var statActive = document.getElementById('adminStatActive');
+  var statConfirmed = document.getElementById('adminStatConfirmed');
+  var statUsers = document.getElementById('adminStatUsers');
+
+  if (statActive) statActive.innerText = activeListings;
+  if (statConfirmed) statConfirmed.innerText = confirmedBookings;
+  if (statUsers) statUsers.innerText = DB.totalProfilesCount || 0;
+
+  renderAdminReportedListings();
+  filterAdminListings(document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value : '');
+}
+
+function renderAdminReportedListings() {
+  var container = document.getElementById('adminReportedListingsControl');
+  if (!container) return;
+
+  var flaggedIds = JSON.parse(localStorage.getItem('rehzo_flagged_listings') || '[]');
+  var flaggedList = DB.listings.filter(function(l){ return flaggedIds.indexOf(l.id) !== -1; });
+
+  if (!flaggedList.length) {
+    container.innerHTML = '<div style="font-size:11px; color:#64748B;">No reported listings. Everything looks good.</div>';
     return;
   }
-  container.innerHTML = DB.listings.map(function(r) {
+
+  container.innerHTML = flaggedList.map(function(r) {
+    var sym = getCurrencySymbol(r.country);
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #FECACA; font-size:11px;">' +
+      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Owner: ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ') - ' + sym + r.rent + '</div>' +
+      '<div style="display:flex; gap:6px;">' +
+        '<button onclick="adminDismissReport(\'' + r.id + '\')" style="background:#64748B; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Dismiss</button>' +
+        '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Purge Listing</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function adminDismissReport(id) {
+  var flaggedIds = JSON.parse(localStorage.getItem('rehzo_flagged_listings') || '[]');
+  flaggedIds = flaggedIds.filter(function(x){ return x !== id; });
+  localStorage.setItem('rehzo_flagged_listings', JSON.stringify(flaggedIds));
+  renderAdminReportedListings();
+}
+
+function filterAdminListings(query) {
+  var container = document.getElementById('adminListingsControl');
+  if (!container) return;
+
+  var q = (query || '').toLowerCase().trim();
+  var filtered = DB.listings.filter(function(l) {
+    if (!q) return true;
+    return (l.houseName && l.houseName.toLowerCase().indexOf(q) !== -1) ||
+           (l.city && l.city.toLowerCase().indexOf(q) !== -1) ||
+           (l.ownerName && l.ownerName.toLowerCase().indexOf(q) !== -1);
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#64748B;">No matching listings found.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(function(r) {
     var sym = getCurrencySymbol(r.country);
     return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
-      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') - ' + sym + r.rent + '</div>' +
+      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Host: ' + cleanText(r.ownerName) + ' - ' + sym + r.rent + '</div>' +
       '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
@@ -3009,6 +3031,9 @@ function renderAdminModeration() {
 async function adminDeleteListing(id) {
   if (confirm("Admin confirmation: Permanently delete listing from Supabase?")) {
     await sb.from('listings').delete().eq('id', id);
+    var flaggedIds = JSON.parse(localStorage.getItem('rehzo_flagged_listings') || '[]');
+    flaggedIds = flaggedIds.filter(function(x){ return x !== id; });
+    localStorage.setItem('rehzo_flagged_listings', JSON.stringify(flaggedIds));
     alert("Listing purged permanently!");
     await syncFromSupabase();
     renderAdminModeration();
