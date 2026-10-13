@@ -145,14 +145,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* Rooms Grid */
 .section-title { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px; }
 .section-title h3 { font-size: 14px; font-weight: 800; color: #0F172A; }
-.section-title span { font-size: 11px; font-weight: 700; color: #044E3B; cursor: pointer; }
 .room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
 .room-thumb-wrap { position: relative; width: 100%; height: 110px; cursor: pointer; }
 .room-thumb { width: 100%; height: 100%; object-fit: cover; }
-.avail-badge { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
+
+/* Badges & Report Stack */
+.badge-stack { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; z-index: 2; }
+.avail-badge { background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .avail-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
-.report-flag-btn { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 9px; padding: 2px 6px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+.report-flag-btn { background: rgba(15, 23, 42, 0.78); color: #fff; border: none; font-size: 8px; padding: 2px 6px; border-radius: 10px; cursor: pointer; font-weight: 700; backdrop-filter: blur(2px); }
+
 .room-details { padding: 8px; }
 .room-title { font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0F172A; cursor: pointer; }
 .room-rent { font-size: 12.5px; font-weight: 800; color: #044E3B; margin-top: 1px; }
@@ -265,9 +268,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
 
-/* Legal Footer */
-.app-legal-footer { margin-top: 24px; text-align: center; font-size: 10px; color: #94A3B8; padding: 12px 0 20px; border-top: 1px solid #E2E8F0; }
-.app-legal-footer a { color: #044E3B; text-decoration: none; font-weight: 700; margin: 0 6px; }
+/* Legal Footer (Clean & Professional) */
+.global-legal-footer { margin: 28px auto 8px; text-align: center; font-size: 11px; color: #64748B; padding: 14px 10px; background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; max-width: 500px; }
+.global-legal-footer a { color: #044E3B; text-decoration: none; font-weight: 800; margin: 0 6px; }
+
+/* Admin Theme Matching Home Emerald */
+.admin-header-card { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; }
+.admin-stat-card { background: #fff; border: 1px solid #A7F3D0; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.admin-stat-num { font-size: 19px; font-weight: 900; color: #044E3B; }
+.admin-stat-label { font-size: 8.5px; font-weight: 800; color: #065F46; text-transform: uppercase; margin-top: 3px; }
 
 @media print {
   body * { visibility: hidden; }
@@ -349,19 +358,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
     <div class="section-title">
       <h3>Available Rooms</h3>
-      <span onclick="resetAllFilters()">Reset & View All</span>
     </div>
 
     <div class="room-grid" id="homeRoomsGrid"></div>
 
-    <!-- Legal Footer Links -->
-    <div class="app-legal-footer">
-      <div>© 2026 REHZO Platform. Verified Housing & Rentals.</div>
-      <div style="margin-top:4px;">
+    <!-- Perfectly Styled Legal Footer -->
+    <footer class="global-legal-footer">
+      <div style="font-weight: 800; color: #0F172A; margin-bottom: 4px;">2026 REHZO Platform • Verified Housing & Rentals</div>
+      <div>
         <a href="privacy.html">Privacy Policy</a> • 
         <a href="terms.html">Terms of Service</a>
       </div>
-    </div>
+    </footer>
   </section>
 
   <!-- ================= 2. SEARCH VIEW ================= -->
@@ -611,26 +619,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div id="notificationsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
   </section>
 
-  <!-- ================= 7. PRIVATE ADMIN ================= -->
+  <!-- ================= 7. PRIVATE ADMIN (Home Color Themed) ================= -->
   <section id="view-admin" class="view">
-    <div class="sub-header">
-      <h3 class="sub-title">Admin Moderation 🔐</h3>
-      <button onclick="goView('home')" style="padding:4px 10px; border:1px solid #E2E8F0; border-radius:14px; background:#fff; font-size:11px; cursor:pointer;">Exit</button>
+    <div class="admin-header-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 style="font-size:16px; font-weight:900;">Admin Moderation 🔐</h3>
+          <p style="font-size:10px; opacity:0.85;">REHZO Global Control Center</p>
+        </div>
+        <button onclick="goView('home')" style="padding:5px 12px; border:none; border-radius:16px; background:rgba(255,255,255,0.2); color:#fff; font-size:11px; font-weight:bold; cursor:pointer;">Exit</button>
+      </div>
     </div>
 
     <!-- Analytics Cards -->
     <div class="stats-grid-3">
-      <div class="stat-card">
-        <div class="stat-num" id="adminStatOwners">0</div>
-        <div class="stat-label">Total Owners</div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatOwners">0</div>
+        <div class="admin-stat-label">Total Owners</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num" id="adminStatUsers">0</div>
-        <div class="stat-label">Total Users</div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatUsers">0</div>
+        <div class="admin-stat-label">Total Users</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num" id="adminStatActive">0</div>
-        <div class="stat-label">Listings</div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatActive">0</div>
+        <div class="admin-stat-label">Listings</div>
       </div>
     </div>
 
@@ -654,7 +667,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
     <!-- Section 2: Total Users & Where They Booked Rooms -->
     <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; color:#1D4ED8; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
+      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
       <div id="adminUsersListContainer"></div>
     </div>
 
@@ -665,7 +678,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         <div id="adminReportedListingsControl"></div>
       </div>
       <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-        <h4 style="font-size:12px; font-weight:800; margin-bottom:8px;">All Platform Rooms</h4>
+        <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">All Platform Rooms</h4>
         <div id="adminListingsControl"></div>
       </div>
     </div>
@@ -719,6 +732,11 @@ function cleanText(str) {
   return String(str).replace(/[&<>"']/g, function(m) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
   });
+}
+
+function normalizePhoneDigits(phoneStr) {
+  if (!phoneStr) return '';
+  return String(phoneStr).replace(/\D/g, '').slice(-10);
 }
 
 async function hashPassword(plainPassword) {
@@ -803,15 +821,6 @@ var matchedBookingId = null;
 var registrationGoogleVerifiedEmail = null;
 var recoveryFoundUser = null;
 var currentLoginMode = 'uid';
-
-function getDeviceId() {
-  var did = localStorage.getItem('rehzo_device_token');
-  if (!did) {
-    did = 'dev_' + Math.random().toString(36).substring(2) + '_' + Date.now();
-    localStorage.setItem('rehzo_device_token', did);
-  }
-  return did;
-}
 
 async function autoDetectUserCountry() {
   try {
@@ -926,6 +935,7 @@ async function syncFromSupabase() {
     console.error("Supabase load error:", e);
   }
 
+  updateUserHeaderChip();
   updateNotificationsBadge();
   renderHomeGrid();
   if (document.getElementById('view-bookings').classList.contains('active')) renderBookingsView();
@@ -949,7 +959,7 @@ window.addEventListener('DOMContentLoaded', function() {
   populateCountryDropdowns();
   updateUserHeaderChip();
 
-  // Maximum 1.2s me splash hide ho jayega (Kahi atke bina)
+  // 1.2s me splash hide ho jayega
   setTimeout(dismissSplash, 1200);
 
   // Background Async Data Sync
@@ -973,13 +983,23 @@ window.addEventListener('DOMContentLoaded', function() {
 function getRelevantNotifications() {
   if (!DB.currentUser) return [];
   var notifs = [];
-  var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+  var userTenDigit = normalizePhoneDigits(DB.currentUser.phone);
+  var userUid = String(DB.currentUser.uid || '').toUpperCase().trim();
 
   DB.bookings.forEach(function(b) {
-    var cleanTenantPhone = (b.userPhone || '').replace(/\D/g, '');
-    var cleanOwnerPhone = (b.ownerPhone || '').replace(/\D/g, '');
+    var ownerTenDigit = normalizePhoneDigits(b.ownerPhone);
+    var tenantTenDigit = normalizePhoneDigits(b.userPhone);
 
-    if (cleanOwnerPhone && cleanOwnerPhone === cleanUserPhone) {
+    // Is current logged in user the Owner of this booked room?
+    var isOwnerOfBooking = (userTenDigit && ownerTenDigit && userTenDigit === ownerTenDigit);
+    if (!isOwnerOfBooking && b.listingId) {
+      var lMatch = DB.listings.find(function(x){ return x.id === b.listingId; });
+      if (lMatch && (lMatch.ownerUid === userUid || (normalizePhoneDigits(lMatch.phone) === userTenDigit))) {
+        isOwnerOfBooking = true;
+      }
+    }
+
+    if (isOwnerOfBooking) {
       if (b.status === 'pending') {
         notifs.push({
           id: 'notif_' + b.id,
@@ -992,22 +1012,16 @@ function getRelevantNotifications() {
         notifs.push({
           id: 'notif_' + b.id,
           title: 'Booking Confirmed! 🎉',
-          desc: cleanText(b.userName) + ' confirmed the stay for ' + cleanText(b.houseName) + '. TRL: ' + (b.trl || ''),
-          time: b.date || 'Recent',
-          action: 'owner'
-        });
-      } else if (b.status === 'cancel_pending' && b.cancelRequestedBy === 'user') {
-        notifs.push({
-          id: 'notif_' + b.id,
-          title: 'Cancellation Request ⚠️',
-          desc: cleanText(b.userName) + ' requested to cancel the booking for ' + cleanText(b.houseName) + '.',
+          desc: cleanText(b.userName) + ' confirmed stay for ' + cleanText(b.houseName) + '. TRL: ' + (b.trl || ''),
           time: b.date || 'Recent',
           action: 'owner'
         });
       }
     }
 
-    if (b.userUid === DB.currentUser.uid || (cleanTenantPhone && cleanTenantPhone === cleanUserPhone)) {
+    // Is current logged in user the Tenant?
+    var isTenantOfBooking = (b.userUid === userUid) || (userTenDigit && tenantTenDigit && userTenDigit === tenantTenDigit);
+    if (isTenantOfBooking) {
       if (b.status === 'owner_accepted') {
         notifs.push({
           id: 'notif_' + b.id,
@@ -1021,22 +1035,6 @@ function getRelevantNotifications() {
           id: 'notif_' + b.id,
           title: 'Stay Confirmed & Locked 🏠',
           desc: 'Your booking for ' + cleanText(b.houseName) + ' is verified. TRL: ' + (b.trl || ''),
-          time: b.date || 'Recent',
-          action: 'bookings'
-        });
-      } else if (b.status === 'rejected') {
-        notifs.push({
-          id: 'notif_' + b.id,
-          title: 'Request Closed / Booked ✕',
-          desc: 'Booking for ' + cleanText(b.houseName) + ' was not completed or confirmed by someone else.',
-          time: b.date || 'Recent',
-          action: 'bookings'
-        });
-      } else if (b.status === 'cancel_pending' && b.cancelRequestedBy === 'owner') {
-        notifs.push({
-          id: 'notif_' + b.id,
-          title: 'Owner Requested Cancellation ⚠️',
-          desc: 'Owner requested cancellation for ' + cleanText(b.houseName) + '.',
           time: b.date || 'Recent',
           action: 'bookings'
         });
@@ -1132,7 +1130,6 @@ async function handleOAuthRedirect() {
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
         if (profCheck.data && profCheck.data.length > 0) {
           alert("Account already exists with this Gmail (" + googleEmail + ")!\nPlease login with your existing account.");
-          await sb.auth.signOut();
           openProfileModal();
           return;
         }
@@ -1158,13 +1155,9 @@ async function handleOAuthRedirect() {
           return;
         }
       }
-
-      if (!DB.currentUser) {
-        await sb.auth.signOut();
-      }
     }
   } catch(e) {
-    console.warn("OAuth Session notice:", e);
+    console.warn("OAuth Session check notice:", e);
   }
 }
 
@@ -1398,9 +1391,7 @@ function openRegistrationModal(prefillData, callbackAction) {
 
 async function triggerRegisterGoogleAuth() {
   try {
-    await sb.auth.signOut();
     localStorage.setItem('rehzo_pending_reg_oauth', 'true');
-
     var redirectToUrl = window.location.origin + window.location.pathname;
     var res = await sb.auth.signInWithOAuth({
       provider: 'google',
@@ -1770,9 +1761,7 @@ async function triggerRecoveryGoogleAuth() {
   }
 
   try {
-    await sb.auth.signOut();
     localStorage.setItem('rehzo_pending_recov_oauth', 'true');
-
     var redirectToUrl = window.location.origin + window.location.pathname;
     var oauthOptions = {
       redirectTo: redirectToUrl,
@@ -1832,7 +1821,6 @@ async function saveNewResetPassword() {
     var checkRes = await sb.from('profiles').select('*').ilike('uid', cleanUid);
     if (checkRes.data && checkRes.data.length > 0) {
       var updatedProfile = checkRes.data[0];
-      await sb.auth.signOut();
       DB.currentUser = updatedProfile;
       localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
       localStorage.removeItem('rehzo_temp_recov_user');
@@ -1857,7 +1845,7 @@ async function saveNewResetPassword() {
 
 async function logoutUser() {
   if (confirm("Log out from REHZO?")) {
-    await sb.auth.signOut();
+    try { await sb.auth.signOut(); } catch(e){}
     DB.currentUser = null;
     localStorage.removeItem('rehzo_current_user');
     updateUserHeaderChip();
@@ -1997,11 +1985,13 @@ function renderHomeGrid(items) {
     var cover = (r.photos && r.photos.length) ? r.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
-      '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<img src="' + cover + '" class="room-thumb" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
-        '<span class="avail-badge">Available</span>' +
+      '<div class="room-thumb-wrap">' +
+        '<img src="' + cover + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+        '<div class="badge-stack">' +
+          '<span class="avail-badge">Available</span>' +
+          '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
+        '</div>' +
       '</div>' +
-      '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '<span style="font-size:9px; font-weight:normal; color:#64748B;">/month</span></div>' +
@@ -2027,8 +2017,8 @@ function triggerBookRoomFlow(roomId) {
     return;
   }
 
-  var cleanOwnerPhone = (r.phone || '').replace(/\D/g, '');
-  var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
+  var cleanOwnerPhone = normalizePhoneDigits(r.phone);
+  var cleanUserPhone = normalizePhoneDigits(DB.currentUser.phone);
 
   if (DB.currentUser.uid === r.ownerUid || (cleanUserPhone && cleanOwnerPhone === cleanUserPhone)) {
     alert("Cannot book this room! You are the registered owner of this property.");
@@ -2185,11 +2175,13 @@ function renderNearGrid() {
   container.innerHTML = near.map(function(r) {
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
-      '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb">' +
-        '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
+      '<div class="room-thumb-wrap">' +
+        '<img src="' + r.photos[0] + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        '<div class="badge-stack">' +
+          '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
+          '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
+        '</div>' +
       '</div>' +
-      '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
@@ -2235,11 +2227,13 @@ function renderSearchGrid() {
   container.innerHTML = list.map(function(r) {
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
-      '<div class="room-thumb-wrap" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb">' +
-        '<span class="avail-badge">Available</span>' +
+      '<div class="room-thumb-wrap">' +
+        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        '<div class="badge-stack">' +
+          '<span class="avail-badge">Available</span>' +
+          '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
+        '</div>' +
       '</div>' +
-      '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
@@ -2279,10 +2273,12 @@ function renderBookingsView() {
     list = DB.bookings.filter(function(b){ return b.status === 'cancelled' || b.status === 'rejected'; });
   }
 
+  var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
+  var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
+
   list = list.filter(function(b){ 
-    var cleanBookingUserPhone = (b.userPhone || '').replace(/\D/g, '');
-    var cleanCurrentPhone = (DB.currentUser && DB.currentUser.phone ? DB.currentUser.phone : '').replace(/\D/g, '');
-    return b.userUid === DB.currentUser.uid || (cleanCurrentPhone && cleanBookingUserPhone === cleanCurrentPhone); 
+    var bookingPhoneTen = normalizePhoneDigits(b.userPhone);
+    return (b.userUid && b.userUid.toUpperCase().trim() === myUid) || (myPhoneTen && bookingPhoneTen && myPhoneTen === bookingPhoneTen); 
   });
 
   if (!list.length) {
@@ -2466,16 +2462,23 @@ function renderOwnerView() {
     return;
   }
 
+  var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
+  var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
+
+  // All listings owned by current user
   var myRooms = DB.listings.filter(function(l){ 
-    var cleanOwnerPhone = (l.phone || '').replace(/\D/g, '');
-    var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
-    return l.ownerUid === DB.currentUser.uid || (cleanUserPhone && cleanOwnerPhone === cleanUserPhone); 
+    var cleanOwnerPhoneTen = normalizePhoneDigits(l.phone);
+    return (l.ownerUid && l.ownerUid.toUpperCase().trim() === myUid) || (myPhoneTen && cleanOwnerPhoneTen && myPhoneTen === cleanOwnerPhoneTen); 
   });
 
+  var myRoomIds = myRooms.map(function(r){ return r.id; });
+
+  // All requests targeted to current owner's properties
   var myRequests = DB.bookings.filter(function(b){ 
-    var cleanOwnerPhone = (b.ownerPhone || '').replace(/\D/g, '');
-    var cleanUserPhone = (DB.currentUser.phone || '').replace(/\D/g, '');
-    return (cleanUserPhone && cleanOwnerPhone === cleanUserPhone);
+    var bOwnerPhoneTen = normalizePhoneDigits(b.ownerPhone);
+    var isDirectPhoneMatch = (myPhoneTen && bOwnerPhoneTen && myPhoneTen === bOwnerPhoneTen);
+    var isRoomIdMatch = (b.listingId && myRoomIds.indexOf(b.listingId) !== -1);
+    return (isDirectPhoneMatch || isRoomIdMatch);
   });
 
   document.getElementById('statActiveCount').innerText = myRooms.filter(function(l){ return l.daysLeft > 0; }).length;
@@ -3117,17 +3120,18 @@ function renderCurrentAdminSubTab() {
 function renderAdminModeration() {
   var ownerPhones = {};
   DB.listings.forEach(function(l) {
-    var p = (l.phone || '').replace(/\D/g, '');
+    var p = normalizePhoneDigits(l.phone);
     if (p) ownerPhones[p] = true;
-    if (l.ownerUid) ownerPhones[l.ownerUid] = true;
+    if (l.ownerUid) ownerPhones[l.ownerUid.toUpperCase().trim()] = true;
   });
 
   var totalOwnersCount = 0;
   var totalUsersCount = 0;
 
   DB.profiles.forEach(function(prof) {
-    var p = (prof.phone || '').replace(/\D/g, '');
-    if (ownerPhones[p] || ownerPhones[prof.uid]) {
+    var p = normalizePhoneDigits(prof.phone);
+    var u = String(prof.uid || '').toUpperCase().trim();
+    if (ownerPhones[p] || ownerPhones[u]) {
       totalOwnersCount++;
     } else {
       totalUsersCount++;
@@ -3246,10 +3250,10 @@ function renderAdminUsersSection(query) {
     return '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
       '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
         '<span>👤 ' + cleanText(u.name) + ' (' + cleanText(u.uid) + ')</span>' +
-        '<span style="color:#1D4ED8;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
+        '<span style="color:#044E3B; font-weight:800;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
       '</div>' +
       '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(u.phone) + (u.gmail ? ' • ✉️ ' + cleanText(u.gmail) : '') + '</div>' +
-      '<div style="margin-top:4px; padding:4px 8px; background:#EFF6FF; border-radius:8px; color:#1D4ED8; font-weight:700;">' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#ECFDF5; border-radius:8px; color:#044E3B; font-weight:700;">' +
         '📍 Booked Locations: ' + cleanText(u.bookedCities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Bookings: ' + cleanText(u.bookings.join(' • ')) + '</div>' +
