@@ -7,8 +7,6 @@
 
 <!-- Supabase JS Client v2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- EmailJS for Real Gmail OTP Dispatch -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -605,17 +603,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <div id="modalSlot"></div>
 
 <script>
-// ================= SUPABASE & EMAIL CLIENT INITIALIZATION =================
+// ================= SUPABASE CLIENT INITIALIZATION =================
 var SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
 var SUPABASE_KEY = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// EmailJS Initialization for Live Gmail Delivery
-(function() {
-  if (window.emailjs) {
-    window.emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
-  }
-})();
 
 function cleanText(str) {
   if (str === null || str === undefined) return '';
@@ -706,7 +697,6 @@ var matchedBookingId = null;
 var registrationGoogleVerifiedEmail = null;
 var recoveryFoundUser = null;
 var currentLoginMode = 'uid';
-var pendingDeviceVerification = null;
 
 function getDeviceId() {
   var did = localStorage.getItem('rehzo_device_token');
@@ -715,28 +705,6 @@ function getDeviceId() {
     localStorage.setItem('rehzo_device_token', did);
   }
   return did;
-}
-
-// 4-Digit Random Real OTP Generator
-function generate4DigitOtp() {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-}
-
-async function sendLiveGmailOtp(email, otp, recipientName) {
-  try {
-    if (window.emailjs) {
-      await window.emailjs.send("service_rehzo", "template_otp", {
-        to_email: email,
-        to_name: recipientName || "User",
-        otp_code: otp,
-        app_name: "REHZO"
-      });
-      return true;
-    }
-  } catch (err) {
-    console.warn("EmailJS Service Notice (Falling back to Direct Transport):", err);
-  }
-  return false;
 }
 
 async function autoDetectUserCountry() {
@@ -1461,19 +1429,18 @@ async function submitUnifiedRegistration(e, callbackAction) {
     }
 
     var hashedPassword = await hashPassword(password);
-    var currentDev = getDeviceId();
     var newProfile = {
       uid: fullUid,
       name: name,
       phone: fullPhone,
       gmail: registrationGoogleVerifiedEmail,
-      password: hashedPassword,
-      last_device_id: currentDev
+      password: hashedPassword
     };
 
     var insertRes = await sb.from('profiles').insert([newProfile]).select().single();
     if (insertRes.error) {
-      var fallbackProfile = { uid: fullUid, name: name, phone: fullPhone, password: hashedPassword, last_device_id: currentDev };
+      // Graceful fallback if any extra field error happens
+      var fallbackProfile = { uid: fullUid, name: name, phone: fullPhone, password: hashedPassword };
       var fbRes = await sb.from('profiles').insert([fallbackProfile]).select().single();
       if (fbRes.error) throw fbRes.error;
       insertRes = fbRes;
@@ -1495,7 +1462,6 @@ async function submitUnifiedRegistration(e, callbackAction) {
   }
 }
 
-// ================= NEW PHONE LOGIN & AUTOMATIC 4-DIGIT GMAIL OTP =================
 async function submitCredentialsLogin(callbackAction) {
   var btn = document.getElementById('btnLoginSubmit');
   var rawPwd = document.getElementById('loginPwd').value;
@@ -1570,41 +1536,6 @@ async function submitCredentialsLogin(callbackAction) {
       return;
     }
 
-    var currentDev = getDeviceId();
-
-    // Check if logging in from a NEW PHONE / DIFFERENT DEVICE
-    if (profile.last_device_id && profile.last_device_id !== currentDev && profile.gmail) {
-      btn.innerText = 'Sending Gmail OTP...';
-      var generatedOtp = generate4DigitOtp();
-      var expiryTime = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
-
-      await sb.from('profiles').update({
-        current_otp: generatedOtp,
-        otp_expiry: expiryTime
-      }).eq('uid', profile.uid);
-
-      await sendLiveGmailOtp(profile.gmail, generatedOtp, profile.name);
-
-      pendingDeviceVerification = {
-        profile: profile,
-        expectedOtp: generatedOtp,
-        newDeviceId: currentDev,
-        callbackAction: callbackAction
-      };
-
-      openOtpVerificationModal(profile.gmail);
-      return;
-    }
-
-    // Same Device Direct Login
-    await sb.from('profiles').update({ 
-      last_device_id: currentDev,
-      password: hashedInputPwd 
-    }).eq('uid', profile.uid);
-
-    profile.password = hashedInputPwd;
-    profile.last_device_id = currentDev;
-
     DB.currentUser = profile;
     localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
     updateUserHeaderChip();
@@ -1615,129 +1546,9 @@ async function submitCredentialsLogin(callbackAction) {
   } catch(e) {
     alert("Login error: " + e.message);
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = 'Login with REHZO ID →';
-    }
+    btn.disabled = false;
+    btn.innerText = 'Login with REHZO ID →';
   }
-}
-
-// Automatic Modal Box for Entering Gmail OTP
-function openOtpVerificationModal(userGmail) {
-  var masked = userGmail ? (userGmail.substring(0, 3) + '***@' + userGmail.split('@')[1]) : 'your registered Gmail';
-
-  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-    '<div class="modal-box-narrow" style="text-align:center;">' +
-      '<div class="modal-header">' +
-        '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<img src="logo.png" alt="REHZO" style="height:26px; width:auto; object-fit:contain;" onerror="this.style.display=\'none\'">' +
-          '<h3 style="font-size:15px; font-weight:800; color:#0F172A;">Device Verification 🔐</h3>' +
-        '</div>' +
-        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
-      '</div>' +
-
-      '<div style="background:#ECFDF5; border:1px solid #BBF7D0; border-radius:14px; padding:12px; margin-bottom:12px; text-align:left;">' +
-        '<div style="font-size:10px; font-weight:800; color:#044E3B; letter-spacing:0.5px;">NEW PHONE / DEVICE DETECTED</div>' +
-        '<div style="font-size:11px; color:#15803D; margin-top:3px;">A real 4-digit security OTP has been sent automatically to: <b>' + cleanText(masked) + '</b></div>' +
-      '</div>' +
-
-      '<div class="field-box" style="margin-bottom:12px; text-align:left;">' +
-        '<label class="field-label" style="text-align:center; font-size:12px; font-weight:900; color:#044E3B; letter-spacing:1px;">ENTER GMAIL OTP</label>' +
-        '<input id="inputGmailOtp" type="tel" maxlength="4" class="pill-input" placeholder="• • • •" style="text-align:center; font-size:24px; font-weight:900; letter-spacing:12px; padding:10px;" autocomplete="one-time-code">' +
-        '<span style="font-size:9.5px; color:#64748B; text-align:center; margin-top:4px;">Check your Gmail Inbox and Spam folder.</span>' +
-      '</div>' +
-
-      '<button class="big-action-btn" id="btnVerifyGmailOtp" onclick="submitOtpAndVerifyDevice()">Verify & Login →</button>' +
-
-      '<div style="margin-top:12px; display:flex; justify-content:space-between; font-size:10.5px;">' +
-        '<span style="color:#044E3B; font-weight:700; cursor:pointer;" onclick="resendGmailOtpDirect()">Resend OTP</span>' +
-        '<span style="color:#64748B; cursor:pointer;" onclick="closeModal()">Cancel</span>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-async function submitOtpAndVerifyDevice() {
-  if (!pendingDeviceVerification) {
-    alert("Verification session expired. Please login again.");
-    openProfileModal();
-    return;
-  }
-
-  var otpInput = document.getElementById('inputGmailOtp').value.trim();
-  if (otpInput.length !== 4) {
-    alert("Please enter the complete 4-digit OTP.");
-    return;
-  }
-
-  var btn = document.getElementById('btnVerifyGmailOtp');
-  btn.disabled = true;
-  btn.innerText = 'Verifying OTP...';
-
-  try {
-    var profRes = await sb.from('profiles').select('current_otp, otp_expiry').eq('uid', pendingDeviceVerification.profile.uid).single();
-    var liveOtp = profRes.data ? profRes.data.current_otp : pendingDeviceVerification.expectedOtp;
-    var expiry = profRes.data ? new Date(profRes.data.otp_expiry) : new Date(Date.now() + 1000);
-
-    if (new Date() > expiry) {
-      alert("OTP has expired. Please tap 'Resend OTP'.");
-      btn.disabled = false;
-      btn.innerText = 'Verify & Login →';
-      return;
-    }
-
-    if (otpInput !== liveOtp && otpInput !== pendingDeviceVerification.expectedOtp) {
-      alert("Incorrect OTP! Please enter the 4-digit OTP sent to your registered Gmail.");
-      btn.disabled = false;
-      btn.innerText = 'Verify & Login →';
-      return;
-    }
-
-    // OTP Verified: Update device token to this new phone
-    await sb.from('profiles').update({
-      last_device_id: pendingDeviceVerification.newDeviceId,
-      current_otp: null,
-      otp_expiry: null
-    }).eq('uid', pendingDeviceVerification.profile.uid);
-
-    var loggedProfile = pendingDeviceVerification.profile;
-    loggedProfile.last_device_id = pendingDeviceVerification.newDeviceId;
-
-    DB.currentUser = loggedProfile;
-    localStorage.setItem('rehzo_current_user', JSON.stringify(DB.currentUser));
-    
-    var cb = pendingDeviceVerification.callbackAction;
-    pendingDeviceVerification = null;
-
-    updateUserHeaderChip();
-    closeModal();
-    alert("Device Verified Successfully!\nWelcome to REHZO, " + cleanText(loggedProfile.name));
-    await syncFromSupabase();
-    resumePendingAction(cb);
-
-  } catch(err) {
-    alert("Verification failed: " + err.message);
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = 'Verify & Login →';
-    }
-  }
-}
-
-async function resendGmailOtpDirect() {
-  if (!pendingDeviceVerification) return;
-  var newOtp = generate4DigitOtp();
-  var expiryTime = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-  await sb.from('profiles').update({
-    current_otp: newOtp,
-    otp_expiry: expiryTime
-  }).eq('uid', pendingDeviceVerification.profile.uid);
-
-  pendingDeviceVerification.expectedOtp = newOtp;
-  await sendLiveGmailOtp(pendingDeviceVerification.profile.gmail, newOtp, pendingDeviceVerification.profile.name);
-  alert("A fresh 4-digit OTP has been sent to " + pendingDeviceVerification.profile.gmail);
 }
 
 function openForgotCredentialsModal() {
@@ -3179,6 +2990,7 @@ function renderCurrentAdminSubTab() {
 }
 
 function renderAdminModeration() {
+  // Identify owners as users who listed at least 1 room, or users with role 'owner'
   var ownerPhones = {};
   DB.listings.forEach(function(l) {
     var p = (l.phone || '').replace(/\D/g, '');
@@ -3215,6 +3027,7 @@ function renderAdminOwnersSection(query) {
   if (!container) return;
   var q = (query || '').toLowerCase().trim();
 
+  // Find all owners
   var ownerMap = {};
   DB.listings.forEach(function(l) {
     var key = l.ownerUid || l.phone || l.ownerName;
@@ -3264,6 +3077,7 @@ function renderAdminUsersSection(query) {
   if (!container) return;
   var q = (query || '').toLowerCase().trim();
 
+  // Find all tenants/users from bookings and profiles
   var userMap = {};
   DB.bookings.forEach(function(b) {
     var key = b.userUid || b.userPhone || b.userName;
@@ -3281,6 +3095,7 @@ function renderAdminUsersSection(query) {
     userMap[key].bookings.push(b.houseName + ' (' + b.roomCity + ') - ' + b.status.toUpperCase());
   });
 
+  // Also include registered profiles who have not booked yet
   DB.profiles.forEach(function(p) {
     if (!userMap[p.uid]) {
       userMap[p.uid] = {
