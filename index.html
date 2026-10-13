@@ -268,10 +268,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
 
-/* Legal Footer (Clean & Professional) */
-.global-legal-footer { margin: 28px auto 8px; text-align: center; font-size: 11px; color: #64748B; padding: 14px 10px; background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; max-width: 500px; }
-.global-legal-footer a { color: #044E3B; text-decoration: none; font-weight: 800; margin: 0 6px; }
-
 /* Admin Theme Matching Home Emerald */
 .admin-header-card { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; }
 .admin-stat-card { background: #fff; border: 1px solid #A7F3D0; border-radius: 16px; padding: 10px 8px; text-align: center; }
@@ -314,7 +310,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <div class="main-wrapper">
 
-  <!-- ================= 1. HOME VIEW ================= -->
+  <!-- ================= 1. HOME VIEW (Clean Home Screen) ================= -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
@@ -361,15 +357,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     </div>
 
     <div class="room-grid" id="homeRoomsGrid"></div>
-
-    <!-- Perfectly Styled Legal Footer -->
-    <footer class="global-legal-footer">
-      <div style="font-weight: 800; color: #0F172A; margin-bottom: 4px;">2026 REHZO Platform • Verified Housing & Rentals</div>
-      <div>
-        <a href="privacy.html">Privacy Policy</a> • 
-        <a href="terms.html">Terms of Service</a>
-      </div>
-    </footer>
   </section>
 
   <!-- ================= 2. SEARCH VIEW ================= -->
@@ -990,7 +977,6 @@ function getRelevantNotifications() {
     var ownerTenDigit = normalizePhoneDigits(b.ownerPhone);
     var tenantTenDigit = normalizePhoneDigits(b.userPhone);
 
-    // Is current logged in user the Owner of this booked room?
     var isOwnerOfBooking = (userTenDigit && ownerTenDigit && userTenDigit === ownerTenDigit);
     if (!isOwnerOfBooking && b.listingId) {
       var lMatch = DB.listings.find(function(x){ return x.id === b.listingId; });
@@ -1019,7 +1005,6 @@ function getRelevantNotifications() {
       }
     }
 
-    // Is current logged in user the Tenant?
     var isTenantOfBooking = (b.userUid === userUid) || (userTenDigit && tenantTenDigit && userTenDigit === tenantTenDigit);
     if (isTenantOfBooking) {
       if (b.status === 'owner_accepted') {
@@ -1224,6 +1209,10 @@ function openProfileModal(callbackAction) {
           '<div>🛡️ <b>Access:</b> Verified Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
+        '<div style="text-align:center; margin-top:14px; font-size:9.5px; color:#94A3B8;">' +
+          '<a href="privacy.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Privacy Policy</a> • ' +
+          '<a href="terms.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Terms of Service</a>' +
+        '</div>' +
       '</div>' +
     '</div>';
   } else {
@@ -1275,8 +1264,12 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<div style="text-align:right; margin-bottom:12px;">' +
+        '<div style="text-align:right; margin-bottom:8px;">' +
           '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
+          '<div style="margin-top:4px; font-size:9px; color:#94A3B8;">' +
+            '<a href="privacy.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Privacy Policy</a> • ' +
+            '<a href="terms.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Terms of Service</a>' +
+          '</div>' +
         '</div>' +
 
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
@@ -2465,7 +2458,6 @@ function renderOwnerView() {
   var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
   var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
 
-  // All listings owned by current user
   var myRooms = DB.listings.filter(function(l){ 
     var cleanOwnerPhoneTen = normalizePhoneDigits(l.phone);
     return (l.ownerUid && l.ownerUid.toUpperCase().trim() === myUid) || (myPhoneTen && cleanOwnerPhoneTen && myPhoneTen === cleanOwnerPhoneTen); 
@@ -2473,7 +2465,6 @@ function renderOwnerView() {
 
   var myRoomIds = myRooms.map(function(r){ return r.id; });
 
-  // All requests targeted to current owner's properties
   var myRequests = DB.bookings.filter(function(b){ 
     var bOwnerPhoneTen = normalizePhoneDigits(b.ownerPhone);
     var isDirectPhoneMatch = (myPhoneTen && bOwnerPhoneTen && myPhoneTen === bOwnerPhoneTen);
