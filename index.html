@@ -98,7 +98,7 @@ html, body { width: 100%; overflow-x: hidden; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 96px; }
 
 /* Splash Screen */
-#splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; }
+#splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; pointer-events: none; }
 .splash-logo { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 12px; animation: pulse 1.4s infinite alternate; }
 .splash-title { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
 .splash-sub { font-size: 12px; opacity: 0.85; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
@@ -354,7 +354,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
     <div class="room-grid" id="homeRoomsGrid"></div>
 
-    <!-- Legal Footer -->
+    <!-- Legal Footer Links -->
     <div class="app-legal-footer">
       <div>© 2026 REHZO Platform. Verified Housing & Rentals.</div>
       <div style="margin-top:4px;">
@@ -704,7 +704,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').catch(function(err) {
-      console.log('ServiceWorker registration notice:', err);
+      console.log('ServiceWorker notice:', err);
     });
   });
 }
@@ -934,20 +934,40 @@ async function syncFromSupabase() {
   if (document.getElementById('view-admin').classList.contains('active')) renderAdminModeration();
 }
 
-window.addEventListener('DOMContentLoaded', async function() {
+// ================= SPLASH SAFE DISMISS =================
+function dismissSplash() {
+  var splash = document.getElementById('splashOverlay');
+  if (splash && splash.style.display !== 'none') {
+    splash.style.opacity = '0';
+    setTimeout(function() { 
+      splash.style.display = 'none'; 
+    }, 450);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function() {
   populateCountryDropdowns();
   updateUserHeaderChip();
-  await autoDetectUserCountry();
-  await handleOAuthRedirect();
-  await syncFromSupabase();
 
-  setTimeout(function() {
-    var splash = document.getElementById('splashOverlay');
-    if (splash) {
-      splash.style.opacity = '0';
-      setTimeout(function() { splash.style.display = 'none'; }, 500);
-    }
-  }, 1000);
+  // Maximum 1.2s me splash hide ho jayega (Kahi atke bina)
+  setTimeout(dismissSplash, 1200);
+
+  // Background Async Data Sync
+  (async function() {
+    try {
+      await autoDetectUserCountry();
+    } catch(e) { console.warn("Auto detect:", e); }
+
+    try {
+      await handleOAuthRedirect();
+    } catch(e) { console.warn("OAuth check:", e); }
+
+    try {
+      await syncFromSupabase();
+    } catch(e) { console.warn("Sync load:", e); }
+
+    dismissSplash();
+  })();
 });
 
 function getRelevantNotifications() {
@@ -1231,7 +1251,7 @@ function openProfileModal(callbackAction) {
 
         '<div class="switch-box-row">' +
           '<button type="button" class="switch-btn active" id="btnModeUid" onclick="setLoginInputMode(\'uid\')">USER ID</button>' +
-          '<button type="button" class="switch-btn" id="btnModePhone" onclick="setLoginInputMode(\'phone\')">CONTACT NO</button>
+          '<button type="button" class="switch-btn" id="btnModePhone" onclick="setLoginInputMode(\'phone\')">CONTACT NO</button>' +
         '</div>' +
 
         '<div class="field-box" style="margin-bottom:10px;">' +
