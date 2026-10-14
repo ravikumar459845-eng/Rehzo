@@ -95,7 +95,7 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { width: 100%; overflow-x: hidden; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 96px; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
 
 /* Splash Screen */
 #splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; pointer-events: none; }
@@ -150,7 +150,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .room-thumb-wrap { position: relative; width: 100%; height: 110px; cursor: pointer; }
 .room-thumb { width: 100%; height: 100%; object-fit: cover; }
 
-/* Badges & Report Stack */
+/* Badges & Report Stack (Report directly under Available) */
 .badge-stack { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; z-index: 2; }
 .avail-badge { background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .avail-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
@@ -310,7 +310,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <div class="main-wrapper">
 
-  <!-- ================= 1. HOME VIEW ================= -->
+  <!-- ================= 1. HOME VIEW (100% Clean) ================= -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
@@ -1252,7 +1252,7 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<div class="field-box" style="margin-bottom:4px;">' +
+        '<div class="field-box" style="margin-bottom:6px;">' +
           '<label class="field-label">Password *</label>' +
           '<div class="pwd-wrap">' +
             '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" minlength="4" maxlength="12" autocomplete="new-password">' +
@@ -1260,13 +1260,15 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<div style="display:flex; justify-content:space-between; align-items:center; margin:6px 0 12px;">' +
-          '<div style="font-size:8.5px; font-weight:700;">' +
-            '<a href="privacy.html" style="color:#E11D48; text-decoration:none;">Privacy</a>' +
-            '<span style="color:#E11D48; margin:0 3px;">•</span>' +
-            '<a href="terms.html" style="color:#E11D48; text-decoration:none;">Terms</a>' +
-          '</div>' +
+        '<div style="text-align:right; margin-bottom:12px;">' +
           '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
+          
+          /* ================= COMPACT ROSE LEGAL LINKS UNDER FORGOT CREDENTIALS ================= */
+          '<div style="text-align:right; margin-top:3px; font-size:8.5px; line-height:1;">' +
+            '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700; margin-right:4px;">Privacy</a>' +
+            '<span style="color:#FDA4AF;">•</span>' +
+            '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700; margin-left:4px;">Terms</a>' +
+          '</div>' +
         '</div>' +
 
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
@@ -2455,6 +2457,7 @@ function renderOwnerView() {
   var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
   var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
 
+  // All listings owned by current user
   var myRooms = DB.listings.filter(function(l){ 
     var cleanOwnerPhoneTen = normalizePhoneDigits(l.phone);
     return (l.ownerUid && l.ownerUid.toUpperCase().trim() === myUid) || (myPhoneTen && cleanOwnerPhoneTen && myPhoneTen === cleanOwnerPhoneTen); 
@@ -2462,6 +2465,7 @@ function renderOwnerView() {
 
   var myRoomIds = myRooms.map(function(r){ return r.id; });
 
+  // All requests targeted to current owner's properties
   var myRequests = DB.bookings.filter(function(b){ 
     var bOwnerPhoneTen = normalizePhoneDigits(b.ownerPhone);
     var isDirectPhoneMatch = (myPhoneTen && bOwnerPhoneTen && myPhoneTen === bOwnerPhoneTen);
