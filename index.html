@@ -268,14 +268,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
 
-/* ================= ROSE THEMED ADMIN PANEL ================= */
-.admin-rose-card { background: linear-gradient(135deg, #E11D48, #BE123C); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(225,29,72,0.2); }
-.admin-rose-subtabs { display: flex; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
-.admin-rose-tab-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 7px; font-size: 11px; font-weight: 800; color: #E11D48; cursor: pointer; text-align: center; }
-.admin-rose-tab-btn.active { background: #E11D48; color: #fff; }
-.admin-stat-card-rose { background: #fff; border: 1px solid #FECDD3; border-radius: 16px; padding: 10px 8px; text-align: center; }
-.admin-stat-num-rose { font-size: 19px; font-weight: 900; color: #E11D48; }
-.admin-stat-label-rose { font-size: 8.5px; font-weight: 800; color: #BE123C; text-transform: uppercase; margin-top: 3px; }
+/* Admin Theme in Rose Color */
+.admin-rose-header { background: linear-gradient(135deg, #E11D48, #BE123C); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(225,29,72,0.2); }
+.admin-rose-card { background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.admin-rose-num { font-size: 19px; font-weight: 900; color: #BE123C; }
+.admin-rose-label { font-size: 8.5px; font-weight: 800; color: #9F1239; text-transform: uppercase; margin-top: 3px; }
+.admin-sub-tab-btn.active { background: #E11D48 !important; color: #fff !important; }
 
 @media print {
   body * { visibility: hidden; }
@@ -313,7 +311,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <div class="main-wrapper">
 
-  <!-- ================= 1. HOME VIEW (100% CLEAN & ZERO FOOTER CLUTTER) ================= -->
+  <!-- ================= 1. HOME VIEW ================= -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
@@ -609,9 +607,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div id="notificationsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
   </section>
 
-  <!-- ================= 7. PRIVATE ADMIN (ROSE COLOR THEMED) ================= -->
+  <!-- ================= 7. PRIVATE ADMIN (Rose Color Theme) ================= -->
   <section id="view-admin" class="view">
-    <div class="admin-rose-card">
+    <div class="admin-rose-header">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h3 style="font-size:16px; font-weight:900;">Admin Moderation 🔐</h3>
@@ -621,32 +619,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       </div>
     </div>
 
-    <!-- Analytics Cards (Rose) -->
+    <!-- Analytics Cards in Rose -->
     <div class="stats-grid-3">
-      <div class="admin-stat-card-rose">
-        <div class="admin-stat-num-rose" id="adminStatOwners">0</div>
-        <div class="admin-stat-label-rose">Total Owners</div>
+      <div class="admin-rose-card">
+        <div class="admin-rose-num" id="adminStatOwners">0</div>
+        <div class="admin-rose-label">Total Owners</div>
       </div>
-      <div class="admin-stat-card-rose">
-        <div class="admin-stat-num-rose" id="adminStatUsers">0</div>
-        <div class="admin-stat-label-rose">Total Users</div>
+      <div class="admin-rose-card">
+        <div class="admin-rose-num" id="adminStatUsers">0</div>
+        <div class="admin-rose-label">Total Users</div>
       </div>
-      <div class="admin-stat-card-rose">
-        <div class="admin-stat-num-rose" id="adminStatActive">0</div>
-        <div class="admin-stat-label-rose">Listings</div>
+      <div class="admin-rose-card">
+        <div class="admin-rose-num" id="adminStatActive">0</div>
+        <div class="admin-rose-label">Listings</div>
       </div>
     </div>
 
-    <!-- Admin Sub Tabs (Rose) -->
-    <div class="admin-rose-subtabs">
-      <button class="admin-rose-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
-      <button class="admin-rose-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
-      <button class="admin-rose-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
+    <!-- Admin Sub Tabs in Rose -->
+    <div class="sub-tabs-row" style="border-color: #FECDD3;">
+      <button class="sub-tab-btn admin-sub-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
+      <button class="sub-tab-btn admin-sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
+      <button class="sub-tab-btn admin-sub-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
     </div>
 
     <!-- Search in Admin -->
     <div style="background:#fff; border:1px solid #FECDD3; border-radius:30px; padding:6px 14px; margin-bottom:12px;">
-      <input id="adminSearchInput" placeholder="Filter by City, Name, or UID…" oninput="renderCurrentAdminSubTab()" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600; color:#BE123C;">
+      <input id="adminSearchInput" placeholder="Filter by City, Name, or UID…" oninput="renderCurrentAdminSubTab()" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600;">
     </div>
 
     <!-- Section 1: Total Owners & What Cities They Listed Rooms -->
@@ -949,10 +947,9 @@ window.addEventListener('DOMContentLoaded', function() {
   populateCountryDropdowns();
   updateUserHeaderChip();
 
-  // 1.2s me splash screen automatic hide hogi
+  // 1.2s safe fallback
   setTimeout(dismissSplash, 1200);
 
-  // Background Async Data Sync
   (async function() {
     try {
       await autoDetectUserCountry();
@@ -980,7 +977,6 @@ function getRelevantNotifications() {
     var ownerTenDigit = normalizePhoneDigits(b.ownerPhone);
     var tenantTenDigit = normalizePhoneDigits(b.userPhone);
 
-    // Is current logged in user the Owner of this booked room?
     var isOwnerOfBooking = (userTenDigit && ownerTenDigit && userTenDigit === ownerTenDigit);
     if (!isOwnerOfBooking && b.listingId) {
       var lMatch = DB.listings.find(function(x){ return x.id === b.listingId; });
@@ -1009,7 +1005,6 @@ function getRelevantNotifications() {
       }
     }
 
-    // Is current logged in user the Tenant?
     var isTenantOfBooking = (b.userUid === userUid) || (userTenDigit && tenantTenDigit && userTenDigit === tenantTenDigit);
     if (isTenantOfBooking) {
       if (b.status === 'owner_accepted') {
@@ -1120,7 +1115,6 @@ async function handleOAuthRedirect() {
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
         if (profCheck.data && profCheck.data.length > 0) {
           alert("Account already exists with this Gmail (" + googleEmail + ")!\nPlease login with your existing account.");
-          await sb.auth.signOut();
           openProfileModal();
           return;
         }
@@ -1215,11 +1209,9 @@ function openProfileModal(callbackAction) {
           '<div>🛡️ <b>Access:</b> Verified Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
-        
-        '<!-- Compact Rose Legal Links inside Profile -->' +
-        '<div style="text-align:center; margin-top:12px; font-size:9px; color:#94A3B8;">' +
-          '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700;">Privacy Policy</a> • ' +
-          '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700;">Terms of Service</a>' +
+        '<div style="text-align:center; margin-top:10px; font-size:8.5px;">' +
+          '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700; margin:0 4px;">Privacy Policy</a> • ' +
+          '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700; margin:0 4px;">Terms of Service</a>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -1272,13 +1264,11 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<!-- Forgot ID/Pwd + Rose Compact Legal Links -->' +
-        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:4px; flex-wrap:wrap;">' +
-          '<span style="font-size:10px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
-          '<div style="font-size:8.5px; color:#FDA4AF; display:inline-flex; gap:4px; align-items:center;">' +
-            '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700; letter-spacing:0.2px;">Privacy</a>' +
-            '<span>•</span>' +
-            '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700; letter-spacing:0.2px;">Terms</a>' +
+        '<div style="text-align:right; margin-bottom:8px;">' +
+          '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
+          '<div style="margin-top:4px; font-size:8.5px; line-height:1.2;">' +
+            '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700; margin:0 3px;">Privacy Policy</a> • ' +
+            '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700; margin:0 3px;">Terms of Service</a>' +
           '</div>' +
         '</div>' +
 
@@ -2468,7 +2458,6 @@ function renderOwnerView() {
   var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
   var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
 
-  // All listings owned by current user
   var myRooms = DB.listings.filter(function(l){ 
     var cleanOwnerPhoneTen = normalizePhoneDigits(l.phone);
     return (l.ownerUid && l.ownerUid.toUpperCase().trim() === myUid) || (myPhoneTen && cleanOwnerPhoneTen && myPhoneTen === cleanOwnerPhoneTen); 
@@ -2476,7 +2465,6 @@ function renderOwnerView() {
 
   var myRoomIds = myRooms.map(function(r){ return r.id; });
 
-  // All requests targeted to current owner's properties
   var myRequests = DB.bookings.filter(function(b){ 
     var bOwnerPhoneTen = normalizePhoneDigits(b.ownerPhone);
     var isDirectPhoneMatch = (myPhoneTen && bOwnerPhoneTen && myPhoneTen === bOwnerPhoneTen);
@@ -3102,9 +3090,9 @@ function closeModal() {
 // ================= ADMIN DASHBOARD FUNCTIONS =================
 function switchAdminSubTab(tab) {
   currentAdminSubTab = tab;
-  document.getElementById('tabAdminOwners').className = 'admin-rose-tab-btn ' + (tab === 'owners' ? 'active' : '');
-  document.getElementById('tabAdminUsers').className = 'admin-rose-tab-btn ' + (tab === 'users' ? 'active' : '');
-  document.getElementById('tabAdminRooms').className = 'admin-rose-tab-btn ' + (tab === 'rooms' ? 'active' : '');
+  document.getElementById('tabAdminOwners').className = 'sub-tab-btn admin-sub-tab-btn ' + (tab === 'owners' ? 'active' : '');
+  document.getElementById('tabAdminUsers').className = 'sub-tab-btn admin-sub-tab-btn ' + (tab === 'users' ? 'active' : '');
+  document.getElementById('tabAdminRooms').className = 'sub-tab-btn admin-sub-tab-btn ' + (tab === 'rooms' ? 'active' : '');
 
   document.getElementById('adminOwnersSection').style.display = (tab === 'owners') ? 'block' : 'none';
   document.getElementById('adminUsersSection').style.display = (tab === 'users') ? 'block' : 'none';
@@ -3183,7 +3171,7 @@ function renderAdminOwnersSection(query) {
   });
 
   if (!list.length) {
-    container.innerHTML = '<div style="font-size:11px; color:#BE123C; padding:12px 0;">No owner listings found in database.</div>';
+    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No owner listings found in database.</div>';
     return;
   }
 
@@ -3245,7 +3233,7 @@ function renderAdminUsersSection(query) {
   });
 
   if (!list.length) {
-    container.innerHTML = '<div style="font-size:11px; color:#BE123C; padding:12px 0;">No registered users or booking records.</div>';
+    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No registered users or booking records.</div>';
     return;
   }
 
@@ -3308,7 +3296,7 @@ function filterAdminListings(query) {
   });
 
   if (!filtered.length) {
-    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#BE123C;">No matching listings found.</div>';
+    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#64748B;">No matching listings found.</div>';
     return;
   }
 
