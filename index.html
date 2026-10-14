@@ -310,7 +310,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <div class="main-wrapper">
 
-  <!-- ================= 1. HOME VIEW (Clean Home Screen) ================= -->
+  <!-- ================= 1. HOME VIEW ================= -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
@@ -1115,6 +1115,7 @@ async function handleOAuthRedirect() {
         var profCheck = await sb.from('profiles').select('*').ilike('gmail', googleEmail);
         if (profCheck.data && profCheck.data.length > 0) {
           alert("Account already exists with this Gmail (" + googleEmail + ")!\nPlease login with your existing account.");
+          await sb.auth.signOut();
           openProfileModal();
           return;
         }
@@ -1209,10 +1210,6 @@ function openProfileModal(callbackAction) {
           '<div>🛡️ <b>Access:</b> Verified Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
-        '<div style="text-align:center; margin-top:14px; font-size:9.5px; color:#94A3B8;">' +
-          '<a href="privacy.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Privacy Policy</a> • ' +
-          '<a href="terms.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Terms of Service</a>' +
-        '</div>' +
       '</div>' +
     '</div>';
   } else {
@@ -1264,12 +1261,15 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<div style="text-align:right; margin-bottom:8px;">' +
+        '<div style="text-align:right; margin-bottom:4px;">' +
           '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
-          '<div style="margin-top:4px; font-size:9px; color:#94A3B8;">' +
-            '<a href="privacy.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Privacy Policy</a> • ' +
-            '<a href="terms.html" style="color:#044E3B; text-decoration:none; font-weight:700;">Terms of Service</a>' +
-          '</div>' +
+        '</div>' +
+
+        '<!-- Legal Links directly below Forgot Password in Rose Color -->' +
+        '<div style="text-align:right; margin-bottom:12px; font-size:9.5px;">' +
+          '<a href="privacy.html" style="color:#E11D48; text-decoration:none; font-weight:700;">Privacy Policy</a>' +
+          '<span style="color:#CBD5E1; margin:0 4px;">•</span>' +
+          '<a href="terms.html" style="color:#E11D48; text-decoration:none; font-weight:700;">Terms of Service</a>' +
         '</div>' +
 
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
