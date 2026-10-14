@@ -268,11 +268,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
 
-/* Admin Theme Matching Home Emerald */
-.admin-header-card { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; }
-.admin-stat-card { background: #fff; border: 1px solid #A7F3D0; border-radius: 16px; padding: 10px 8px; text-align: center; }
-.admin-stat-num { font-size: 19px; font-weight: 900; color: #044E3B; }
-.admin-stat-label { font-size: 8.5px; font-weight: 800; color: #065F46; text-transform: uppercase; margin-top: 3px; }
+/* ================= ROSE THEMED ADMIN PANEL ================= */
+.admin-rose-card { background: linear-gradient(135deg, #E11D48, #BE123C); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(225,29,72,0.2); }
+.admin-rose-subtabs { display: flex; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 30px; padding: 3px; gap: 3px; margin-bottom: 12px; }
+.admin-rose-tab-btn { flex: 1; border: none; background: none; border-radius: 24px; padding: 7px; font-size: 11px; font-weight: 800; color: #E11D48; cursor: pointer; text-align: center; }
+.admin-rose-tab-btn.active { background: #E11D48; color: #fff; }
+.admin-stat-card-rose { background: #fff; border: 1px solid #FECDD3; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.admin-stat-num-rose { font-size: 19px; font-weight: 900; color: #E11D48; }
+.admin-stat-label-rose { font-size: 8.5px; font-weight: 800; color: #BE123C; text-transform: uppercase; margin-top: 3px; }
 
 @media print {
   body * { visibility: hidden; }
@@ -310,7 +313,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 <div class="main-wrapper">
 
-  <!-- ================= 1. HOME VIEW ================= -->
+  <!-- ================= 1. HOME VIEW (100% CLEAN & ZERO FOOTER CLUTTER) ================= -->
   <section id="view-home" class="view active">
     <div class="banner">
       <h2>Better Rooms, Brighter Days</h2>
@@ -606,66 +609,66 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div id="notificationsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
   </section>
 
-  <!-- ================= 7. PRIVATE ADMIN (Home Color Themed) ================= -->
+  <!-- ================= 7. PRIVATE ADMIN (ROSE COLOR THEMED) ================= -->
   <section id="view-admin" class="view">
-    <div class="admin-header-card">
+    <div class="admin-rose-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h3 style="font-size:16px; font-weight:900;">Admin Moderation 🔐</h3>
-          <p style="font-size:10px; opacity:0.85;">REHZO Global Control Center</p>
+          <p style="font-size:10px; opacity:0.9;">REHZO Global Control Center</p>
         </div>
-        <button onclick="goView('home')" style="padding:5px 12px; border:none; border-radius:16px; background:rgba(255,255,255,0.2); color:#fff; font-size:11px; font-weight:bold; cursor:pointer;">Exit</button>
+        <button onclick="goView('home')" style="padding:5px 12px; border:none; border-radius:16px; background:rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:bold; cursor:pointer;">Exit</button>
       </div>
     </div>
 
-    <!-- Analytics Cards -->
+    <!-- Analytics Cards (Rose) -->
     <div class="stats-grid-3">
-      <div class="admin-stat-card">
-        <div class="admin-stat-num" id="adminStatOwners">0</div>
-        <div class="admin-stat-label">Total Owners</div>
+      <div class="admin-stat-card-rose">
+        <div class="admin-stat-num-rose" id="adminStatOwners">0</div>
+        <div class="admin-stat-label-rose">Total Owners</div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-num" id="adminStatUsers">0</div>
-        <div class="admin-stat-label">Total Users</div>
+      <div class="admin-stat-card-rose">
+        <div class="admin-stat-num-rose" id="adminStatUsers">0</div>
+        <div class="admin-stat-label-rose">Total Users</div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-num" id="adminStatActive">0</div>
-        <div class="admin-stat-label">Listings</div>
+      <div class="admin-stat-card-rose">
+        <div class="admin-stat-num-rose" id="adminStatActive">0</div>
+        <div class="admin-stat-label-rose">Listings</div>
       </div>
     </div>
 
-    <!-- Admin Sub Tabs -->
-    <div class="sub-tabs-row">
-      <button class="sub-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
-      <button class="sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
-      <button class="sub-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
+    <!-- Admin Sub Tabs (Rose) -->
+    <div class="admin-rose-subtabs">
+      <button class="admin-rose-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
+      <button class="admin-rose-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
+      <button class="admin-rose-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
     </div>
 
     <!-- Search in Admin -->
-    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 14px; margin-bottom:12px;">
-      <input id="adminSearchInput" placeholder="Filter by City, Name, or UID…" oninput="renderCurrentAdminSubTab()" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600;">
+    <div style="background:#fff; border:1px solid #FECDD3; border-radius:30px; padding:6px 14px; margin-bottom:12px;">
+      <input id="adminSearchInput" placeholder="Filter by City, Name, or UID…" oninput="renderCurrentAdminSubTab()" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600; color:#BE123C;">
     </div>
 
     <!-- Section 1: Total Owners & What Cities They Listed Rooms -->
-    <div id="adminOwnersSection" style="display:block; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">🏢 Registered Owners & Listing Locations</h4>
+    <div id="adminOwnersSection" style="display:block; background:#fff; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#E11D48; margin-bottom:8px;">🏢 Registered Owners & Listing Locations</h4>
       <div id="adminOwnersListContainer"></div>
     </div>
 
     <!-- Section 2: Total Users & Where They Booked Rooms -->
-    <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
+    <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#E11D48; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
       <div id="adminUsersListContainer"></div>
     </div>
 
     <!-- Section 3: All Listings & Moderate -->
     <div id="adminRoomsSection" style="display:none;">
-      <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:16px; padding:12px; margin-bottom:12px;">
-        <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
+      <div style="background:#FFF1F2; border:1px solid #FDA4AF; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#BE123C; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
         <div id="adminReportedListingsControl"></div>
       </div>
-      <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-        <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">All Platform Rooms</h4>
+      <div style="background:#fff; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#E11D48; margin-bottom:8px;">All Platform Rooms</h4>
         <div id="adminListingsControl"></div>
       </div>
     </div>
@@ -946,7 +949,7 @@ window.addEventListener('DOMContentLoaded', function() {
   populateCountryDropdowns();
   updateUserHeaderChip();
 
-  // 1.2s me splash hide ho jayega
+  // 1.2s me splash screen automatic hide hogi
   setTimeout(dismissSplash, 1200);
 
   // Background Async Data Sync
@@ -977,6 +980,7 @@ function getRelevantNotifications() {
     var ownerTenDigit = normalizePhoneDigits(b.ownerPhone);
     var tenantTenDigit = normalizePhoneDigits(b.userPhone);
 
+    // Is current logged in user the Owner of this booked room?
     var isOwnerOfBooking = (userTenDigit && ownerTenDigit && userTenDigit === ownerTenDigit);
     if (!isOwnerOfBooking && b.listingId) {
       var lMatch = DB.listings.find(function(x){ return x.id === b.listingId; });
@@ -1005,6 +1009,7 @@ function getRelevantNotifications() {
       }
     }
 
+    // Is current logged in user the Tenant?
     var isTenantOfBooking = (b.userUid === userUid) || (userTenDigit && tenantTenDigit && userTenDigit === tenantTenDigit);
     if (isTenantOfBooking) {
       if (b.status === 'owner_accepted') {
@@ -1210,6 +1215,12 @@ function openProfileModal(callbackAction) {
           '<div>🛡️ <b>Access:</b> Verified Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
+        
+        '<!-- Compact Rose Legal Links inside Profile -->' +
+        '<div style="text-align:center; margin-top:12px; font-size:9px; color:#94A3B8;">' +
+          '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700;">Privacy Policy</a> • ' +
+          '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700;">Terms of Service</a>' +
+        '</div>' +
       '</div>' +
     '</div>';
   } else {
@@ -1261,15 +1272,14 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<div style="text-align:right; margin-bottom:4px;">' +
-          '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
-        '</div>' +
-
-        '<!-- Legal Links directly below Forgot Password in Rose Color -->' +
-        '<div style="text-align:right; margin-bottom:12px; font-size:9.5px;">' +
-          '<a href="privacy.html" style="color:#E11D48; text-decoration:none; font-weight:700;">Privacy Policy</a>' +
-          '<span style="color:#CBD5E1; margin:0 4px;">•</span>' +
-          '<a href="terms.html" style="color:#E11D48; text-decoration:none; font-weight:700;">Terms of Service</a>' +
+        '<!-- Forgot ID/Pwd + Rose Compact Legal Links -->' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:4px; flex-wrap:wrap;">' +
+          '<span style="font-size:10px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
+          '<div style="font-size:8.5px; color:#FDA4AF; display:inline-flex; gap:4px; align-items:center;">' +
+            '<a href="privacy.html" style="color:#F43F5E; text-decoration:none; font-weight:700; letter-spacing:0.2px;">Privacy</a>' +
+            '<span>•</span>' +
+            '<a href="terms.html" style="color:#F43F5E; text-decoration:none; font-weight:700; letter-spacing:0.2px;">Terms</a>' +
+          '</div>' +
         '</div>' +
 
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
@@ -2458,6 +2468,7 @@ function renderOwnerView() {
   var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
   var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
 
+  // All listings owned by current user
   var myRooms = DB.listings.filter(function(l){ 
     var cleanOwnerPhoneTen = normalizePhoneDigits(l.phone);
     return (l.ownerUid && l.ownerUid.toUpperCase().trim() === myUid) || (myPhoneTen && cleanOwnerPhoneTen && myPhoneTen === cleanOwnerPhoneTen); 
@@ -2465,6 +2476,7 @@ function renderOwnerView() {
 
   var myRoomIds = myRooms.map(function(r){ return r.id; });
 
+  // All requests targeted to current owner's properties
   var myRequests = DB.bookings.filter(function(b){ 
     var bOwnerPhoneTen = normalizePhoneDigits(b.ownerPhone);
     var isDirectPhoneMatch = (myPhoneTen && bOwnerPhoneTen && myPhoneTen === bOwnerPhoneTen);
@@ -3090,9 +3102,9 @@ function closeModal() {
 // ================= ADMIN DASHBOARD FUNCTIONS =================
 function switchAdminSubTab(tab) {
   currentAdminSubTab = tab;
-  document.getElementById('tabAdminOwners').className = 'sub-tab-btn ' + (tab === 'owners' ? 'active' : '');
-  document.getElementById('tabAdminUsers').className = 'sub-tab-btn ' + (tab === 'users' ? 'active' : '');
-  document.getElementById('tabAdminRooms').className = 'sub-tab-btn ' + (tab === 'rooms' ? 'active' : '');
+  document.getElementById('tabAdminOwners').className = 'admin-rose-tab-btn ' + (tab === 'owners' ? 'active' : '');
+  document.getElementById('tabAdminUsers').className = 'admin-rose-tab-btn ' + (tab === 'users' ? 'active' : '');
+  document.getElementById('tabAdminRooms').className = 'admin-rose-tab-btn ' + (tab === 'rooms' ? 'active' : '');
 
   document.getElementById('adminOwnersSection').style.display = (tab === 'owners') ? 'block' : 'none';
   document.getElementById('adminUsersSection').style.display = (tab === 'users') ? 'block' : 'none';
@@ -3171,18 +3183,18 @@ function renderAdminOwnersSection(query) {
   });
 
   if (!list.length) {
-    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No owner listings found in database.</div>';
+    container.innerHTML = '<div style="font-size:11px; color:#BE123C; padding:12px 0;">No owner listings found in database.</div>';
     return;
   }
 
   container.innerHTML = list.map(function(o) {
-    return '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
+    return '<div style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
       '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
         '<span>🏢 ' + cleanText(o.name) + ' (' + cleanText(o.uid || 'Owner') + ')</span>' +
-        '<span style="color:#044E3B;">' + o.houses.length + ' Room(s) Listed</span>' +
+        '<span style="color:#E11D48;">' + o.houses.length + ' Room(s) Listed</span>' +
       '</div>' +
       '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(o.phone) + (o.gmail ? ' • ✉️ ' + cleanText(o.gmail) : '') + '</div>' +
-      '<div style="margin-top:4px; padding:4px 8px; background:#ECFDF5; border-radius:8px; color:#044E3B; font-weight:700;">' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#FFE4E6; border-radius:8px; color:#BE123C; font-weight:700;">' +
         '📍 Listing Locations: ' + cleanText(o.cities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Houses: ' + cleanText(o.houses.join(' • ')) + '</div>' +
@@ -3233,18 +3245,18 @@ function renderAdminUsersSection(query) {
   });
 
   if (!list.length) {
-    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No registered users or booking records.</div>';
+    container.innerHTML = '<div style="font-size:11px; color:#BE123C; padding:12px 0;">No registered users or booking records.</div>';
     return;
   }
 
   container.innerHTML = list.map(function(u) {
-    return '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
+    return '<div style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
       '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
         '<span>👤 ' + cleanText(u.name) + ' (' + cleanText(u.uid) + ')</span>' +
-        '<span style="color:#044E3B; font-weight:800;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
+        '<span style="color:#E11D48; font-weight:800;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
       '</div>' +
       '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(u.phone) + (u.gmail ? ' • ✉️ ' + cleanText(u.gmail) : '') + '</div>' +
-      '<div style="margin-top:4px; padding:4px 8px; background:#ECFDF5; border-radius:8px; color:#044E3B; font-weight:700;">' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#FFE4E6; border-radius:8px; color:#BE123C; font-weight:700;">' +
         '📍 Booked Locations: ' + cleanText(u.bookedCities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Bookings: ' + cleanText(u.bookings.join(' • ')) + '</div>' +
@@ -3266,11 +3278,11 @@ function renderAdminReportedListings() {
 
   container.innerHTML = flaggedList.map(function(r) {
     var sym = getCurrencySymbol(r.country);
-    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #FECACA; font-size:11px;">' +
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #FDA4AF; font-size:11px;">' +
       '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Owner: ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ') - ' + sym + r.rent + '</div>' +
       '<div style="display:flex; gap:6px;">' +
         '<button onclick="adminDismissReport(\'' + r.id + '\')" style="background:#64748B; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Dismiss</button>' +
-        '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Purge Listing</button>' +
+        '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#E11D48; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Purge Listing</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -3296,15 +3308,15 @@ function filterAdminListings(query) {
   });
 
   if (!filtered.length) {
-    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#64748B;">No matching listings found.</div>';
+    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#BE123C;">No matching listings found.</div>';
     return;
   }
 
   container.innerHTML = filtered.map(function(r) {
     var sym = getCurrencySymbol(r.country);
-    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #FECDD3; font-size:11px;">' +
       '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Host: ' + cleanText(r.ownerName) + ' - ' + sym + r.rent + '</div>' +
-      '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
+      '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#E11D48; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
 }
