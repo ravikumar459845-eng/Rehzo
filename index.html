@@ -95,7 +95,7 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { width: 100%; overflow-x: hidden; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 96px; }
 
 /* Splash Screen */
 #splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; pointer-events: none; }
@@ -150,7 +150,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .room-thumb-wrap { position: relative; width: 100%; height: 110px; cursor: pointer; }
 .room-thumb { width: 100%; height: 100%; object-fit: cover; }
 
-/* Badges & Report Stack (Report directly under available) */
+/* Badges & Report Stack */
 .badge-stack { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; z-index: 2; }
 .avail-badge { background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .avail-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
@@ -268,12 +268,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .photo-del-btn { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .photo-add-box { width: 100%; border: 1px dashed #CBD5E1; border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #64748B; cursor: pointer; background: #F8FAFC; }
 
-/* Admin Rose Color Theme */
-.admin-rose-card { background: linear-gradient(135deg, #E11D48, #BE123C); border-radius: 18px; padding: 15px; color: #fff; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(225,29,72,0.2); }
-.admin-rose-stat-card { background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 16px; padding: 10px 8px; text-align: center; }
-.admin-rose-stat-num { font-size: 19px; font-weight: 900; color: #E11D48; }
-.admin-rose-stat-label { font-size: 8.5px; font-weight: 800; color: #9F1239; text-transform: uppercase; margin-top: 3px; }
-.admin-rose-title { font-size: 12px; font-weight: 800; color: #E11D48; margin-bottom: 8px; }
+/* Admin Theme Matching Home Emerald */
+.admin-header-card { background: linear-gradient(135deg, #044E3B, #055B45); border-radius: 18px; padding: 14px; color: #fff; margin-bottom: 12px; }
+.admin-stat-card { background: #fff; border: 1px solid #A7F3D0; border-radius: 16px; padding: 10px 8px; text-align: center; }
+.admin-stat-num { font-size: 19px; font-weight: 900; color: #044E3B; }
+.admin-stat-label { font-size: 8.5px; font-weight: 800; color: #065F46; text-transform: uppercase; margin-top: 3px; }
 
 @media print {
   body * { visibility: hidden; }
@@ -607,31 +606,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div id="notificationsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
   </section>
 
-  <!-- ================= 7. PRIVATE ADMIN (Rose Color Theme) ================= -->
+  <!-- ================= 7. PRIVATE ADMIN (Home Color Themed) ================= -->
   <section id="view-admin" class="view">
-    <div class="admin-rose-card">
+    <div class="admin-header-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h3 style="font-size:16px; font-weight:900;">Admin Moderation 🔐</h3>
-          <p style="font-size:10px; opacity:0.9;">REHZO Global Control Center</p>
+          <p style="font-size:10px; opacity:0.85;">REHZO Global Control Center</p>
         </div>
-        <button onclick="goView('home')" style="padding:5px 12px; border:none; border-radius:16px; background:rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:bold; cursor:pointer;">Exit</button>
+        <button onclick="goView('home')" style="padding:5px 12px; border:none; border-radius:16px; background:rgba(255,255,255,0.2); color:#fff; font-size:11px; font-weight:bold; cursor:pointer;">Exit</button>
       </div>
     </div>
 
     <!-- Analytics Cards -->
     <div class="stats-grid-3">
-      <div class="admin-rose-stat-card">
-        <div class="admin-rose-stat-num" id="adminStatOwners">0</div>
-        <div class="admin-rose-stat-label">Total Owners</div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatOwners">0</div>
+        <div class="admin-stat-label">Total Owners</div>
       </div>
-      <div class="admin-rose-stat-card">
-        <div class="admin-rose-stat-num" id="adminStatUsers">0</div>
-        <div class="admin-rose-stat-label">Total Users</div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatUsers">0</div>
+        <div class="admin-stat-label">Total Users</div>
       </div>
-      <div class="admin-rose-stat-card">
-        <div class="admin-rose-stat-num" id="adminStatActive">0</div>
-        <div class="admin-rose-stat-label">Listings</div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatActive">0</div>
+        <div class="admin-stat-label">Listings</div>
       </div>
     </div>
 
@@ -648,25 +647,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     </div>
 
     <!-- Section 1: Total Owners & What Cities They Listed Rooms -->
-    <div id="adminOwnersSection" style="display:block; background:#fff; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 class="admin-rose-title">🏢 Registered Owners & Listing Locations</h4>
+    <div id="adminOwnersSection" style="display:block; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">🏢 Registered Owners & Listing Locations</h4>
       <div id="adminOwnersListContainer"></div>
     </div>
 
     <!-- Section 2: Total Users & Where They Booked Rooms -->
-    <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 class="admin-rose-title">👥 Registered Users & Booking Activity</h4>
+    <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
       <div id="adminUsersListContainer"></div>
     </div>
 
     <!-- Section 3: All Listings & Moderate -->
     <div id="adminRoomsSection" style="display:none;">
-      <div style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
-        <h4 style="font-size:12px; font-weight:800; color:#BE123C; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
+      <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
         <div id="adminReportedListingsControl"></div>
       </div>
-      <div style="background:#fff; border:1px solid #FECDD3; border-radius:16px; padding:12px; margin-bottom:12px;">
-        <h4 class="admin-rose-title">All Platform Rooms</h4>
+      <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">All Platform Rooms</h4>
         <div id="adminListingsControl"></div>
       </div>
     </div>
@@ -947,10 +946,10 @@ window.addEventListener('DOMContentLoaded', function() {
   populateCountryDropdowns();
   updateUserHeaderChip();
 
-  // Safe timeout to dismiss splash
+  // 1.2s me splash hide ho jayega
   setTimeout(dismissSplash, 1200);
 
-  // Background Sync
+  // Background Async Data Sync
   (async function() {
     try {
       await autoDetectUserCountry();
@@ -1210,12 +1209,6 @@ function openProfileModal(callbackAction) {
           '<div>🛡️ <b>Access:</b> Verified Account</div>' +
         '</div>' +
         '<button class="big-action-btn" style="background:#EF4444;" onclick="logoutUser()">Log Out / Switch Account</button>' +
-        
-        '<!-- Legal Links inside Profile (Compact & Rose Color) -->' +
-        '<div style="text-align:center; margin-top:14px; font-size:9.5px; line-height:1.2;">' +
-          '<a href="privacy.html" style="color:#E11D48; text-decoration:none; font-weight:800; margin:0 4px;">Privacy Policy</a> • ' +
-          '<a href="terms.html" style="color:#E11D48; text-decoration:none; font-weight:800; margin:0 4px;">Terms of Service</a>' +
-        '</div>' +
       '</div>' +
     '</div>';
   } else {
@@ -1259,7 +1252,7 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<div class="field-box" style="margin-bottom:6px;">' +
+        '<div class="field-box" style="margin-bottom:4px;">' +
           '<label class="field-label">Password *</label>' +
           '<div class="pwd-wrap">' +
             '<input id="loginPwd" type="password" class="pill-input" placeholder="Enter password" minlength="4" maxlength="12" autocomplete="new-password">' +
@@ -1267,15 +1260,13 @@ function openProfileModal(callbackAction) {
           '</div>' +
         '</div>' +
 
-        '<!-- Forgot Credentials -->' +
-        '<div style="text-align:right; margin-bottom:6px;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin:6px 0 12px;">' +
+          '<div style="font-size:8.5px; font-weight:700;">' +
+            '<a href="privacy.html" style="color:#E11D48; text-decoration:none;">Privacy</a>' +
+            '<span style="color:#E11D48; margin:0 3px;">•</span>' +
+            '<a href="terms.html" style="color:#E11D48; text-decoration:none;">Terms</a>' +
+          '</div>' +
           '<span style="font-size:10.5px; color:#044E3B; font-weight:700; cursor:pointer;" onclick="openForgotCredentialsModal()">Forgot User ID or Password?</span>' +
-        '</div>' +
-
-        '<!-- Rose Color Compact Legal Links directly below Forgot -->' +
-        '<div style="text-align:right; margin-bottom:12px; font-size:9px; line-height:1;">' +
-          '<a href="privacy.html" style="color:#E11D48; text-decoration:none; font-weight:800; margin-left:4px;">Privacy Policy</a> • ' +
-          '<a href="terms.html" style="color:#E11D48; text-decoration:none; font-weight:800; margin-left:4px;">Terms of Service</a>' +
         '</div>' +
 
         '<button class="big-action-btn" id="btnLoginSubmit" onclick="submitCredentialsLogin(' + (callbackAction ? '\'' + callbackAction + '\'' : 'null') + ')">Login with REHZO ID →</button>' +
@@ -3182,13 +3173,13 @@ function renderAdminOwnersSection(query) {
   }
 
   container.innerHTML = list.map(function(o) {
-    return '<div style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
+    return '<div style="background:#F8FAF9; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
       '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
         '<span>🏢 ' + cleanText(o.name) + ' (' + cleanText(o.uid || 'Owner') + ')</span>' +
-        '<span style="color:#E11D48;">' + o.houses.length + ' Room(s) Listed</span>' +
+        '<span style="color:#044E3B;">' + o.houses.length + ' Room(s) Listed</span>' +
       '</div>' +
       '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(o.phone) + (o.gmail ? ' • ✉️ ' + cleanText(o.gmail) : '') + '</div>' +
-      '<div style="margin-top:4px; padding:4px 8px; background:#FFE4E6; border-radius:8px; color:#BE123C; font-weight:700;">' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#ECFDF5; border-radius:8px; color:#044E3B; font-weight:700;">' +
         '📍 Listing Locations: ' + cleanText(o.cities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Houses: ' + cleanText(o.houses.join(' • ')) + '</div>' +
@@ -3244,13 +3235,13 @@ function renderAdminUsersSection(query) {
   }
 
   container.innerHTML = list.map(function(u) {
-    return '<div style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
+    return '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
       '<div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">' +
         '<span>👤 ' + cleanText(u.name) + ' (' + cleanText(u.uid) + ')</span>' +
-        '<span style="color:#E11D48; font-weight:800;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
+        '<span style="color:#044E3B; font-weight:800;">' + (u.bookings[0] === 'No bookings yet' ? '0 Bookings' : u.bookings.length + ' Booking(s)') + '</span>' +
       '</div>' +
       '<div style="color:#64748B; margin-top:2px;">📞 ' + cleanText(u.phone) + (u.gmail ? ' • ✉️ ' + cleanText(u.gmail) : '') + '</div>' +
-      '<div style="margin-top:4px; padding:4px 8px; background:#FFE4E6; border-radius:8px; color:#BE123C; font-weight:700;">' +
+      '<div style="margin-top:4px; padding:4px 8px; background:#ECFDF5; border-radius:8px; color:#044E3B; font-weight:700;">' +
         '📍 Booked Locations: ' + cleanText(u.bookedCities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Bookings: ' + cleanText(u.bookings.join(' • ')) + '</div>' +
@@ -3308,9 +3299,9 @@ function filterAdminListings(query) {
 
   container.innerHTML = filtered.map(function(r) {
     var sym = getCurrencySymbol(r.country);
-    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #FECDD3; font-size:11px;">' +
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
       '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Host: ' + cleanText(r.ownerName) + ' - ' + sym + r.rent + '</div>' +
-      '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#E11D48; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
+      '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
 }
