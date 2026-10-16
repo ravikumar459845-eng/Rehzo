@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <!-- ================= GLOBAL & INTERNATIONAL SEO ================= -->
 <title>Rehzo — Find & Book Verified Rooms, Hostels & PGs Worldwide</title>
@@ -94,7 +94,7 @@
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+html, body { width: 100%; overflow-x: hidden; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #F8FAF9; color: #1E293B; padding-bottom: 84px; }
 
 /* Splash Screen */
@@ -109,7 +109,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 }
 
 /* Header */
-.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; width: 100%; }
 .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
 .brand-text h1 { font-size: 16px; font-weight: 800; line-height: 1; color: #0F172A; }
 .brand-text p { font-size: 9px; font-weight: 700; color: #044E3B; margin-top: 2px; }
@@ -119,8 +119,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .notif-badge { position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px; border-radius: 8px; background: #EF4444; color: #fff; font-size: 9px; font-weight: 900; display: none; align-items: center; justify-content: center; padding: 0 4px; border: 1.5px solid #fff; }
 
 /* Main Wrapper */
-.main-wrapper { width: 100%; max-width: 100%; margin: 0 auto; padding: 12px 14px; }
-.view { display: none; width: 100%; }
+.main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 12px 14px; }
+.view { display: none; }
 .view.active { display: block; }
 
 /* Banner */
@@ -238,7 +238,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .notif-time { font-size: 9px; color: #94A3B8; font-weight: 600; }
 
 /* Bottom Nav Bar */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; width: 100%; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 0; z-index: 20; max-width: 500px; margin: 0 auto; width: 100%; }
 .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #94A3B8; font-size: 9px; font-weight: 800; gap: 2px; }
 .nav-item.active { color: #044E3B; }
 .nav-svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -628,19 +628,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
         <div class="admin-stat-num" id="adminStatUsers">0</div>
         <div class="admin-stat-label">Total Users</div>
       </div>
-      <div class="stats-grid-3" style="grid-column: span 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;">
-        <div class="admin-stat-card"><div class="admin-stat-num" id="adminStatBooked">0</div><div class="admin-stat-label">Booked</div></div>
-        <div class="admin-stat-card"><div class="admin-stat-num" id="adminStatVacant">0</div><div class="admin-stat-label">Vacant</div></div>
-        <div class="admin-stat-card"><div class="admin-stat-num" id="adminStatTotalRooms">0</div><div class="admin-stat-label">Total Rooms</div></div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="adminStatActive">0</div>
+        <div class="admin-stat-label">Listings</div>
       </div>
     </div>
 
     <!-- Admin Sub Tabs -->
     <div class="sub-tabs-row">
-      <button class="sub-tab-btn active" id="tabAdminOverview" onclick="switchAdminSubTab('overview')">Overview</button>
-      <button class="sub-tab-btn" id="tabAdminReports" onclick="switchAdminSubTab('reports')">Reports 🚩</button>
-      <button class="sub-tab-btn" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners</button>
-      <button class="sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users</button>
+      <button class="sub-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
+      <button class="sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
+      <button class="sub-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
     </div>
 
     <!-- Search in Admin -->
@@ -648,28 +646,28 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
       <input id="adminSearchInput" placeholder="Filter by City, Name, or UID…" oninput="renderCurrentAdminSubTab()" style="width:100%; border:none; outline:none; font-size:11.5px; font-weight:600;">
     </div>
 
-    <!-- Section 1: Overview & Country/City Counts -->
-    <div id="adminOverviewSection" style="display:block; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">📊 Global & Country-Wise Room Availability</h4>
-      <div id="adminOverviewContainer"></div>
-    </div>
-
-    <!-- Section 2: Reports Section -->
-    <div id="adminReportsSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚨 User & Owner Reports Management</h4>
-      <div id="adminReportsContainer"></div>
-    </div>
-
-    <!-- Section 3: Owners List -->
-    <div id="adminOwnersSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+    <!-- Section 1: Total Owners & What Cities They Listed Rooms -->
+    <div id="adminOwnersSection" style="display:block; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
       <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">🏢 Registered Owners & Listing Locations</h4>
       <div id="adminOwnersListContainer"></div>
     </div>
 
-    <!-- Section 4: Users List -->
+    <!-- Section 2: Total Users & Where They Booked Rooms -->
     <div id="adminUsersSection" style="display:none; background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
       <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">👥 Registered Users & Booking Activity</h4>
       <div id="adminUsersListContainer"></div>
+    </div>
+
+    <!-- Section 3: All Listings & Moderate -->
+    <div id="adminRoomsSection" style="display:none;">
+      <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#991B1B; margin-bottom:8px;">🚩 Flagged / Reported Listings</h4>
+        <div id="adminReportedListingsControl"></div>
+      </div>
+      <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:12px; margin-bottom:12px;">
+        <h4 style="font-size:12px; font-weight:800; color:#044E3B; margin-bottom:8px;">All Platform Rooms</h4>
+        <div id="adminListingsControl"></div>
+      </div>
     </div>
   </section>
 
@@ -725,7 +723,7 @@ var SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
 var SUPABASE_KEY = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ================= BIDIRECTIONAL CIPHER HELPER =================
+// ================= BIDIRECTIONAL CIPHER HELPER (A=1...Z=26, 1=A...26=Z) =================
 var RehzoCipher = {
   letterToNum: function(str) {
     if (!str) return '';
@@ -858,12 +856,12 @@ function populateCountryDropdowns() {
   }
 }
 
+// Session-based state management (New tabs/phones/links always require fresh login)
 var DB = {
   currentUser: JSON.parse(sessionStorage.getItem('rehzo_current_user')) || null,
   listings: [],
   bookings: [],
   profiles: [],
-  reports: [],
   totalProfilesCount: 0
 };
 
@@ -871,14 +869,13 @@ var userGeo = { lat: 24.9536, lng: 84.0321 };
 var lockedMapCoord = { lat: 24.9536, lng: 84.0321 };
 var currentBookingsTab = 'current';
 var currentOwnerTab = 'rooms';
-var currentAdminSubTab = 'overview';
+var currentAdminSubTab = 'owners';
 var uploadedPhotoFiles = [];
 var editUploadedPhotoFiles = [];
 var currentEditListingPhotos = [];
 var selectedSuitable = ['Family'];
 var selectedAmenities = ['Wi-Fi', 'Parking'];
 var selectedRules = ['No Smoking'];
-var bookingModalSuitable = 'Family';
 var activeBookingRoom = null;
 var matchedBookingId = null;
 
@@ -994,6 +991,8 @@ async function syncFromSupabase() {
     if (!resProfiles.error && resProfiles.data) {
       DB.profiles = resProfiles.data;
       DB.totalProfilesCount = resProfiles.data.length;
+      
+      // Keep session role in sync if logged in
       if (DB.currentUser) {
         var myUpdated = DB.profiles.find(function(p){ return p.uid === DB.currentUser.uid; });
         if (myUpdated) {
@@ -1002,19 +1001,13 @@ async function syncFromSupabase() {
         }
       }
     }
-
-    var resReports = await sb.from('reports').select('*').order('created_at', { ascending: false });
-    if (!resReports.error && resReports.data) {
-      DB.reports = resReports.data;
-    }
   } catch(e) {
     console.warn("Supabase fetch notice:", e);
   }
 
   updateUserHeaderChip();
   updateNotificationsBadge();
-  if (document.getElementById('view-home').classList.contains('active')) renderHomeGrid();
-  if (document.getElementById('view-search').classList.contains('active')) renderSearchGrid();
+  renderHomeGrid();
   if (document.getElementById('view-bookings').classList.contains('active')) renderBookingsView();
   if (document.getElementById('view-owner').classList.contains('active')) renderOwnerView();
   if (document.getElementById('view-notifications').classList.contains('active')) renderNotifications();
@@ -2982,19 +2975,6 @@ function openBookingPillModal(id) {
           '</select>' +
         '</div>' +
       '</div>' +
-      '<div class="field-box" style="margin-bottom:8px;">' +
-        '<label class="field-label">Suitable For *</label>' +
-        '<div class="collapsible-trigger" onclick="toggleDrawer(\'bookingSuitableDrawer\')">' +
-          '<span id="bookingSuitableText">Family</span>' +
-          '<span>▾</span>' +
-        '</div>' +
-        '<div class="collapsible-drawer" id="bookingSuitableDrawer">' +
-          '<div class="radio-chip selected" onclick="selectBookingSuitable(this, \'Family\')"><div class="circle-indicator"></div> Family</div>' +
-          '<div class="radio-chip" onclick="selectBookingSuitable(this, \'Student\')"><div class="circle-indicator"></div> Student</div>' +
-          '<div class="radio-chip" onclick="selectBookingSuitable(this, \'Worker\')"><div class="circle-indicator"></div> Worker</div>' +
-          '<div class="radio-chip" onclick="selectBookingSuitable(this, \'Anyone\')"><div class="circle-indicator"></div> Anyone</div>' +
-        '</div>' +
-      '</div>' +
       '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; flex-direction:column; gap:3px;">' +
         '<div style="display:flex; justify-content:space-between;"><span>Rent: ' + sym + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span><span>' + sym + Number(l.rent).toLocaleString() + '</span></div>' +
         '<div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><span>+ ' + sym + Number(l.deposit || 0).toLocaleString() + '</span></div>' +
@@ -3003,17 +2983,6 @@ function openBookingPillModal(id) {
       '<button class="big-action-btn" id="btnConfirmBooking" onclick="submitBookingRequest()">Send Request to Owner →</button>' +
     '</div>' +
   '</div>';
-  bookingModalSuitable = 'Family';
-}
-
-function selectBookingSuitable(el, val) {
-  var parent = document.getElementById('bookingSuitableDrawer');
-  var chips = parent.querySelectorAll('.radio-chip');
-  for (var i = 0; i < chips.length; i++) chips[i].classList.remove('selected');
-  el.classList.add('selected');
-  bookingModalSuitable = val;
-  document.getElementById('bookingSuitableText').innerText = val;
-  parent.classList.remove('open');
 }
 
 function updateBookingTotalCalculation() {
@@ -3050,7 +3019,6 @@ async function submitBookingRequest() {
     listing_id: activeBookingRoom.id,
     house_name: activeBookingRoom.houseName,
     room_type: activeBookingRoom.roomType,
-    suitable_for: bookingModalSuitable,
     rent: Math.max(0, parseFloat(activeBookingRoom.rent) || 0),
     deposit: Math.max(0, parseFloat(activeBookingRoom.deposit) || 0),
     duration: months,
@@ -3095,7 +3063,6 @@ function openSlipModal(bkId) {
 
   var houseName = b.houseName || l.houseName || 'Room Listing';
   var roomType = b.roomType || l.roomType || 'Room';
-  var suitableFor = b.suitableFor || (l.suitableFor ? l.suitableFor[0] : 'Family');
   var address = b.roomExactAddress || l.address || '';
   var city = b.roomCity || l.city || '';
   var state = b.roomState || l.state || '';
@@ -3136,7 +3103,6 @@ function openSlipModal(bkId) {
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Suitable For:</span> <b style="color:#0F172A;">' + cleanText(suitableFor) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(address) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + cleanText(city) + (state ? ' (' + cleanText(state) + ')' : '') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + cleanText(pin) + '</b></div>' +
@@ -3167,225 +3133,58 @@ function closeModal() {
   document.getElementById('modalSlot').innerHTML = '';
 }
 
-// ================= REPORT SYSTEM =================
-function openReportModal(targetType, targetId, houseName, ownerName, ownerPhone, ownerUid) {
-  if (!DB.currentUser) {
-    alert("Please login to report.");
-    openProfileModal();
-    return;
-  }
-  document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
-    '<div class="modal-box-narrow">' +
-      '<div class="modal-header">' +
-        '<h3 style="font-size:15px; font-weight:800; color:#991B1B;">Report Listing / User</h3>' +
-        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
-      '</div>' +
-      '<div class="field-box" style="margin-bottom:10px;">' +
-        '<label class="field-label">Select Reason *</label>' +
-        '<select id="reportReasonSelect" class="pill-input">' +
-          '<option value="Fake Room">Fake Room</option>' +
-          '<option value="High Price">High Price</option>' +
-          '<option value="Wrong Room Owner">Wrong Room Owner</option>' +
-          '<option value="Fraud / Scam">Fraud / Scam</option>' +
-          '<option value="Other">Other</option>' +
-        '</select>' +
-      '</div>' +
-      '<div class="field-box" style="margin-bottom:12px;">' +
-        '<label class="field-label">Additional Details (optional)</label>' +
-        '<textarea id="reportDescInput" class="pill-input" style="height:70px; border-radius:16px; resize:none;" placeholder="Describe issue..."></textarea>' +
-      '</div>' +
-      '<button class="big-action-btn" style="background:#DC2626;" onclick="submitReport(\'' + targetType + '\', \'' + targetId + '\', \'' + cleanText(houseName) + '\', \'' + cleanText(ownerName) + '\', \'' + cleanText(ownerPhone) + '\', \'' + cleanText(ownerUid) + '\')">Submit Report 🚨</button>' +
-    '</div>' +
-  '</div>';
-}
-
-async function submitReport(targetType, targetId, houseName, ownerName, ownerPhone, ownerUid) {
-  var reason = document.getElementById('reportReasonSelect').value;
-  var desc = cleanText(document.getElementById('reportDescInput').value);
-  var btn = document.getElementById('btnConfirmBooking');
-
-  var reportPayload = {
-    reporter_uid: DB.currentUser.uid,
-    reporter_name: DB.currentUser.name,
-    reporter_phone: DB.currentUser.phone,
-    target_type: targetType,
-    target_id: targetId,
-    house_name: houseName,
-    owner_name: ownerName || 'N/A',
-    owner_phone: ownerPhone || 'N/A',
-    owner_uid: ownerUid || 'N/A',
-    reason: reason,
-    description: desc,
-    created_at: new Date().toISOString()
-  };
-
-  var res = await sb.from('reports').insert([reportPayload]);
-  if (!res.error) {
-    alert("Report submitted successfully to Admin!");
-    closeModal();
-    await syncFromSupabase();
-  } else {
-    alert("Error submitting report: " + res.error.message);
-  }
-}
-
-async function adminDeleteUserOrOwner(uidOrPhone, isOwner) {
-  if (confirm("Are you sure you want to PERMANENTLY delete this " + (isOwner ? "Owner" : "User") + " and all associated data from the app?")) {
-    try {
-      var cleanId = String(uidOrPhone).trim();
-      await sb.from('profiles').delete().or('uid.ilike.' + cleanId + ',phone.ilike.' + cleanId);
-      if (isOwner) {
-        await sb.from('listings').delete().or('owner_uid.ilike.' + cleanId + ',owner_phone.ilike.' + cleanId);
-      }
-      alert("Permanently deleted from app!");
-      await syncFromSupabase();
-      renderAdminModeration();
-    } catch(err) {
-      alert("Delete failed: " + err.message);
-    }
-  }
-}
-
 // ================= ADMIN DASHBOARD FUNCTIONS =================
 function switchAdminSubTab(tab) {
   currentAdminSubTab = tab;
-  document.getElementById('tabAdminOverview').className = 'sub-tab-btn ' + (tab === 'overview' ? 'active' : '');
-  document.getElementById('tabAdminReports').className = 'sub-tab-btn ' + (tab === 'reports' ? 'active' : '');
   document.getElementById('tabAdminOwners').className = 'sub-tab-btn ' + (tab === 'owners' ? 'active' : '');
   document.getElementById('tabAdminUsers').className = 'sub-tab-btn ' + (tab === 'users' ? 'active' : '');
+  document.getElementById('tabAdminRooms').className = 'sub-tab-btn ' + (tab === 'rooms' ? 'active' : '');
 
-  document.getElementById('adminOverviewSection').style.display = (tab === 'overview') ? 'block' : 'none';
-  document.getElementById('adminReportsSection').style.display = (tab === 'reports') ? 'block' : 'none';
   document.getElementById('adminOwnersSection').style.display = (tab === 'owners') ? 'block' : 'none';
   document.getElementById('adminUsersSection').style.display = (tab === 'users') ? 'block' : 'none';
+  document.getElementById('adminRoomsSection').style.display = (tab === 'rooms') ? 'block' : 'none';
 
   renderCurrentAdminSubTab();
 }
 
 function renderCurrentAdminSubTab() {
   var q = document.getElementById('adminSearchInput') ? document.getElementById('adminSearchInput').value : '';
-  if (currentAdminSubTab === 'overview') renderAdminOverviewSection();
-  else if (currentAdminSubTab === 'reports') renderAdminReportsSection(q);
-  else if (currentAdminSubTab === 'owners') renderAdminOwnersSection(q);
+  if (currentAdminSubTab === 'owners') renderAdminOwnersSection(q);
   else if (currentAdminSubTab === 'users') renderAdminUsersSection(q);
+  else filterAdminListings(q);
 }
 
 function renderAdminModeration() {
-  var ownerIds = {};
+  var ownerPhones = {};
   DB.listings.forEach(function(l) {
-    if (l.ownerUid) ownerIds[l.ownerUid.toUpperCase().trim()] = true;
-    if (l.phone) ownerIds[normalizePhoneDigits(l.phone)] = true;
+    var p = normalizePhoneDigits(l.phone);
+    if (p) ownerPhones[p] = true;
+    if (l.ownerUid) ownerPhones[l.ownerUid.toUpperCase().trim()] = true;
   });
 
-  var totalOwners = 0;
-  var totalUsers = 0;
-  DB.profiles.forEach(function(p) {
-    var uId = String(p.uid || '').toUpperCase().trim();
-    var pNum = normalizePhoneDigits(p.phone);
-    if (ownerIds[uId] || ownerIds[pNum]) totalOwners++;
-    else totalUsers++;
-  });
+  var totalOwnersCount = 0;
+  var totalUsersCount = 0;
 
-  var totalRooms = DB.listings.length;
-  var bookedRooms = DB.listings.filter(function(l){ return l.status === 'booked'; }).length;
-  var vacantRooms = totalRooms - bookedRooms;
+  DB.profiles.forEach(function(prof) {
+    var p = normalizePhoneDigits(prof.phone);
+    var u = String(prof.uid || '').toUpperCase().trim();
+    if (ownerPhones[p] || ownerPhones[u]) {
+      totalOwnersCount++;
+    } else {
+      totalUsersCount++;
+    }
+  });
 
   var statOwners = document.getElementById('adminStatOwners');
   var statUsers = document.getElementById('adminStatUsers');
-  var statBooked = document.getElementById('adminStatBooked');
-  var statVacant = document.getElementById('adminStatVacant');
-  var statTotalRooms = document.getElementById('adminStatTotalRooms');
+  var statActive = document.getElementById('adminStatActive');
 
-  if (statOwners) statOwners.innerText = totalOwners;
-  if (statUsers) statUsers.innerText = totalUsers;
-  if (statBooked) statBooked.innerText = bookedRooms;
-  if (statVacant) statVacant.innerText = vacantRooms;
-  if (statTotalRooms) statTotalRooms.innerText = totalRooms;
+  if (statOwners) statOwners.innerText = totalOwnersCount;
+  if (statUsers) statUsers.innerText = totalUsersCount;
+  if (statActive) statActive.innerText = DB.listings.length;
 
   renderCurrentAdminSubTab();
-}
-
-function renderAdminOverviewSection() {
-  var container = document.getElementById('adminOverviewContainer');
-  if (!container) return;
-
-  var countryMap = {};
-  var cityMap = {};
-
-  DB.listings.forEach(function(l) {
-    var c = l.country || 'IN';
-    var city = l.city || 'Unknown City';
-    if (!countryMap[c]) countryMap[c] = { total: 0, vacant: 0, booked: 0 };
-    countryMap[c].total++;
-    if (l.status === 'booked') countryMap[c].booked++;
-    else countryMap[c].vacant++;
-
-    if (!cityMap[city]) cityMap[city] = { total: 0, vacant: 0, booked: 0, country: c };
-    cityMap[city].total++;
-    if (l.status === 'booked') cityMap[city].booked++;
-    else cityMap[city].vacant++;
-  });
-
-  var countryHtml = Object.keys(countryMap).map(function(cKey) {
-    var info = countryMap[cKey];
-    var cObj = WORLD_COUNTRIES.find(function(x){ return x.code === cKey; }) || { name: cKey };
-    return '<div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:12px; padding:10px; margin-bottom:8px;">' +
-      '<div style="font-size:12px; font-weight:900; color:#044E3B;">🌐 Country: ' + cleanText(cObj.name) + ' (' + cKey + ')</div>' +
-      '<div style="font-size:11px; color:#166534; margin-top:3px;">Total Rooms: <b>' + info.total + '</b> | Vacant: <b>' + info.vacant + '</b> | Booked: <b>' + info.booked + '</b></div>' +
-    '</div>';
-  }).join('');
-
-  var cityHtml = Object.keys(cityMap).map(function(cityKey) {
-    var info = cityMap[cityKey];
-    return '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:8px 10px; margin-bottom:6px; font-size:11px;">' +
-      '📍 City: <b>' + cleanText(cityKey) + '</b> (' + info.country + ') — Total: <b>' + info.total + '</b> | Vacant (Khali): <b style="color:#10B981;">' + info.vacant + '</b> | Booked: <b>' + info.booked + '</b>' +
-    '</div>';
-  }).join('');
-
-  container.innerHTML = '<div>' +
-    '<div style="font-size:11px; font-weight:800; color:#334155; margin-bottom:6px;">Country-Wise Breakdown:</div>' +
-    (countryHtml || '<div style="font-size:11px; color:#64748B;">No country data available.</div>') +
-    '<div style="font-size:11px; font-weight:800; color:#334155; margin:10px 0 6px;">City-Wise Breakdown:</div>' +
-    (cityHtml || '<div style="font-size:11px; color:#64748B;">No city data available.</div>') +
-  '</div>';
-}
-
-function renderAdminReportsSection(query) {
-  var container = document.getElementById('adminReportsContainer');
-  if (!container) return;
-  var q = (query || '').toLowerCase().trim();
-
-  var list = DB.reports.filter(function(r) {
-    if (!q) return true;
-    return (r.house_name && r.house_name.toLowerCase().indexOf(q) !== -1) ||
-           (r.reporter_name && r.reporter_name.toLowerCase().indexOf(q) !== -1) ||
-           (r.owner_name && r.owner_name.toLowerCase().indexOf(q) !== -1) ||
-           (r.reason && r.reason.toLowerCase().indexOf(q) !== -1);
-  });
-
-  if (!list.length) {
-    container.innerHTML = '<div style="font-size:11px; color:#64748B; padding:12px 0;">No active reports found.</div>';
-    return;
-  }
-
-  container.innerHTML = list.map(function(rp) {
-    return '<div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">' +
-      '<div style="display:flex; justify-content:space-between; font-weight:900; color:#991B1B;">' +
-        '<span>🚨 Reason: ' + cleanText(rp.reason) + '</span>' +
-        '<span style="font-size:9px; color:#64748B;">' + new Date(rp.created_at).toLocaleString() + '</span>' +
-      '</div>' +
-      '<div style="margin-top:4px; color:#334155; line-height:1.5;">' +
-        '🏠 <b>Room:</b> ' + cleanText(rp.house_name) + '<br>' +
-        '👤 <b>Reporter:</b> ' + cleanText(rp.reporter_name) + ' (' + cleanText(rp.reporter_phone) + ')<br>' +
-        '🏢 <b>Owner:</b> ' + cleanText(rp.owner_name) + ' (' + cleanText(rp.owner_phone) + ' | UID: ' + cleanText(rp.owner_uid) + ')<br>' +
-        (rp.description ? '📝 <b>Note:</b> ' + cleanText(rp.description) + '<br>' : '') +
-      '</div>' +
-      '<div class="action-row-mini" style="margin-top:8px;">' +
-        '<button class="btn-action-large danger" onclick="adminDeleteUserOrOwner(\'' + rp.owner_uid + '\', true)">Delete Owner Permanently</button>' +
-        '<button class="btn-action-large danger" onclick="adminDeleteUserOrOwner(\'' + rp.reporter_uid + '\', false)">Delete User Permanently</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+  renderAdminReportedListings();
 }
 
 function renderAdminOwnersSection(query) {
@@ -3433,9 +3232,6 @@ function renderAdminOwnersSection(query) {
         '📍 Listing Locations: ' + cleanText(o.cities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Houses: ' + cleanText(o.houses.join(' • ')) + '</div>' +
-      '<div class="action-row-mini" style="margin-top:6px;">' +
-        '<button class="btn-action-large danger" onclick="adminDeleteUserOrOwner(\'' + (o.uid || o.phone) + '\', true)">Delete Owner Permanently</button>' +
-      '</div>' +
     '</div>';
   }).join('');
 }
@@ -3498,241 +3294,77 @@ function renderAdminUsersSection(query) {
         '📍 Booked Locations: ' + cleanText(u.bookedCities.join(', ')) +
       '</div>' +
       '<div style="font-size:10px; color:#475569; margin-top:3px;">Bookings: ' + cleanText(u.bookings.join(' • ')) + '</div>' +
-      '<div class="action-row-mini" style="margin-top:6px;">' +
-        '<button class="btn-action-large danger" onclick="adminDeleteUserOrOwner(\'' + (u.uid || u.phone) + '\', false)">Delete User Permanently</button>' +
-      '</div>' +
     '</div>';
   }).join('');
 }
 
-// ================= ENHANCED NEAR ME & SEARCH =================
-function renderNearGrid() {
-  var confirmedRoomIds = DB.bookings
-    .filter(function(b){ return b.status === 'confirmed'; })
-    .map(function(b){ return b.listingId; });
-
-  var near = [];
-  for (var i = 0; i < DB.listings.length; i++) {
-    var l = DB.listings[i];
-    var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
-    if (l.status === 'available' && !isConfirmed && l.daysLeft > 0 && l.lat && l.lng && l.country === detectedCountryCode) {
-      var d = getDistKm(userGeo.lat, userGeo.lng, l.lat, l.lng);
-      near.push(Object.assign({}, l, { distKm: d.toFixed(1) }));
-    }
-  }
-  near.sort(function(a,b){ return parseFloat(a.distKm) - parseFloat(b.distKm); });
-
-  var container = document.getElementById('nearRoomsGrid');
-  if (!near.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No available rooms found nearby.</div>';
-    return;
-  }
-  container.innerHTML = near.map(function(r) {
-    var sym = getCurrencySymbol(r.country);
-    return '<div class="room-card">' +
-      '<div class="room-thumb-wrap">' +
-        '<img src="' + r.photos[0] + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<div class="badge-stack">' +
-          '<span class="avail-badge">📍 ' + r.distKm + ' km away</span>' +
-          '<button class="report-flag-btn" onclick="openReportModal(\'listing\', \'' + r.id + '\', \'' + cleanText(r.houseName) + '\', \'' + cleanText(r.ownerName) + '\', \'' + cleanText(r.phone) + '\', \'' + cleanText(r.ownerUid) + '\')">🚩 Report</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="room-details">' +
-        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
-        '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function detectGPS(isManual) {
-  var statusText = document.getElementById('nearStatusText');
-  var btn = document.getElementById('gpsRefreshBtn');
-  statusText.innerText = 'Detecting real live GPS…';
-  if (btn) btn.innerText = 'Finding…';
-
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      userGeo.lat = pos.coords.latitude;
-      userGeo.lng = pos.coords.longitude;
-      statusText.innerText = '📍 Live GPS Active (' + userGeo.lat.toFixed(3) + ', ' + userGeo.lng.toFixed(3) + ')';
-      if (btn) btn.innerText = 'Find';
-      renderNearGrid();
-      if (isManual) alert("GPS Location turned ON successfully!");
-    }, function() {
-      statusText.innerText = '📍 GPS location unavailable';
-      if (btn) btn.innerText = 'Find';
-      renderNearGrid();
-    }, { enableHighAccuracy: true, timeout: 8000 });
-  } else {
-    statusText.innerText = '📍 Geolocation not supported';
-    if (btn) btn.innerText = 'Find';
-    renderNearGrid();
-  }
-}
-
-// 900m Advance Search (Starts completely empty)
-function handleSearch(val) {
-  var q = val.trim();
-  var alertBox = document.getElementById('trlAlertBox');
-  var container = document.getElementById('searchRoomsGrid');
-
-  if (q.length === 12 && /^\d+$/.test(q)) {
-    var b = DB.bookings.find(function(x){ return x.trl === q; });
-    if (b) {
-      matchedBookingId = b.id;
-      alertBox.style.display = 'block';
-      document.getElementById('trlAlertDetails').innerText = cleanText(b.houseName) + ' • ' + cleanText(b.userName) + ' (' + (b.status ? b.status.toUpperCase() : 'PENDING') + ')';
-      document.getElementById('trlViewSlipBtn').onclick = function() { openSlipModal(b.id); };
-      return;
-    }
-  }
-  alertBox.style.display = 'none';
-
-  if (!q) {
-    if (container) container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:36px; font-size:11.5px; color:#64748B;">Type state, city, area, pin code, address, room type or price to search rooms within 900m.</div>';
-    return;
-  }
-
-  var sLow = q.toLowerCase();
-  var confirmedRoomIds = DB.bookings
-    .filter(function(b){ return b.status === 'confirmed'; })
-    .map(function(b){ return b.listingId; });
-
-  var filtered = DB.listings.filter(function(l) {
-    var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
-    if (l.status !== 'available' || isConfirmed || l.daysLeft <= 0) return false;
-
-    var matchText = (l.houseName + ' ' + l.city + ' ' + (l.state||'') + ' ' + (l.pin||'') + ' ' + l.address + ' ' + l.roomType + ' ' + l.rent).toLowerCase();
-    var matchQuery = matchText.indexOf(sLow) !== -1;
-
-    if (!matchQuery) return false;
-
-    // Check 900m (0.9 km) radius from user GPS if coordinates exist
-    if (l.lat && l.lng) {
-      var d = getDistKm(userGeo.lat, userGeo.lng, l.lat, l.lng);
-      return d <= 0.9;
-    }
-    return true;
-  });
-
-  renderSearchGridResults(filtered);
-}
-
-function renderSearchGrid() {
-  var container = document.getElementById('searchRoomsGrid');
-  if (container && !document.getElementById('searchScreenInput').value.trim()) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:36px; font-size:11.5px; color:#64748B;">Type state, city, area, pin code, address, room type or price to search rooms within 900m.</div>';
-  }
-}
-
-function renderSearchGridResults(list) {
-  var container = document.getElementById('searchRoomsGrid');
+function renderAdminReportedListings() {
+  var container = document.getElementById('adminReportedListingsControl');
   if (!container) return;
 
-  if (!list.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No available rooms found within 900m matching your search.</div>';
+  var flaggedIds = JSON.parse(sessionStorage.getItem('rehzo_flagged_listings') || '[]');
+  var flaggedList = DB.listings.filter(function(l){ return flaggedIds.indexOf(l.id) !== -1; });
+
+  if (!flaggedList.length) {
+    container.innerHTML = '<div style="font-size:11px; color:#64748B;">No reported listings. Everything looks good.</div>';
     return;
   }
 
-  container.innerHTML = list.map(function(r) {
+  container.innerHTML = flaggedList.map(function(r) {
     var sym = getCurrencySymbol(r.country);
-    return '<div class="room-card">' +
-      '<div class="room-thumb-wrap">' +
-        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
-        '<div class="badge-stack">' +
-          '<span class="avail-badge">Available</span>' +
-          '<button class="report-flag-btn" onclick="openReportModal(\'listing\', \'' + r.id + '\', \'' + cleanText(r.houseName) + '\', \'' + cleanText(r.ownerName) + '\', \'' + cleanText(r.phone) + '\', \'' + cleanText(r.ownerUid) + '\')">🚩 Report</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="room-details">' +
-        '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
-        '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
-        '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #FECACA; font-size:11px;">' +
+      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Owner: ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ') - ' + sym + r.rent + '</div>' +
+      '<div style="display:flex; gap:6px;">' +
+        '<button onclick="adminDismissReport(\'' + r.id + '\')" style="background:#64748B; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Dismiss</button>' +
+        '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Purge Listing</button>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-// Live Exact Location Button for Confirmed Bookings
-function renderBookingsView() {
-  var container = document.getElementById('bookingsListContainer');
+function adminDismissReport(id) {
+  var flaggedIds = JSON.parse(sessionStorage.getItem('rehzo_flagged_listings') || '[]');
+  flaggedIds = flaggedIds.filter(function(x){ return x !== id; });
+  sessionStorage.setItem('rehzo_flagged_listings', JSON.stringify(flaggedIds));
+  renderAdminReportedListings();
+}
 
-  if (!DB.currentUser) {
-    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:32px 16px; text-align:center;">' +
-      '<div style="font-size:36px; margin-bottom:8px;">🔒</div>' +
-      '<h4 style="font-size:14px; font-weight:800; color:#0F172A; margin-bottom:4px;">Login Required</h4>' +
-      '<p style="font-size:11px; color:#64748B; margin-bottom:14px;">Please login to view and manage your booked stays.</p>' +
-      '<button class="big-action-btn" style="max-width:200px; margin:0 auto; padding:8px 16px; font-size:11.5px;" onclick="openProfileModal()">Login Now</button>' +
-    '</div>';
-    return;
-  }
+function filterAdminListings(query) {
+  var container = document.getElementById('adminListingsControl');
+  if (!container) return;
 
-  var list = [];
-  if (currentBookingsTab === 'current') {
-    list = DB.bookings.filter(function(b){ return b.status === 'pending' || b.status === 'owner_accepted' || b.status === 'cancel_pending'; });
-  } else if (currentBookingsTab === 'confirm') {
-    list = DB.bookings.filter(function(b){ return b.status === 'confirmed'; });
-  } else if (currentBookingsTab === 'cancelled') {
-    list = DB.bookings.filter(function(b){ return b.status === 'cancelled' || b.status === 'rejected'; });
-  }
-
-  var myUid = String(DB.currentUser.uid || '').toUpperCase().trim();
-  var myPhoneTen = normalizePhoneDigits(DB.currentUser.phone);
-
-  list = list.filter(function(b){ 
-    var bookingPhoneTen = normalizePhoneDigits(b.userPhone);
-    return (b.userUid && b.userUid.toUpperCase().trim() === myUid) || (myPhoneTen && bookingPhoneTen && myPhoneTen === bookingPhoneTen); 
+  var q = (query || '').toLowerCase().trim();
+  var filtered = DB.listings.filter(function(l) {
+    if (!q) return true;
+    return (l.houseName && l.houseName.toLowerCase().indexOf(q) !== -1) ||
+           (l.city && l.city.toLowerCase().indexOf(q) !== -1) ||
+           (l.ownerName && l.ownerName.toLowerCase().indexOf(q) !== -1);
   });
 
-  if (!list.length) {
-    container.innerHTML = '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; text-align:center; font-size:11.5px; color:#64748B;">No ' + cleanText(currentBookingsTab) + ' bookings found.</div>';
+  if (!filtered.length) {
+    container.innerHTML = '<div style="padding:10px; font-size:11px; color:#64748B;">No matching listings found.</div>';
     return;
   }
 
-  container.innerHTML = list.map(function(b) {
-    var l = DB.listings.find(function(x){ return x.id === b.listingId; });
-    var cover = (l && l.photos && l.photos.length) ? l.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
-    var isConfirmed = (b.status === 'confirmed');
-    var isOwnerAccepted = (b.status === 'owner_accepted');
-    var isPending = (b.status === 'pending');
-    var isCancelPending = (b.status === 'cancel_pending');
-
-    var pillClass = isConfirmed ? 'status-confirmed' : (isOwnerAccepted ? 'status-owner-accepted' : (isPending ? 'status-pending' : (isCancelPending ? 'status-cancel-pending' : 'status-cancelled')));
-    var statusText = isConfirmed ? 'CONFIRMED' : (isOwnerAccepted ? 'OWNER ACCEPTED (CONFIRM NOW)' : (isPending ? 'WAITING OWNER' : (isCancelPending ? 'CANCEL PENDING' : b.status.toUpperCase())));
-    var totalRent = ((parseFloat(b.rent) || 0) * (parseInt(b.duration) || 1)) + (parseFloat(b.deposit) || 0);
-    var sym = getCurrencySymbol(l ? l.country : 'IN');
-
-    var lat = b.roomLat || (l ? l.lat : null);
-    var lng = b.roomLng || (l ? l.lng : null);
-    var address = b.roomExactAddress || (l ? l.address : '');
-    var city = b.roomCity || (l ? l.city : '');
-    var mapsLink = (lat && lng) ? 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address + ', ' + city);
-
-    return '<div class="compact-h-card">' +
-      '<img src="' + cover + '" class="compact-h-img" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
-      '<div class="compact-h-content">' +
-        '<div class="compact-h-header">' +
-          '<div class="compact-h-title">' + cleanText(b.houseName) + '</div>' +
-          '<span class="status-pill ' + pillClass + '">● ' + statusText + '</span>' +
-        '</div>' +
-        '<div class="compact-h-rent">' + sym + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ' + sym + Number(totalRent).toLocaleString() + '</div>' +
-        '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + cleanText(b.date) + '</div>' +
-        (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
-        '<div class="action-row-mini">' +
-          (isOwnerAccepted ? '<button class="btn-action-large success" onclick="tenantFinalConfirmBooking(\'' + b.id + '\')">✓ Final Confirm & Book</button>' : '') +
-          (isConfirmed ? '<button class="btn-action-large success" onclick="window.open(\'' + mapsLink + '\', \'_blank\')">📍 Exact Room Location</button>' : '') +
-          (isConfirmed ? '<button class="btn-action-large" onclick="openSlipModal(\'' + b.id + '\')">📄 Official Slip</button>' : '') +
-          (isConfirmed ? '<button class="btn-action-large danger" onclick="requestCancelBooking(\'' + b.id + '\', \'user\')">Request Cancel</button>' : '') +
-          (isCancelPending && b.cancelRequestedBy === 'owner' ? '<button class="btn-action-large success" onclick="acceptCancelBooking(\'' + b.id + '\')">Accept Owner Cancel</button>' : '') +
-          (isCancelPending && b.cancelRequestedBy === 'owner' ? '<button class="btn-action-large danger" onclick="rejectCancelBooking(\'' + b.id + '\')">Reject Cancel</button>' : '') +
-          (isCancelPending && b.cancelRequestedBy === 'user' ? '<span class="btn-action-large disabled">Waiting Owner Approval</span>' : '') +
-          (isPending ? '<span class="btn-action-large disabled">Awaiting Owner</span>' : '') +
-        '</div>' +
-      '</div>' +
+  container.innerHTML = filtered.map(function(r) {
+    var sym = getCurrencySymbol(r.country);
+    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
+      '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Host: ' + cleanText(r.ownerName) + ' - ' + sym + r.rent + '</div>' +
+      '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
   }).join('');
+}
+
+async function adminDeleteListing(id) {
+  if (confirm("Admin confirmation: Permanently delete listing from Supabase?")) {
+    await sb.from('listings').delete().eq('id', id);
+    var flaggedIds = JSON.parse(sessionStorage.getItem('rehzo_flagged_listings') || '[]');
+    flaggedIds = flaggedIds.filter(function(x){ return x !== id; });
+    sessionStorage.setItem('rehzo_flagged_listings', JSON.stringify(flaggedIds));
+    alert("Listing purged permanently!");
+    await syncFromSupabase();
+    renderAdminModeration();
+  }
 }
 </script>
 </body>
