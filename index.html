@@ -364,11 +364,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="sub-header">
       <h3 class="sub-title">Advanced Search Stays</h3>
     </div>
-    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:30px; padding:6px 12px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-      <span style="font-size:14px;">🔍</span>
-      <input id="searchScreenInput" placeholder="Search Country, State, City, Area, Pin Code, Address…" oninput="handleAdvancedSearch(this.value)" style="width:100%; border:none; outline:none; font-size:12px; font-weight:600;">
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:12px; margin-bottom:12px;">
+      <div style="font-size:11px; font-weight:800; color:#044E3B; margin-bottom:6px;">🔍 Search by Country, State, City, Area, Pin Code or Address</div>
+      <div style="display:flex; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:30px; padding:6px 14px; align-items:center;">
+        <input id="searchScreenInput" placeholder="e.g. Delhi, 110001, Kathmandu, MG Road..." oninput="handleAdvancedSearch(this.value)" style="width:100%; border:none; outline:none; font-size:12px; font-weight:600; background:transparent;">
+      </div>
+      <div style="font-size:10px; color:#64748B; margin-top:6px;">Showing real-time available rooms matching your precise location criteria.</div>
     </div>
-    <div style="font-size:10.5px; color:#64748B; margin-bottom:10px; padding-left:4px;">💡 Real-time global match across all parameters & nearby 900m area zones.</div>
     <div class="room-grid" id="searchRoomsGrid"></div>
   </section>
 
@@ -377,14 +379,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="sub-header">
       <div class="back-btn-row" onclick="goView('home')">
         <span class="back-arrow">‹</span>
-        <h3 class="sub-title">Nearby stays</h3>
+        <h3 class="sub-title">Nearby Stays</h3>
       </div>
     </div>
     <div style="background:#fff; border:1px solid #E2E8F0; border-radius:18px; padding:12px; margin-bottom:12px; display:flex; gap:10px; align-items:center;">
       <div style="width:34px; height:34px; border-radius:50%; background:#ECFDF5; color:#044E3B; display:flex; align-items:center; justify-content:center; font-size:16px;">📍</div>
       <div style="flex:1;">
-        <div id="nearStatusText" style="font-size:12px; font-weight:800; color:#0F172A;">Detecting real live GPS (900m - 10km radius)…</div>
-        <div style="font-size:10px; color:#64748B; margin-top:2px;">Showing verified rooms near your precise location.</div>
+        <div id="nearStatusText" style="font-size:12px; font-weight:800; color:#0F172A;">Detecting real live GPS…</div>
+        <div style="font-size:10px; color:#64748B; margin-top:2px;">Showing rooms strictly within 10 km of you.</div>
       </div>
       <button id="gpsRefreshBtn" onclick="detectGPS(true)" style="padding:6px 12px; background:#044E3B; color:#fff; border:none; border-radius:16px; font-size:10.5px; font-weight:bold; cursor:pointer;">Find rooms</button>
     </div>
@@ -613,7 +615,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
     <div class="admin-header-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <h3 style="font-size:16px; font-weight:900;">Admin Moderation & Tracking 🔐</h3>
+          <h3 style="font-size:16px; font-weight:900;">Admin Moderation 🔐</h3>
           <p style="font-size:10px; opacity:0.85;">Rehzo Global Control Center</p>
         </div>
         <button onclick="goView('home')" style="padding:5px 12px; border:none; border-radius:16px; background:rgba(255,255,255,0.2); color:#fff; font-size:11px; font-weight:bold; cursor:pointer;">Exit</button>
@@ -638,9 +640,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
     <!-- Admin Sub Tabs -->
     <div class="sub-tabs-row">
-      <button class="sub-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners</button>
-      <button class="sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users</button>
-      <button class="sub-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">Reports & Rooms</button>
+      <button class="sub-tab-btn active" id="tabAdminOwners" onclick="switchAdminSubTab('owners')">Owners (Listings)</button>
+      <button class="sub-tab-btn" id="tabAdminUsers" onclick="switchAdminSubTab('users')">Users (Bookings)</button>
+      <button class="sub-tab-btn" id="tabAdminRooms" onclick="switchAdminSubTab('rooms')">All Rooms</button>
     </div>
 
     <!-- Search in Admin -->
@@ -947,11 +949,11 @@ async function syncFromSupabase() {
           listingId: b.listing_id,
           houseName: b.house_name,
           roomType: b.room_type,
+          suitableFor: b.suitable_for || 'Family',
           rent: Math.max(0, parseFloat(b.rent) || 0),
           deposit: Math.max(0, parseFloat(b.deposit) || 0),
           duration: Math.max(1, parseInt(b.duration) || 1),
           date: b.checkin_date,
-          suitableFor: b.suitable_for || 'Family',
           userUid: b.user_uid,
           userName: b.user_name,
           userPhone: b.user_phone,
@@ -1930,9 +1932,7 @@ function goView(viewId) {
   }
 
   if (viewId === 'home') renderHomeGrid();
-  if (viewId === 'search') {
-    renderAdvancedSearchGrid('');
-  }
+  if (viewId === 'search') renderSearchGrid();
   if (viewId === 'near') detectGPS(false);
   if (viewId === 'bookings') renderBookingsView();
   if (viewId === 'owner') renderOwnerView();
@@ -1977,38 +1977,47 @@ function checkAdminAccess() {
   }
 }
 
+// ================= REPORTING SYSTEM WITH ADMIN TRACKING =================
 function reportListing(listingId) {
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box-narrow" style="max-width:340px;">' +
       '<div class="modal-header">' +
-        '<div style="font-size:14px; font-weight:800; color:#0F172A;">🚩 Report Listing</div>' +
-        '<span onclick="closeModal()" style="cursor:pointer; font-size:15px; font-weight:bold;">✕</span>' +
+        '<h3 style="font-size:14px; font-weight:800; color:#0F172A;">Report Listing</h3>' +
+        '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
-      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Select the reason for reporting this property:</p>' +
+      '<p style="font-size:11px; color:#64748B; margin-bottom:10px;">Please select the reason for reporting this property:</p>' +
       '<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">' +
-        '<button onclick="submitListingReport(\'' + listingId + '\', \'Fake Room / Fraud\')" style="padding:10px; border:1px solid #E2E8F0; border-radius:12px; background:#fff; font-size:11px; font-weight:800; text-align:left; cursor:pointer; color:#991B1B;">⚠️ Fake Room / Fraud</button>' +
-        '<button onclick="submitListingReport(\'' + listingId + '\', \'Fake Room Owner\')" style="padding:10px; border:1px solid #E2E8F0; border-radius:12px; background:#fff; font-size:11px; font-weight:800; text-align:left; cursor:pointer; color:#991B1B;">⚠️ Fake Room Owner</button>' +
-        '<button onclick="submitListingReport(\'' + listingId + '\', \'High Demand / Overpriced\')" style="padding:10px; border:1px solid #E2E8F0; border-radius:12px; background:#fff; font-size:11px; font-weight:800; text-align:left; cursor:pointer; color:#B45309;">⚠️ High Demand / Overpriced</button>' +
-        '<button onclick="submitListingReport(\'' + listingId + '\', \'Other Issue\')" style="padding:10px; border:1px solid #E2E8F0; border-radius:12px; background:#fff; font-size:11px; font-weight:800; text-align:left; cursor:pointer; color:#334155;">⚠️ Other Issue</button>' +
+        '<label style="font-size:11.5px; font-weight:700; color:#334155; cursor:pointer;"><input type="radio" name="reportReason" value="Fake room" checked> Fake room / Photos don\'t match</label>' +
+        '<label style="font-size:11.5px; font-weight:700; color:#334155; cursor:pointer;"><input type="radio" name="reportReason" value="High demand / Fraud pricing"> High demand / Fraud pricing</label>' +
+        '<label style="font-size:11.5px; font-weight:700; color:#334155; cursor:pointer;"><input type="radio" name="reportReason" value="Fake room owner"> Fake room owner / Unresponsive</label>' +
+        '<label style="font-size:11.5px; font-weight:700; color:#334155; cursor:pointer;"><input type="radio" name="reportReason" value="Incorrect location"> Incorrect location / Address</label>' +
       '</div>' +
-      '<button class="big-action-btn" onclick="closeModal()" style="background:#64748B; padding:8px;">Cancel</button>' +
+      '<button class="big-action-btn" onclick="submitReport(\'' + listingId + '\')">Submit Report →</button>' +
     '</div>' +
   '</div>';
 }
 
-function submitListingReport(listingId, reason) {
+function submitReport(listingId) {
+  var selectedOpt = document.querySelector('input[name="reportReason"]:checked');
+  var reason = selectedOpt ? selectedOpt.value : 'Fake room';
+
   var reports = JSON.parse(sessionStorage.getItem('rehzo_detailed_reports') || '{}');
   if (!reports[listingId]) reports[listingId] = [];
-  reports[listingId].push({ reason: reason, time: new Date().toLocaleString(), user: DB.currentUser ? DB.currentUser.uid : 'Guest' });
+  reports[listingId].push({
+    reason: reason,
+    user: DB.currentUser ? DB.currentUser.uid : 'GUEST',
+    time: new Date().toLocaleString()
+  });
   sessionStorage.setItem('rehzo_detailed_reports', JSON.stringify(reports));
 
-  var flagged = JSON.parse(sessionStorage.getItem('rehzo_flagged_listings') || '[]');
-  if (flagged.indexOf(listingId) === -1) {
-    flagged.push(listingId);
-    sessionStorage.setItem('rehzo_flagged_listings', JSON.stringify(flagged));
+  var reported = JSON.parse(sessionStorage.getItem('rehzo_flagged_listings') || '[]');
+  if (reported.indexOf(listingId) === -1) {
+    reported.push(listingId);
+    sessionStorage.setItem('rehzo_flagged_listings', JSON.stringify(reported));
   }
+
   closeModal();
-  alert("Report submitted (" + reason + "). Admin tracking system has recorded this for review.");
+  alert("Report submitted successfully! Admin can now track and moderate this listing.");
 }
 
 function renderHomeGrid(items) {
@@ -2151,11 +2160,10 @@ function handleSearch(val) {
   renderHomeGrid(filtered);
 }
 
+// ================= ADVANCED SEARCH LOGIC (Country, State, City, Area, Pin, Address) =================
 function handleAdvancedSearch(val) {
   var q = (val || '').toLowerCase().trim();
   var container = document.getElementById('searchRoomsGrid');
-  if (!container) return;
-
   var confirmedRoomIds = DB.bookings
     .filter(function(b){ return b.status === 'confirmed'; })
     .map(function(b){ return b.listingId; });
@@ -2165,24 +2173,21 @@ function handleAdvancedSearch(val) {
     if (l.status !== 'available' || isConfirmed || l.daysLeft <= 0) return false;
     if (!q) return true;
 
-    var countryName = (WORLD_COUNTRIES.find(function(c){ return c.code === l.country; }) || {}).name || l.country;
-    var stateStr = l.state || '';
-    var cityStr = l.city || '';
-    var pinStr = l.pin || '';
-    var addrStr = l.address || '';
-    var houseStr = l.houseName || '';
+    var cName = (WORLD_COUNTRIES.find(function(item){ return item.code === l.country; }) || {}).name || l.country;
+    var combinedText = (
+      (l.houseName || '') + ' ' +
+      (l.city || '') + ' ' +
+      (l.state || '') + ' ' +
+      (l.pin || '') + ' ' +
+      (l.address || '') + ' ' +
+      cName
+    ).toLowerCase();
 
-    return countryName.toLowerCase().indexOf(q) !== -1 ||
-           l.country.toLowerCase().indexOf(q) !== -1 ||
-           stateStr.toLowerCase().indexOf(q) !== -1 ||
-           cityStr.toLowerCase().indexOf(q) !== -1 ||
-           pinStr.toLowerCase().indexOf(q) !== -1 ||
-           addrStr.toLowerCase().indexOf(q) !== -1 ||
-           houseStr.toLowerCase().indexOf(q) !== -1;
+    return combinedText.indexOf(q) !== -1;
   });
 
   if (!filtered.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No rooms found matching your search parameters.</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No rooms available matching your exact search criteria.</div>';
     return;
   }
 
@@ -2199,15 +2204,11 @@ function handleAdvancedSearch(val) {
       '<div class="room-details">' +
         '<div class="room-title" onclick="openRoomDetailsModal(\'' + r.id + '\')">' + cleanText(r.houseName) + '</div>' +
         '<div class="room-rent">' + sym + Number(r.rent).toLocaleString() + '</div>' +
-        '<div class="room-city">📍 ' + cleanText(r.city) + ' • Pin: ' + cleanText(r.pin) + '</div>' +
+        '<div class="room-city">📍 ' + cleanText(r.city) + ' • ' + cleanText(r.pin || '') + '</div>' +
         '<button class="book-btn" onclick="triggerBookRoomFlow(\'' + r.id + '\')">Book Now</button>' +
       '</div>' +
     '</div>';
   }).join('');
-}
-
-function renderAdvancedSearchGrid(q) {
-  handleAdvancedSearch(q || '');
 }
 
 function applyFilters() {
@@ -2268,12 +2269,12 @@ function renderNearGrid() {
     var isConfirmed = confirmedRoomIds.indexOf(l.id) !== -1;
     if (l.status === 'available' && !isConfirmed && l.daysLeft > 0 && l.lat && l.lng && l.country === detectedCountryCode) {
       var d = getDistKm(userGeo.lat, userGeo.lng, l.lat, l.lng);
-      if (d <= 10) near.push(Object.assign({}, l, { distKm: d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1) + ' km' }));
+      if (d <= 10) near.push(Object.assign({}, l, { distKm: d.toFixed(1) }));
     }
   }
   var container = document.getElementById('nearRoomsGrid');
   if (!near.length) {
-    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No available rooms within 900m - 10 km radius of your location.</div>';
+    container.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:32px; font-size:11.5px; color:#64748B;">No available rooms within 10 km radius of your location.</div>';
     return;
   }
   container.innerHTML = near.map(function(r) {
@@ -2282,7 +2283,7 @@ function renderNearGrid() {
       '<div class="room-thumb-wrap">' +
         '<img src="' + r.photos[0] + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
         '<div class="badge-stack">' +
-          '<span class="avail-badge">Nearby (' + r.distKm + ')</span>' +
+          '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
           '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
         '</div>' +
       '</div>' +
@@ -2298,27 +2299,31 @@ function renderNearGrid() {
 function detectGPS(isManual) {
   var statusText = document.getElementById('nearStatusText');
   var btn = document.getElementById('gpsRefreshBtn');
-  statusText.innerText = 'Scanning 900m - 10km radius…';
-  if (btn) btn.innerText = 'Finding…';
+  statusText.innerText = 'Detecting real live GPS…';
+  if (btn) btn.innerText = 'Scanning…';
 
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(function(pos) {
       userGeo.lat = pos.coords.latitude;
       userGeo.lng = pos.coords.longitude;
-      statusText.innerText = '📍 Precise GPS Active (' + userGeo.lat.toFixed(4) + ')';
+      statusText.innerText = '📍 Live GPS: ' + userGeo.lat.toFixed(4) + ', ' + userGeo.lng.toFixed(4);
       if (btn) btn.innerText = 'Find rooms';
       renderNearGrid();
-      if (isManual) alert("Nearby stays successfully updated from live GPS!");
+      if (isManual) alert("Location successfully updated from Live GPS!");
     }, function() {
-      statusText.innerText = '📍 Default Zone (900m radius)';
+      statusText.innerText = '📍 Location fallback';
       if (btn) btn.innerText = 'Find rooms';
       renderNearGrid();
     }, { enableHighAccuracy: true, timeout: 8000 });
   } else {
-    statusText.innerText = '📍 Location fallback';
+    statusText.innerText = '📍 Geolocation not supported';
     if (btn) btn.innerText = 'Find rooms';
     renderNearGrid();
   }
+}
+
+function renderSearchGrid() {
+  handleAdvancedSearch('');
 }
 
 function switchBookingsTab(tab) {
@@ -2385,7 +2390,7 @@ function renderBookingsView() {
           '<span class="status-pill ' + pillClass + '">● ' + statusText + '</span>' +
         '</div>' +
         '<div class="compact-h-rent">' + sym + Number(b.rent).toLocaleString() + '/mo • Total (inc. Deposit): ' + sym + Number(totalRent).toLocaleString() + '</div>' +
-        '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + cleanText(b.date) + ' • Suitable: ' + cleanText(b.suitableFor || 'Family') + '</div>' +
+        '<div class="compact-h-sub">' + b.duration + ' mo • Check-in: ' + cleanText(b.date) + ' • Suitable For: ' + cleanText(b.suitableFor || 'Family') + '</div>' +
         (b.trl ? '<div class="compact-h-sub" style="font-weight:700; color:#1E293B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
         '<div class="action-row-mini">' +
           (isOwnerAccepted ? '<button class="btn-action-large success" onclick="tenantFinalConfirmBooking(\'' + b.id + '\')">✓ Final Confirm & Book</button>' : '') +
@@ -2606,7 +2611,7 @@ function renderOwnerView() {
               '● ' + (isOwnerAccepted ? 'AWAITING TENANT CONFIRM' : b.status.toUpperCase()) + '</span>' +
           '</div>' +
           '<div style="font-size:10.5px; color:#334155; margin-top:3px; line-height:1.4;">' +
-            '<div><b>Guest:</b> ' + cleanText(b.userName) + ' (' + b.duration + ' mo) • Suitable: <b>' + cleanText(b.suitableFor || 'Family') + '</b></div>' +
+            '<div><b>Guest:</b> ' + cleanText(b.userName) + ' (' + b.duration + ' mo) • Suitable: ' + cleanText(b.suitableFor || 'Family') + '</div>' +
             '<div>📞 ' + cleanText(b.userPhone) + ' • Total: ' + sym + Number(totalRent).toLocaleString() + '</div>' +
             (b.trl ? '<div style="font-weight:700; color:#044E3B; margin-top:2px;">TRL: ' + cleanText(b.trl) + '</div>' : '') +
           '</div>' +
@@ -2987,11 +2992,9 @@ function openBookingPillModal(id) {
   var prefillName = DB.currentUser ? DB.currentUser.name : '';
   var prefillPhone = DB.currentUser ? DB.currentUser.phone : '';
   var prefillGmail = (DB.currentUser && DB.currentUser.gmail) ? DB.currentUser.gmail : '';
-  var ownerSuitableArray = (l.suitableFor && l.suitableFor.length) ? l.suitableFor : ['Family'];
 
-  var suitableSelectOptions = ownerSuitableArray.map(function(s){
-    return '<option value="' + cleanText(s) + '">' + cleanText(s) + '</option>';
-  }).join('');
+  var suitableOptions = (l.suitableFor && l.suitableFor.length) ? l.suitableFor : ['Family', 'Student', 'Worker', 'Anyone'];
+  var suitableOptionsHtml = suitableOptions.map(function(s){ return '<option value="' + s + '">' + s + '</option>'; }).join('');
 
   document.getElementById('modalSlot').innerHTML = '<div class="modal-overlay">' +
     '<div class="modal-box-narrow" style="max-width:420px;">' +
@@ -3023,7 +3026,7 @@ function openBookingPillModal(id) {
       '</div>' +
       '<div class="field-box" style="margin-bottom:8px;">' +
         '<label class="field-label">Suitable For *</label>' +
-        '<select id="bpSuitable" class="pill-input">' + suitableSelectOptions + '</select>' +
+        '<select id="bpSuitable" class="pill-input">' + suitableOptionsHtml + '</select>' +
       '</div>' +
       '<div id="bookingCalcBox" style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:#044E3B; display:flex; flex-direction:column; gap:3px;">' +
         '<div style="display:flex; justify-content:space-between;"><span>Rent: ' + sym + Number(l.rent).toLocaleString() + ' × <b id="calcMonthText">1 Month</b></span><span>' + sym + Number(l.rent).toLocaleString() + '</span></div>' +
@@ -3058,7 +3061,7 @@ async function submitBookingRequest() {
   var addr = cleanText(document.getElementById('bpOldAddr').value);
   var date = document.getElementById('bpDate').value;
   var months = Math.max(1, parseInt(document.getElementById('bpMonths').value) || 1);
-  var suitable = document.getElementById('bpSuitable') ? document.getElementById('bpSuitable').value : 'Family';
+  var suitable = document.getElementById('bpSuitable').value;
 
   if (!name || !phone || !addr || !date) { alert("Please fill all required booking fields."); return; }
 
@@ -3070,11 +3073,11 @@ async function submitBookingRequest() {
     listing_id: activeBookingRoom.id,
     house_name: activeBookingRoom.houseName,
     room_type: activeBookingRoom.roomType,
+    suitable_for: suitable,
     rent: Math.max(0, parseFloat(activeBookingRoom.rent) || 0),
     deposit: Math.max(0, parseFloat(activeBookingRoom.deposit) || 0),
     duration: months,
     checkin_date: date,
-    suitable_for: suitable,
     user_uid: DB.currentUser ? DB.currentUser.uid : 'GUEST',
     user_name: name,
     user_phone: phone,
@@ -3115,6 +3118,7 @@ function openSlipModal(bkId) {
 
   var houseName = b.houseName || l.houseName || 'Room Listing';
   var roomType = b.roomType || l.roomType || 'Room';
+  var suitableFor = b.suitableFor || 'Family';
   var address = b.roomExactAddress || l.address || '';
   var city = b.roomCity || l.city || '';
   var state = b.roomState || l.state || '';
@@ -3122,7 +3126,6 @@ function openSlipModal(bkId) {
   var rent = b.rent || l.rent || 0;
   var deposit = (b.deposit !== undefined && b.deposit !== null) ? b.deposit : (l.deposit || 0);
   var duration = b.duration || 1;
-  var suitableFor = b.suitableFor || 'Family';
   var totalAmount = (parseFloat(rent) * parseInt(duration)) + parseFloat(deposit);
 
   var lat = b.roomLat || l.lat;
@@ -3156,6 +3159,7 @@ function openSlipModal(bkId) {
         '<div style="font-weight:900; color:#044E3B; margin-top:4px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏠 ROOM & PROPERTY DETAILS</div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>House Name:</span> <b style="color:#0F172A;">' + cleanText(houseName) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Room Type:</span> <b style="color:#0F172A;">' + cleanText(roomType) + '</b></div>' +
+        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Suitable For:</span> <b style="color:#0F172A;">' + cleanText(suitableFor) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(address) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>City / State:</span> <b style="color:#0F172A;">' + cleanText(city) + (state ? ' (' + cleanText(state) + ')' : '') + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Area Code:</span> <b style="color:#0F172A;">' + cleanText(pin) + '</b></div>' +
@@ -3171,7 +3175,6 @@ function openSlipModal(bkId) {
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Permanent Address:</span> <b style="color:#0F172A; text-align:right;">' + cleanText(b.userOldAddress) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Check-in Date:</span> <b style="color:#0F172A;">' + cleanText(b.date) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Stay Duration:</span> <b style="color:#0F172A;">' + b.duration + ' ' + (b.duration > 1 ? 'Months' : 'Month') + '</b></div>' +
-        '<div style="display:flex; justify-content:space-between; color:#64748B;"><span>Suitable For:</span> <b style="color:#044E3B;">' + cleanText(suitableFor) + '</b></div>' +
         '<div style="display:flex; justify-content:space-between; color:#044E3B; font-size:11.5px; font-weight:900; margin-top:2px;"><span>Total Rent (inc. Deposit):</span> <span>' + sym + Number(totalAmount).toLocaleString() + '</span></div>' +
 
         '<div style="font-weight:900; color:#044E3B; margin-top:8px; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">🏢 OWNER DETAILS</div>' +
@@ -3367,20 +3370,21 @@ function renderAdminReportedListings() {
 
   container.innerHTML = flaggedList.map(function(r) {
     var sym = getCurrencySymbol(r.country);
-    var reportsForThis = detailedReports[r.id] || [];
-    var reportReasonsHtml = reportsForThis.map(function(rep){
-      return '<div style="font-size:9.5px; color:#991B1B; margin-top:1px;">• ' + cleanText(rep.reason) + ' (' + rep.time + ')</div>';
-    }).join('');
+    var reportsArr = detailedReports[r.id] || [];
+    var reportReasonsHtml = reportsArr.map(function(rep){ return '<div style="font-size:9.5px; color:#991B1B;">• ' + cleanText(rep.reason) + ' (by ' + cleanText(rep.user) + ' at ' + rep.time + ')</div>'; }).join('');
 
     return '<div style="padding:8px 0; border-bottom:1px solid #FECACA; font-size:11px;">' +
       '<div style="display:flex; justify-content:space-between; align-items:center;">' +
         '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Owner: ' + cleanText(r.ownerName) + ' (' + cleanText(r.phone) + ') - ' + sym + r.rent + '</div>' +
         '<div style="display:flex; gap:6px;">' +
           '<button onclick="adminDismissReport(\'' + r.id + '\')" style="background:#64748B; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Dismiss</button>' +
-          '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Purge</button>' +
+          '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Purge Listing</button>' +
         '</div>' +
       '</div>' +
-      '<div style="margin-top:3px; background:#FFF5F5; padding:4px 8px; border-radius:6px;">' + (reportReasonsHtml || '<span style="color:#64748B;">Flagged by user</span>') + '</div>' +
+      '<div style="margin-top:4px; background:#FFF1F2; padding:4px 8px; border-radius:6px;">' +
+        '<b style="font-size:10px; color:#7F1D1D;">Tracked Report Reasons:</b>' +
+        (reportReasonsHtml || '<div style="font-size:9.5px; color:#64748B;">Flagged by user review</div>') +
+      '</div>' +
     '</div>';
   }).join('');
 }
