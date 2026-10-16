@@ -99,14 +99,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 /* Splash Screen */
 #splashOverlay { position: fixed; inset: 0; background: #044E3B; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity 0.5s ease; pointer-events: none; }
-.splash-logo { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 12px; animation: pulse 1.4s infinite alternate; }
 .splash-title { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
 .splash-sub { font-size: 12px; opacity: 0.85; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
-
-@keyframes pulse {
-  0% { transform: scale(0.96); opacity: 0.9; }
-  100% { transform: scale(1.04); opacity: 1; }
-}
 
 /* Header */
 .top-header { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,0.98); border-bottom: 1px solid #E2E8F0; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; width: 100%; }
@@ -147,11 +141,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .section-title h3 { font-size: 14px; font-weight: 800; color: #0F172A; }
 .room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .room-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-.room-thumb-wrap { position: relative; width: 100%; height: 110px; cursor: pointer; }
-.room-thumb { width: 100%; height: 100%; object-fit: cover; }
+.room-thumb-wrap { position: relative; width: 100%; height: 110px; overflow-x: auto; display: flex; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.room-thumb-wrap::-webkit-scrollbar { display: none; }
+.room-thumb-slide { width: 100%; height: 100%; flex-shrink: 0; scroll-snap-align: start; object-fit: cover; }
 
 /* Badges & Report Stack */
-.badge-stack { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; z-index: 2; }
+.badge-stack { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; z-index: 2; pointer-events: none; }
+.badge-stack button { pointer-events: auto; }
 .avail-badge { background: rgba(255,255,255,0.95); color: #044E3B; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .avail-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
 .report-flag-btn { background: rgba(15, 23, 42, 0.78); color: #fff; border: none; font-size: 8px; padding: 2px 6px; border-radius: 10px; cursor: pointer; font-weight: 700; backdrop-filter: blur(2px); }
@@ -723,22 +719,6 @@ var SUPABASE_URL = "https://zaksdcywktbdebkepzic.supabase.co";
 var SUPABASE_KEY = "sb_publishable_U1tGuibkzkO5tLNKNB4uJA_bDubbtUZ";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ================= BIDIRECTIONAL CIPHER HELPER (A=1...Z=26, 1=A...26=Z) =================
-var RehzoCipher = {
-  letterToNum: function(str) {
-    if (!str) return '';
-    return String(str).toUpperCase().replace(/[A-Z]/g, function(char) {
-      return (char.charCodeAt(0) - 64) + ' ';
-    }).trim();
-  },
-  numToLetter: function(numStr) {
-    if (!numStr) return '';
-    return String(numStr).replace(/\b(1[0-9]|2[0-6]|[1-9])\b/g, function(n) {
-      return String.fromCharCode(parseInt(n, 10) + 64);
-    }).replace(/\s+/g, '');
-  }
-};
-
 // ================= AUTOMATIC CLIENT-SIDE IMAGE COMPRESSOR =================
 async function compressImageFile(file, maxWidth = 1280, quality = 0.82) {
   return new Promise((resolve) => {
@@ -856,7 +836,6 @@ function populateCountryDropdowns() {
   }
 }
 
-// Session-based state management (New tabs/phones/links always require fresh login)
 var DB = {
   currentUser: JSON.parse(sessionStorage.getItem('rehzo_current_user')) || null,
   listings: [],
@@ -1033,6 +1012,20 @@ window.addEventListener('DOMContentLoaded', function() {
     try { await syncFromSupabase(); } catch(e){}
     dismissSplash();
   })();
+
+  // REALTIME LIVE SUBSCRIPTIONS FOR INSTANT AUTO-SYNC
+  try {
+    sb.channel('public:listings_and_bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, function(payload) {
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, function(payload) {
+        syncFromSupabase();
+      })
+      .subscribe();
+  } catch(err) {
+    console.warn("Realtime notice:", err);
+  }
 });
 
 function getRelevantNotifications() {
@@ -2032,11 +2025,15 @@ function renderHomeGrid(items) {
     return;
   }
   container.innerHTML = list.map(function(r) {
-    var cover = (r.photos && r.photos.length) ? r.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
+    var photosArr = (r.photos && r.photos.length) ? r.photos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+    var slidesHtml = photosArr.map(function(url) {
+      return '<img src="' + url + '" class="room-thumb-slide" onclick="openRoomDetailsModal(\'' + r.id + '\')" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">';
+    }).join('');
+
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap">' +
-        '<img src="' + cover + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">' +
+        slidesHtml +
         '<div class="badge-stack">' +
           '<span class="avail-badge">Available</span>' +
           '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
@@ -2082,7 +2079,11 @@ function openRoomDetailsModal(roomId) {
   var r = DB.listings.find(function(x){ return x.id === roomId; });
   if (!r) return;
 
-  var cover = (r.photos && r.photos.length) ? r.photos[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
+  var photosArr = (r.photos && r.photos.length) ? r.photos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+  var modalSlidesHtml = photosArr.map(function(url) {
+    return '<img src="' + url + '" style="width:100%; height:160px; border-radius:16px; object-fit:cover; flex-shrink:0; scroll-snap-align:start;" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">';
+  }).join('');
+
   var sym = getCurrencySymbol(r.country);
 
   var suitableBadges = (r.suitableFor && r.suitableFor.length)
@@ -2110,7 +2111,7 @@ function openRoomDetailsModal(roomId) {
         '</div>' +
         '<span onclick="closeModal()" style="cursor:pointer; font-size:16px; font-weight:bold;">✕</span>' +
       '</div>' +
-      '<img src="' + cover + '" style="width:100%; height:160px; border-radius:16px; object-fit:cover; margin-bottom:12px;">' +
+      '<div style="width:100%; height:160px; border-radius:16px; overflow-x:auto; display:flex; scroll-snap-type:x mandatory; margin-bottom:12px;">' + modalSlidesHtml + '</div>' +
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
         '<h2 style="font-size:16px; font-weight:900; color:#0F172A;">' + cleanText(r.houseName) + '</h2>' +
         '<span style="background:#ECFDF5; color:#044E3B; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:800;">' + cleanText(r.roomType) + '</span>' +
@@ -2184,7 +2185,6 @@ function handleAdvancedSearch(val) {
       l.roomType
     ].join(' ').toLowerCase();
 
-    // Supports search terms like "patna bazar samiti", "sasaram", "mumbai marine drive", "pin code", etc.
     var qWords = q.split(/\s+/);
     return qWords.every(function(word) {
       return fullTargetText.indexOf(word) !== -1;
@@ -2197,10 +2197,15 @@ function handleAdvancedSearch(val) {
   }
 
   container.innerHTML = filtered.map(function(r) {
+    var photosArr = (r.photos && r.photos.length) ? r.photos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+    var slidesHtml = photosArr.map(function(url) {
+      return '<img src="' + url + '" class="room-thumb-slide" onclick="openRoomDetailsModal(\'' + r.id + '\')" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">';
+    }).join('');
+
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap">' +
-        '<img src="' + (r.photos[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600') + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        slidesHtml +
         '<div class="badge-stack">' +
           '<span class="avail-badge">Available</span>' +
           '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
@@ -2283,10 +2288,15 @@ function renderNearGrid() {
     return;
   }
   container.innerHTML = near.map(function(r) {
+    var photosArr = (r.photos && r.photos.length) ? r.photos : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'];
+    var slidesHtml = photosArr.map(function(url) {
+      return '<img src="' + url + '" class="room-thumb-slide" onclick="openRoomDetailsModal(\'' + r.id + '\')" onerror="this.src=\'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600\'">';
+    }).join('');
+
     var sym = getCurrencySymbol(r.country);
     return '<div class="room-card">' +
       '<div class="room-thumb-wrap">' +
-        '<img src="' + r.photos[0] + '" class="room-thumb" onclick="openRoomDetailsModal(\'' + r.id + '\')">' +
+        slidesHtml +
         '<div class="badge-stack">' +
           '<span class="avail-badge">Available (' + r.distKm + ' km)</span>' +
           '<button class="report-flag-btn" onclick="reportListing(\'' + r.id + '\')">🚩 Report</button>' +
@@ -2999,7 +3009,6 @@ function openBookingPillModal(id) {
   var prefillPhone = DB.currentUser ? DB.currentUser.phone : '';
   var prefillGmail = (DB.currentUser && DB.currentUser.gmail) ? DB.currentUser.gmail : '';
 
-  // Get owner options for suitableFor (default to 'Family' or first item)
   var suitableOptions = (l.suitableFor && l.suitableFor.length) ? l.suitableFor : ['Family', 'Student', 'Worker', 'Anyone'];
   var suitableSelectHTML = suitableOptions.map(function(opt) {
     return '<option value="' + opt + '">' + opt + '</option>';
@@ -3033,7 +3042,6 @@ function openBookingPillModal(id) {
           '</select>' +
         '</div>' +
       '</div>' +
-      // Suitable For Box Added Centered Between Check-in & Duration
       '<div class="field-box" style="margin: 6px 0 10px 0; align-items: center;">' +
         '<label class="field-label" style="text-align: center; width: 100%;">Suitable For (Room Option)</label>' +
         '<select id="bpSuitable" class="pill-input" style="max-width: 240px; text-align: center; font-weight: 800; color: #044E3B;">' + suitableSelectHTML + '</select>' +
@@ -3421,7 +3429,7 @@ function filterAdminListings(query) {
 
   container.innerHTML = filtered.map(function(r) {
     var sym = getCurrencySymbol(r.country);
-    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
+    return '<div style="display:flex; justify-content:space-width:100%; justify-content:space-between; align-items:center; padding:9px; border-bottom:1px solid #E2E8F0; font-size:11px;">' +
       '<div><b>' + cleanText(r.houseName) + '</b> (' + cleanText(r.city) + ') • Host: ' + cleanText(r.ownerName) + ' - ' + sym + r.rent + '</div>' +
       '<button onclick="adminDeleteListing(\'' + r.id + '\')" style="background:#EF4444; color:#fff; border:none; border-radius:8px; padding:3px 8px; font-size:9.5px; font-weight:bold; cursor:pointer;">Delete</button>' +
     '</div>';
